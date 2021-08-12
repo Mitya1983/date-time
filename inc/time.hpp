@@ -8,10 +8,11 @@
 namespace Tristan::Time {
 
     enum class Precision : uint8_t {
-        NANOSECONDS,
-        MICROSECONDS,
+        MINUTES,
+        SECONDS,
         MILLISECONDS,
-        SECONDS
+        MICROSECONDS,
+        NANOSECONDS
     };
     
     struct TimeOffset {
@@ -44,13 +45,16 @@ class Time
 public:
     
     explicit Time(Precision precision = Precision::SECONDS);
+    explicit Time(uint8_t hours, uint8_t minutes) noexcept (false /*std::range_error*/);
     explicit Time(uint8_t hours, uint8_t minutes, uint8_t seconds) noexcept (false /*std::range_error*/);
     explicit Time(uint8_t hours, uint8_t minutes, uint8_t seconds, uint16_t milliseconds) noexcept (false /*std::range_error*/);
     explicit Time(uint8_t hours, uint8_t minutes, uint8_t seconds, uint16_t milliseconds, uint16_t microseconds) noexcept (false /*std::range_error*/);
     explicit Time(uint8_t hours, uint8_t minutes, uint8_t seconds, uint16_t milliseconds, uint16_t microseconds, uint16_t nanoseconds) noexcept (false /*std::range_error*/);
     
     /// @brief Parses the string provided and create time object
-    /// @param iso_time std::string representing time in following formats
+    /// @param time std::string representing time in following formats
+    /// \formats[hours, minutes, seconds] - two digits
+    /// \formats[milliseconds, microseconds and nanoseconds] - four digits
     /// \formats[hours:minutes] - Minutes precision
     /// \formats[hours:minutes:seconds] - Seconds precision
     /// \formats[hours:minutes:seconds:milliseconds] - Milliseconds precision
@@ -73,12 +77,12 @@ public:
     
     void setOffset(TimeOffset offset);
     
-    void addHours(uint32_t hours);
-    void addMinutes(uint32_t hours);
-    void addSeconds(uint32_t hours);
-    void addMilliseconds(uint32_t hours);
-    void addMicroseconds(uint32_t hours);
-    void addNanoseconds(uint32_t hours);
+    void addHours(uint64_t hours);
+    void addMinutes(uint64_t minutes);
+    void addSeconds(uint64_t seconds);
+    void addMilliseconds(uint64_t milliseconds);
+    void addMicroseconds(uint64_t microseconds);
+    void addNanoseconds(uint64_t nanoseconds);
     
     [[nodiscard]] auto hours() const  -> int {m_durations.m_hours.count();};
     [[nodiscard]] auto minutes() const -> int {m_durations.m_minutes.count();}
