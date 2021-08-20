@@ -163,7 +163,7 @@ tristan::time::DayTime::DayTime(const std::string& time) :
     }
 }
 
-bool tristan::time::DayTime::operator==(const tristan::time::DayTime &r) const{
+auto tristan::time::DayTime::operator==(const tristan::time::DayTime &r) const -> bool{
     
     auto comparable_precision = std::min(this->m_precision, r.m_precision);
     
@@ -206,7 +206,7 @@ bool tristan::time::DayTime::operator==(const tristan::time::DayTime &r) const{
     return true;
 }
 
-bool tristan::time::DayTime::operator<(const tristan::time::DayTime &r) const
+auto tristan::time::DayTime::operator<(const tristan::time::DayTime &r) const -> bool
 {
     auto comparable_precision = std::min(this->m_precision, r.m_precision);
     

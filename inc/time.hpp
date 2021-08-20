@@ -88,10 +88,10 @@ public:
     DayTime(const DayTime&) = default;
     DayTime(DayTime&&) = default;
     //OPERATORS
-    DayTime& operator=(const DayTime&) = default;
-    DayTime& operator=(DayTime&&) = default;
-    bool operator==(const DayTime &r) const;
-    bool operator<(const DayTime &r) const;
+    auto operator=(const DayTime&) -> DayTime& = default;
+    auto operator=(DayTime&&) -> DayTime& = default;
+    auto operator==(const DayTime &r) const -> bool;
+    auto operator<(const DayTime &r) const -> bool;
     
     void operator += (const DayTime& r);
     void operator -= (const DayTime& r);
