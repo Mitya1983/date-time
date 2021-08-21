@@ -15,9 +15,6 @@ namespace tristan::date {
     
     class Date
     {
-        friend auto operator + (const Date& l, const Date &r) -> Date;
-        friend auto operator - (const Date& l, const Date &r) -> Date;
-        
         class Durations {
             friend class Date;
         public:
@@ -44,9 +41,6 @@ namespace tristan::date {
         auto operator=(Date&&) -> Date& = default;
         auto operator==(const Date& r) const -> bool;
         auto operator<(const Date& r) const -> bool;
-        
-        void operator+=(const Date& r);
-        void operator-=(const Date& r);
         
         virtual ~Date() = default;
     
@@ -79,8 +73,6 @@ namespace tristan::date {
     auto operator > (const Date &l, const Date &r) -> bool;
     auto operator <= (const Date &l, const Date &r) -> bool;
     auto operator >= (const Date &l, const Date &r) -> bool;
-    auto operator + (const Date& l, const Date &r) -> Date;
-    auto operator - (const Date& l, const Date &r) -> Date;
     auto operator<<(std::ostream &out, const Date &date) -> std::ostream&;
     
 }//namespace tristan::date
