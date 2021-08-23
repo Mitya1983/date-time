@@ -51,7 +51,7 @@ tristan::time::DayTime::DayTime(uint8_t hours, uint8_t minutes) noexcept(false) 
         throw std::range_error(message);
     }
     m_durations.m_hours = std::chrono::hours(hours);
-    m_durations.m_minutes = std::chrono::hours(minutes);
+    m_durations.m_minutes = std::chrono::minutes(minutes);
 }
 
 tristan::time::DayTime::DayTime(uint8_t hours, uint8_t minutes, uint8_t seconds) :
@@ -62,7 +62,7 @@ tristan::time::DayTime::DayTime(uint8_t hours, uint8_t minutes, uint8_t seconds)
                               + std::to_string(seconds) + ". The value from 0 to 59 is expected";
         throw std::range_error(message);
     }
-    m_durations.m_seconds = std::chrono::hours(seconds);
+    m_durations.m_seconds = std::chrono::seconds(seconds);
     
     m_precision = tristan::time::Precision::SECONDS;
 }
@@ -70,9 +70,9 @@ tristan::time::DayTime::DayTime(uint8_t hours, uint8_t minutes, uint8_t seconds)
 tristan::time::DayTime::DayTime(uint8_t hours, uint8_t minutes, uint8_t seconds, uint16_t milliseconds) :
         tristan::time::DayTime(hours, minutes, seconds)
 {
-    if (milliseconds > 1000){
+    if (milliseconds > 999){
         std::string message = "tristan::time::DayTime(int hours, int minutes, int seconds, uint16_t milliseconds): bad [milliseconds] value was provided - "
-                              + std::to_string(seconds) + ". The value from 0 to 1000 is expected";
+                              + std::to_string(seconds) + ". The value from 0 to 999 is expected";
         throw std::range_error(message);
     }
     m_durations.m_milliseconds = std::chrono::milliseconds(milliseconds);
@@ -84,9 +84,9 @@ tristan::time::DayTime::DayTime(uint8_t hours, uint8_t minutes, uint8_t seconds,
                                 uint16_t microseconds) :
         tristan::time::DayTime(hours, minutes, seconds, milliseconds)
 {
-    if (microseconds > 1000){
+    if (microseconds > 999){
         std::string message = "tristan::time::DayTime(int hours, int minutes, int seconds, uint16_t milliseconds): bad [microseconds] value was provided - "
-                              + std::to_string(seconds) + ". The value from 0 to 1000 is expected";
+                              + std::to_string(seconds) + ". The value from 0 to 999 is expected";
         throw std::range_error(message);
     }
     m_durations.m_microseconds = std::chrono::microseconds(microseconds);
@@ -98,9 +98,9 @@ tristan::time::DayTime::DayTime(uint8_t hours, uint8_t minutes, uint8_t seconds,
                                 uint16_t nanoseconds) :
         tristan::time::DayTime(hours, minutes, seconds, milliseconds, microseconds)
 {
-    if (nanoseconds > 1000){
+    if (nanoseconds > 999){
         std::string message = "tristan::time::DayTime(int hours, int minutes, int seconds, uint16_t milliseconds): bad [nanoseconds] value was provided - "
-                              + std::to_string(seconds) + ". The value from 0 to 1000 is expected";
+                              + std::to_string(seconds) + ". The value from 0 to 999 is expected";
         throw std::range_error(message);
     }
     m_durations.m_nanoseconds = std::chrono::nanoseconds(nanoseconds);
@@ -498,7 +498,7 @@ void tristan::time::DayTime::substractMilliseconds(uint64_t milliseconds){
     else{
         milliseconds_to_substract = milliseconds;
     }
-    this->addSeconds(seconds_to_substract);
+    this->substractSeconds(seconds_to_substract);
     if (milliseconds_to_substract == 0){
         return;
     }
@@ -546,7 +546,7 @@ void tristan::time::DayTime::substractNanoseconds(uint64_t nanoseconds){
     else{
         nanoseconds_to_substract = nanoseconds;
     }
-    this->addMicroseconds(microseconds_to_substract);
+    this->substractMicroseconds(microseconds_to_substract);
     if (nanoseconds_to_substract == 0){
         return;
     }
@@ -651,8 +651,8 @@ std::string tristan::time::DayTime::toString(bool show_offset) const{
             }
         }
         l_time += std::to_string(static_cast<int8_t>(m_offset));
-        if (m_offset > tristan::time::TimeZone::WEST_10){
-            l_time = '0';
+        if (m_offset > tristan::time::TimeZone::WEST_10 && m_offset < tristan::time::TimeZone::UTC){
+            l_time += '0';
         }
     }
     return l_time;
@@ -700,8 +700,8 @@ auto tristan::time::operator+(const tristan::time::DayTime& l, const tristan::ti
             [[fallthrough]];
         }
         case tristan::time::Precision::MINUTES:{
-            time.addHours(r.hours());
             time.addMinutes(r.minutes());
+            time.addHours(r.hours());
             break;
         }
     }
@@ -729,8 +729,8 @@ auto tristan::time::operator-(const tristan::time::DayTime& l, const tristan::ti
             [[fallthrough]];
         }
         case tristan::time::Precision::MINUTES:{
-            time.substractHours(r.hours());
             time.substractMinutes(r.minutes());
+            time.substractHours(r.hours());
             break;
         }
     }
@@ -771,16 +771,16 @@ namespace
             if ((i > 8 && i < 12) && (time[i] < '0' || time[i] > '9')) {
                 return false;
             }
-            if (i == 13 && time[i] != '.') {
+            if (i == 12 && time[i] != '.') {
                 return false;
             }
-            if ((i > 13 && i < 16) && (time[i] < '0' || time[i] > '9')) {
+            if ((i > 12 && i < 16) && (time[i] < '0' || time[i] > '9')) {
                 return false;
             }
-            if (i == 18 && time[i] != '.') {
+            if (i == 16 && time[i] != '.') {
                 return false;
             }
-            if ((i > 18 && i < 20) && (time[i] < '0' || time[i] > '9')) {
+            if ((i > 16 && i < 20) && (time[i] < '0' || time[i] > '9')) {
                 return false;
             }
         }

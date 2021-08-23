@@ -28,7 +28,7 @@ namespace tristan::time {
         WEST_3,
         WEST_2,
         WEST_1,
-        UTC,
+        UTC = 0,
         EAST_1,
         EAST_2,
         EAST_3,
