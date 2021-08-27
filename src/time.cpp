@@ -2,265 +2,229 @@
 #include <chrono>
 #include <algorithm>
 
-namespace
-{
+namespace{
     auto checkTimeFormat(const std::string& time) -> bool;
+    const uint32_t minutes_in_day = 1440;
+    const uint32_t seconds_in_day = 86400;
+    const uint32_t milliseconds_in_day = 86400000;
+    const uint64_t microseconds_in_day = 86400000000;
+    const uint64_t nanoseconds_in_day = 86400000000000;
+    const uint32_t minutes_in_hour = 60;
+    const uint32_t seconds_in_hour = 3600;
+    const uint32_t milliseconds_in_hour = 3600000;
+    const uint64_t microseconds_in_hour = 3600000000;
+    const uint64_t nanoseconds_in_hour = 3600000000000;
+    const uint32_t seconds_in_minute = 60;
+    const uint32_t milliseconds_in_minute = 60000;
+    const uint64_t microseconds_in_minute = 60000000;
+    const uint64_t nanoseconds_in_minute = 60000000000;
+    const uint32_t milliseconds_in_second = 1000;
+    const uint64_t microseconds_in_second = 1000000;
+    const uint64_t nanoseconds_in_second = 1000000000;
+    const uint64_t microseconds_in_millisecond = 1000;
+    const uint64_t nanoseconds_in_millisecond = 1000000;
+    const uint64_t nanoseconds_in_microsecond = 1000;
+    using Days = std::chrono::duration<int64_t, std::ratio_divide<std::ratio<seconds_in_day>, std::chrono::seconds::period>>;
 } //End of unnamed namespace
 
 tristan::time::DayTime::DayTime(tristan::time::Precision precision) :
-        m_precision(precision),
-        m_offset(tristan::time::TimeZone::UTC),
-        m_durations()
-{
-    auto time_point = std::chrono::system_clock::now();
-    auto duration_in_hours = std::chrono::duration_cast<std::chrono::hours>(time_point.time_since_epoch());
-    m_durations.m_hours = std::chrono::hours(duration_in_hours.count() % 24);
-    auto duration_in_minutes = std::chrono::duration_cast<std::chrono::minutes>(time_point.time_since_epoch());
-    m_durations.m_minutes = std::chrono::minutes(duration_in_minutes.count() % 60);
-    if (m_precision <= tristan::time::Precision::SECONDS) {
-        auto duration_in_seconds = std::chrono::duration_cast<std::chrono::seconds>(time_point.time_since_epoch());
-        m_durations.m_seconds = std::chrono::seconds(duration_in_seconds.count() % 60);
-    }
-    if (m_precision <= tristan::time::Precision::MILLISECONDS){
-        auto duration_in_milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(time_point.time_since_epoch());
-        m_durations.m_milliseconds = std::chrono::milliseconds(duration_in_milliseconds.count() % 1000);
-    }
-    if (m_precision <= tristan::time::Precision::MICROSECONDS){
-        auto duration_in_microseconds = std::chrono::duration_cast<std::chrono::microseconds>(time_point.time_since_epoch());
-        m_durations.m_microseconds = std::chrono::microseconds(duration_in_microseconds.count() % 1000);
-    }
-    if (m_precision == tristan::time::Precision::NANOSECONDS){
-        auto duration_in_nanoseconds = std::chrono::duration_cast<std::chrono::nanoseconds>(time_point.time_since_epoch());
-        m_durations.m_nanoseconds = std::chrono::nanoseconds(duration_in_nanoseconds.count() % 1000);
+        m_precision{precision},
+        m_offset{tristan::time::TimeZone::UTC}{
+    auto time_point = std::chrono::system_clock::duration(std::chrono::system_clock::now().time_since_epoch());
+    auto days = std::chrono::duration_cast<Days>(time_point);
+    
+    switch (m_precision){
+        case tristan::time::Precision::MINUTES:{
+            m_time_since_day_start = std::chrono::duration_cast<std::chrono::minutes>(
+                    time_point - std::chrono::duration_cast<std::chrono::system_clock::duration>(days)
+            );
+            break;
+        }
+        case tristan::time::Precision::SECONDS:{
+            m_time_since_day_start = std::chrono::duration_cast<std::chrono::seconds>(
+                    time_point - std::chrono::duration_cast<std::chrono::system_clock::duration>(days)
+            );
+            break;
+        }
+        case tristan::time::Precision::MILLISECONDS:{
+            m_time_since_day_start = std::chrono::duration_cast<std::chrono::milliseconds>(
+                    time_point - std::chrono::duration_cast<std::chrono::system_clock::duration>(days)
+            );
+            break;
+        }
+        case tristan::time::Precision::MICROSECONDS:{
+            m_time_since_day_start = std::chrono::duration_cast<std::chrono::microseconds>(
+                    time_point - std::chrono::duration_cast<std::chrono::system_clock::duration>(days)
+            );
+            break;
+        }
+        case tristan::time::Precision::NANOSECONDS:{
+            m_time_since_day_start = std::chrono::duration_cast<std::chrono::nanoseconds>(
+                    time_point - std::chrono::duration_cast<std::chrono::system_clock::duration>(days)
+            );
+            break;
+        }
     }
 }
 
-tristan::time::DayTime::DayTime(uint8_t hours, uint8_t minutes) noexcept(false) :
-        m_precision(tristan::time::Precision::MINUTES),
-        m_offset(tristan::time::TimeZone::UTC),
-        m_durations()
-{
+tristan::time::DayTime::DayTime(uint8_t hours, uint8_t minutes) noexcept(false):
+        m_precision{tristan::time::Precision::MINUTES},
+        m_offset{tristan::time::TimeZone::UTC}{
     if (hours > 23){
-        std::string message = "tristan::time::DayTime(int hours, int minutes, int seconds): bad [hour] value was provided - "
-                              + std::to_string(hours) + ". The value from 0 to 23 is expected";
-        throw std::range_error(message);
+        std::string message =
+                "tristan::time::DayTime(int hours, int minutes, int seconds): bad [hour] value was provided - "
+                + std::to_string(hours) + ". The value from 0 to 23 is expected";
+        throw std::range_error{message};
     }
     if (minutes > 59){
-        std::string message = "tristan::time::DayTime(int hours, int minutes, int seconds): bad [minutes] value was provided - "
-                              + std::to_string(minutes) + ". The value from 0 to 59 is expected";
-        throw std::range_error(message);
+        std::string message =
+                "tristan::time::DayTime(int hours, int minutes, int seconds): bad [minutes] value was provided - "
+                + std::to_string(minutes) + ". The value from 0 to 59 is expected";
+        throw std::range_error{message};
     }
-    m_durations.m_hours = std::chrono::hours(hours);
-    m_durations.m_minutes = std::chrono::minutes(minutes);
+    m_time_since_day_start = std::chrono::minutes{hours * 60 + minutes};
 }
 
 tristan::time::DayTime::DayTime(uint8_t hours, uint8_t minutes, uint8_t seconds) :
-        tristan::time::DayTime(hours, minutes)
-{
+        tristan::time::DayTime{hours, minutes}{
     if (seconds > 59){
-        std::string message = "tristan::time::DayTime(int hours, int minutes, int seconds): bad [seconds] value was provided - "
-                              + std::to_string(seconds) + ". The value from 0 to 59 is expected";
-        throw std::range_error(message);
+        std::string message =
+                "tristan::time::DayTime(int hours, int minutes, int seconds): bad [seconds] value was provided - "
+                + std::to_string(seconds) + ". The value from 0 to 59 is expected";
+        throw std::range_error{message};
     }
-    m_durations.m_seconds = std::chrono::seconds(seconds);
+    auto l_minutes = std::get<std::chrono::minutes>(m_time_since_day_start);
+    m_time_since_day_start =
+            std::chrono::duration_cast<std::chrono::seconds>(l_minutes) + std::chrono::seconds{seconds};
     
     m_precision = tristan::time::Precision::SECONDS;
 }
 
 tristan::time::DayTime::DayTime(uint8_t hours, uint8_t minutes, uint8_t seconds, uint16_t milliseconds) :
-        tristan::time::DayTime(hours, minutes, seconds)
-{
+        tristan::time::DayTime{hours, minutes, seconds}{
     if (milliseconds > 999){
-        std::string message = "tristan::time::DayTime(int hours, int minutes, int seconds, uint16_t milliseconds): bad [milliseconds] value was provided - "
-                              + std::to_string(seconds) + ". The value from 0 to 999 is expected";
-        throw std::range_error(message);
+        std::string message =
+                "tristan::time::DayTime(int hours, int minutes, int seconds, uint16_t milliseconds): bad [milliseconds] value was provided - "
+                + std::to_string(seconds) + ". The value from 0 to 999 is expected";
+        throw std::range_error{message};
     }
-    m_durations.m_milliseconds = std::chrono::milliseconds(milliseconds);
+    auto l_seconds = std::get<std::chrono::seconds>(m_time_since_day_start);
+    m_time_since_day_start =
+            std::chrono::duration_cast<std::chrono::milliseconds>(l_seconds) + std::chrono::milliseconds{milliseconds};
     
     m_precision = tristan::time::Precision::MILLISECONDS;
 }
 
 tristan::time::DayTime::DayTime(uint8_t hours, uint8_t minutes, uint8_t seconds, uint16_t milliseconds,
                                 uint16_t microseconds) :
-        tristan::time::DayTime(hours, minutes, seconds, milliseconds)
-{
+        tristan::time::DayTime{hours, minutes, seconds, milliseconds}{
     if (microseconds > 999){
-        std::string message = "tristan::time::DayTime(int hours, int minutes, int seconds, uint16_t milliseconds): bad [microseconds] value was provided - "
-                              + std::to_string(seconds) + ". The value from 0 to 999 is expected";
-        throw std::range_error(message);
+        std::string message =
+                "tristan::time::DayTime(int hours, int minutes, int seconds, uint16_t milliseconds): bad [microseconds] value was provided - "
+                + std::to_string(seconds) + ". The value from 0 to 999 is expected";
+        throw std::range_error{message};
     }
-    m_durations.m_microseconds = std::chrono::microseconds(microseconds);
+    auto l_milliseconds = std::get<std::chrono::milliseconds>(m_time_since_day_start);
+    m_time_since_day_start = std::chrono::duration_cast<std::chrono::microseconds>(l_milliseconds) +
+                             std::chrono::microseconds{microseconds};
     
     m_precision = tristan::time::Precision::MICROSECONDS;
 }
 
-tristan::time::DayTime::DayTime(uint8_t hours, uint8_t minutes, uint8_t seconds, uint16_t milliseconds, uint16_t microseconds,
-                                uint16_t nanoseconds) :
-        tristan::time::DayTime(hours, minutes, seconds, milliseconds, microseconds)
-{
+tristan::time::DayTime::DayTime(uint8_t hours, uint8_t minutes, uint8_t seconds, uint16_t milliseconds,
+                                uint16_t microseconds, uint16_t nanoseconds) :
+        tristan::time::DayTime{hours, minutes, seconds, milliseconds, microseconds}{
     if (nanoseconds > 999){
-        std::string message = "tristan::time::DayTime(int hours, int minutes, int seconds, uint16_t milliseconds): bad [nanoseconds] value was provided - "
-                              + std::to_string(seconds) + ". The value from 0 to 999 is expected";
-        throw std::range_error(message);
+        std::string message =
+                "tristan::time::DayTime(int hours, int minutes, int seconds, uint16_t milliseconds): bad [nanoseconds] value was provided - "
+                + std::to_string(seconds) + ". The value from 0 to 999 is expected";
+        throw std::range_error{message};
     }
-    m_durations.m_nanoseconds = std::chrono::nanoseconds(nanoseconds);
+    auto l_microseconds = std::get<std::chrono::microseconds>(m_time_since_day_start);
+    m_time_since_day_start = std::chrono::duration_cast<std::chrono::nanoseconds>(l_microseconds) +
+                             std::chrono::nanoseconds{nanoseconds};
     
     m_precision = tristan::time::Precision::NANOSECONDS;
 }
 
 tristan::time::DayTime::DayTime(const std::string& time) :
-        m_offset(tristan::time::TimeZone::UTC),
-        m_durations()
-{
+        m_offset{tristan::time::TimeZone::UTC},
+        m_precision(tristan::time::Precision::MINUTES){
     auto size = time.length();
     
     if (!checkTimeFormat(time)){
-        throw std::invalid_argument("tristan::time::DayTime::DayTime(const std::string& time): Invalid time format");
+        throw std::invalid_argument{"tristan::time::DayTime::DayTime(const std::string& time): Invalid time format"};
     }
-    
     const uint8_t hours_pos = 0;
     const uint8_t minutes_pos = 3;
     const uint8_t seconds_pos = 6;
     const uint8_t milliseconds_pos = 9;
     const uint8_t microseconds_pos = 13;
     const uint8_t nanoseconds_pos = 17;
-    m_precision = tristan::time::Precision::MINUTES;
+    
     switch (size){
-        case 20:{
-            m_durations.m_nanoseconds = std::chrono::nanoseconds (std::stoi(time.substr(nanoseconds_pos, 3)));
-            m_precision = tristan::time::Precision::NANOSECONDS;
-            [[fallthrough]];
-        }
-        case 16:{
-            m_durations.m_microseconds = std::chrono::microseconds (std::stoi(time.substr(microseconds_pos, 3)));
-            if (m_precision == tristan::time::Precision::MINUTES){
-                m_precision = tristan::time::Precision::MICROSECONDS;
-            }
-            [[fallthrough]];
-        }
-        case 12:{
-            m_durations.m_milliseconds = std::chrono::milliseconds (std::stoi(time.substr(milliseconds_pos, 3)));
-            if (m_precision == tristan::time::Precision::MINUTES){
-                m_precision = tristan::time::Precision::MILLISECONDS;
-            }
-            [[fallthrough]];
+        case 5:{
+            auto hours = std::stoi(time.substr(hours_pos, 2));
+            auto minutes = std::stoi(time.substr(minutes_pos, 2));
+            *this = tristan::time::DayTime(hours, minutes);
+            break;
         }
         case 8:{
-            m_durations.m_seconds = std::chrono::seconds (std::stoi(time.substr(seconds_pos, 2)));
-            if (m_precision == tristan::time::Precision::MINUTES){
-                m_precision = tristan::time::Precision::SECONDS;
-            }
-            [[fallthrough]];
+            auto hours = std::stoi(time.substr(hours_pos, 2));
+            auto minutes = std::stoi(time.substr(minutes_pos, 2));
+            auto seconds = std::stoi(time.substr(seconds_pos, 2));
+            *this = tristan::time::DayTime(hours, minutes, seconds);
+            break;
         }
-        case 5:{
-            m_durations.m_hours = std::chrono::hours(std::stoi(time.substr(hours_pos, 2)));
-            m_durations.m_minutes = std::chrono::minutes (std::stoi(time.substr(minutes_pos, 2)));
+        case 12:{
+            auto hours = std::stoi(time.substr(hours_pos, 2));
+            auto minutes = std::stoi(time.substr(minutes_pos, 2));
+            auto seconds = std::stoi(time.substr(seconds_pos, 2));
+            auto milliseconds = std::stoi(time.substr(milliseconds_pos, 3));
+            *this = tristan::time::DayTime(hours, minutes, seconds, milliseconds);
+            break;
+        }
+        case 16:{
+            auto hours = std::stoi(time.substr(hours_pos, 2));
+            auto minutes = std::stoi(time.substr(minutes_pos, 2));
+            auto seconds = std::stoi(time.substr(seconds_pos, 2));
+            auto milliseconds = std::stoi(time.substr(milliseconds_pos, 3));
+            auto microseconds = std::stoi(time.substr(microseconds_pos, 3));
+            *this = tristan::time::DayTime(hours, minutes, seconds, milliseconds, microseconds);
+            break;
+        }
+        case 20:{
+            auto hours = std::stoi(time.substr(hours_pos, 2));
+            auto minutes = std::stoi(time.substr(minutes_pos, 2));
+            auto seconds = std::stoi(time.substr(seconds_pos, 2));
+            auto milliseconds = std::stoi(time.substr(milliseconds_pos, 3));
+            auto microseconds = std::stoi(time.substr(microseconds_pos, 3));
+            auto nanoseconds = std::stoi(time.substr(nanoseconds_pos, 3));
+            *this = tristan::time::DayTime(hours, minutes, seconds, milliseconds, microseconds, nanoseconds);
             break;
         }
         default:{
-            throw std::invalid_argument("tristan::time::DayTime::DayTime(const std::string& time): Invalid time format");
+            throw std::invalid_argument{
+                    "tristan::time::DayTime::DayTime(const std::string& time): Invalid time format"};
         }
     }
 }
 
-auto tristan::time::DayTime::operator==(const tristan::time::DayTime &r) const -> bool{
+auto tristan::time::DayTime::operator==(const tristan::time::DayTime& r) const -> bool{
     
-    auto comparable_precision = std::min(this->m_precision, r.m_precision);
-    
-    switch (comparable_precision){
-        case tristan::time::Precision::NANOSECONDS:{
-            if (this->m_durations.m_nanoseconds != r.m_durations.m_nanoseconds){
-                return false;
-            }
-            [[fallthrough]];
-        }
-        case tristan::time::Precision::MICROSECONDS:{
-            if (this->m_durations.m_microseconds != r.m_durations.m_microseconds){
-                return false;
-            }
-            [[fallthrough]];
-        }
-        case tristan::time::Precision::MILLISECONDS:{
-            if (this->m_durations.m_milliseconds != r.m_durations.m_milliseconds){
-                return false;
-            }
-            [[fallthrough]];
-        }
-        case tristan::time::Precision::SECONDS:{
-            if (this->m_durations.m_seconds != r.m_durations.m_seconds){
-                return false;
-            }
-            [[fallthrough]];
-        }
-        case tristan::time::Precision::MINUTES:{
-            if (this->m_durations.m_minutes != r.m_durations.m_minutes){
-                return false;
-            }
-            if (this->m_durations.m_hours != r.m_durations.m_hours){
-                return false;
-            }
-            break;
-        }
+    if (m_precision != r.m_precision){
+        return false;
     }
     
-    return true;
+    return m_time_since_day_start == r.m_time_since_day_start;
 }
 
-auto tristan::time::DayTime::operator<(const tristan::time::DayTime &r) const -> bool
-{
-    auto comparable_precision = std::min(this->m_precision, r.m_precision);
+auto tristan::time::DayTime::operator<(const tristan::time::DayTime& r) const -> bool{
+    if (m_precision != r.m_precision){
+        return false;
+    }
     
-    if (this->m_durations.m_hours < r.m_durations.m_hours){
-        return true;
-    }
-    if (this->m_durations.m_hours > r.m_durations.m_hours){
-        return false;
-    }
-    //Hours are equal
-    if (this->m_durations.m_minutes < r.m_durations.m_minutes){
-        return true;
-    }
-    if (this->m_durations.m_minutes > r.m_durations.m_minutes){
-        return false;
-    }
-    //Minutes are equal
-    if (comparable_precision == tristan::time::Precision::SECONDS){
-        if (this->m_durations.m_seconds < r.m_durations.m_seconds){
-            return true;
-        }
-        if (this->m_durations.m_seconds > r.m_durations.m_seconds){
-            return false;
-        }
-    }
-    //Seconds are equal
-    if (comparable_precision == tristan::time::Precision::MILLISECONDS){
-        if (this->m_durations.m_milliseconds < r.m_durations.m_milliseconds){
-            return true;
-        }
-        if (this->m_durations.m_milliseconds > r.m_durations.m_milliseconds){
-            return false;
-        }
-    }
-    //Milliseconds are equal
-    if (comparable_precision == tristan::time::Precision::MICROSECONDS){
-        if (this->m_durations.m_microseconds < r.m_durations.m_microseconds){
-            return true;
-        }
-        if (this->m_durations.m_microseconds > r.m_durations.m_microseconds){
-            return false;
-        }
-    }
-    //Microseconds are equal
-    if (comparable_precision == tristan::time::Precision::NANOSECONDS){
-        if (this->m_durations.m_nanoseconds < r.m_durations.m_nanoseconds){
-            return true;
-        }
-        if (this->m_durations.m_nanoseconds > r.m_durations.m_nanoseconds){
-            return false;
-        }
-    }
-    //If got here all values are equal
-    return false;
+    return m_time_since_day_start < r.m_time_since_day_start;
 }
 
 void tristan::time::DayTime::operator+=(const tristan::time::DayTime& r){
@@ -272,23 +236,34 @@ void tristan::time::DayTime::operator-=(const tristan::time::DayTime& r){
 }
 
 void tristan::time::DayTime::addHours(uint64_t hours){
+    
     if (hours == 0){
         return;
     }
-    uint8_t hours_to_add;
     if (hours > 23){
-        hours_to_add = hours % 24;
+        hours %= 24;
     }
-    else {
-        hours_to_add = hours;
-    }
-    
-    if (hours_to_add == 0){
-        return;
-    }
-    m_durations.m_hours += std::chrono::hours(hours_to_add);
-    if (m_durations.m_hours > std::chrono::hours(23)){
-        m_durations.m_hours %= 24;
+    switch (m_precision){
+        case tristan::time::Precision::MINUTES:{
+            _addMinutes(hours * minutes_in_hour);
+            break;
+        }
+        case tristan::time::Precision::SECONDS:{
+            _addSeconds(hours * seconds_in_hour);
+            break;
+        }
+        case tristan::time::Precision::MILLISECONDS:{
+            _addMilliseconds(hours * milliseconds_in_hour);
+            break;
+        }
+        case tristan::time::Precision::MICROSECONDS:{
+            _addMicroseconds(hours * microseconds_in_hour);
+            break;
+        }
+        case tristan::time::Precision::NANOSECONDS:{
+            _addNanoseconds(hours * nanoseconds_in_hour);
+            break;
+        }
     }
 }
 
@@ -296,24 +271,30 @@ void tristan::time::DayTime::addMinutes(uint64_t minutes){
     if (minutes == 0){
         return;
     }
-    uint8_t minutes_to_add;
-    uint8_t hours_to_add = 0;
-    if (minutes > 59){
-        hours_to_add = minutes / 60;
-        minutes_to_add = minutes % 60;
+    if (minutes > minutes_in_day){
+        minutes %= minutes_in_day;
     }
-    else{
-        minutes_to_add = minutes;
-    }
-    
-    this->addHours(hours_to_add);
-    if (minutes_to_add == 0){
-        return;
-    }
-    m_durations.m_minutes += std::chrono::minutes(minutes_to_add);
-    if (m_durations.m_minutes > std::chrono::minutes(59)){
-        this->addHours(1);
-        m_durations.m_minutes %= 60;
+    switch (m_precision){
+        case tristan::time::Precision::MINUTES:{
+            _addMinutes(minutes);
+            break;
+        }
+        case tristan::time::Precision::SECONDS:{
+            _addSeconds(minutes * seconds_in_minute);
+            break;
+        }
+        case tristan::time::Precision::MILLISECONDS:{
+            _addMilliseconds(minutes * milliseconds_in_minute);
+            break;
+        }
+        case tristan::time::Precision::MICROSECONDS:{
+            _addMicroseconds(minutes * microseconds_in_minute);
+            break;
+        }
+        case tristan::time::Precision::NANOSECONDS:{
+            _addNanoseconds(minutes * nanoseconds_in_minute);
+            break;
+        }
     }
 }
 
@@ -321,24 +302,32 @@ void tristan::time::DayTime::addSeconds(uint64_t seconds){
     if (seconds == 0){
         return;
     }
-    uint8_t seconds_to_add;
-    uint8_t minutes_to_add = 0;
-    if (seconds > 59){
-        minutes_to_add = seconds / 60;
-        seconds_to_add = seconds % 60;
+    if (seconds > seconds_in_day){
+        seconds %= seconds_in_day;
     }
-    else{
-        seconds_to_add = seconds;
-    }
-    this->addMinutes(minutes_to_add);
-    if (seconds_to_add == 0){
-        return;
-    }
-    m_durations.m_seconds += std::chrono::seconds(seconds_to_add);
-    
-    if (m_durations.m_seconds > std::chrono::seconds(59)){
-        this->addMinutes(1);
-        m_durations.m_seconds %= 60;
+    switch (m_precision){
+        case tristan::time::Precision::MINUTES:{
+            if (seconds < seconds_in_minute){
+                return;
+            }
+            _addMinutes(seconds % seconds_in_minute);
+        }
+        case tristan::time::Precision::SECONDS:{
+            _addSeconds(seconds);
+            break;
+        }
+        case tristan::time::Precision::MILLISECONDS:{
+            _addMilliseconds(seconds * milliseconds_in_second);
+            break;
+        }
+        case tristan::time::Precision::MICROSECONDS:{
+            _addMicroseconds(seconds * microseconds_in_second);
+            break;
+        }
+        case tristan::time::Precision::NANOSECONDS:{
+            _addNanoseconds(seconds * nanoseconds_in_second);
+            break;
+        }
     }
 }
 
@@ -346,23 +335,35 @@ void tristan::time::DayTime::addMilliseconds(uint64_t milliseconds){
     if (milliseconds == 0){
         return;
     }
-    uint8_t milliseconds_to_add;
-    uint8_t seconds_to_add = 0;
-    if (milliseconds > 999){
-        seconds_to_add = milliseconds / 1000;
-        milliseconds_to_add = milliseconds % 1000;
+    if (milliseconds > milliseconds_in_day){
+        milliseconds %= milliseconds_in_day;
     }
-    else{
-        milliseconds_to_add = milliseconds;
-    }
-    this->addSeconds(seconds_to_add);
-    if (milliseconds_to_add == 0){
-        return;
-    }
-    m_durations.m_milliseconds += std::chrono::milliseconds(milliseconds_to_add);
-    if (m_durations.m_milliseconds > std::chrono::milliseconds (1000)){
-        this->addSeconds(1);
-        m_durations.m_milliseconds %= 1000;
+    switch (m_precision){
+        case tristan::time::Precision::MINUTES:{
+            if (milliseconds < milliseconds_in_minute){
+                return;
+            }
+            _addMinutes(milliseconds % milliseconds_in_minute);
+        }
+        case tristan::time::Precision::SECONDS:{
+            if (milliseconds < milliseconds_in_second){
+                return;
+            }
+            _addSeconds(milliseconds % milliseconds_in_second);
+            break;
+        }
+        case tristan::time::Precision::MILLISECONDS:{
+            _addMilliseconds(milliseconds);
+            break;
+        }
+        case tristan::time::Precision::MICROSECONDS:{
+            _addMicroseconds(milliseconds * microseconds_in_millisecond);
+            break;
+        }
+        case tristan::time::Precision::NANOSECONDS:{
+            _addNanoseconds(milliseconds * nanoseconds_in_millisecond);
+            break;
+        }
     }
 }
 
@@ -370,23 +371,38 @@ void tristan::time::DayTime::addMicroseconds(uint64_t microseconds){
     if (microseconds == 0){
         return;
     }
-    uint8_t microseconds_to_add;
-    uint8_t milliseconds_to_add = 0;
-    if (microseconds > 999){
-        milliseconds_to_add = microseconds / 1000;
-        microseconds_to_add = microseconds % 1000;
+    if (microseconds > microseconds_in_day){
+        microseconds %= microseconds_in_day;
     }
-    else{
-        microseconds_to_add = microseconds;
-    }
-    this->addMilliseconds(milliseconds_to_add);
-    if (microseconds_to_add == 0){
-        return;
-    }
-    m_durations.m_microseconds += std::chrono::microseconds(microseconds_to_add);
-    if (m_durations.m_microseconds > std::chrono::microseconds (1000)){
-        this->addMilliseconds(1);
-        m_durations.m_microseconds %= 1000;
+    switch (m_precision){
+        case tristan::time::Precision::MINUTES:{
+            if (microseconds < microseconds_in_minute){
+                return;
+            }
+            _addMinutes(microseconds % microseconds_in_minute);
+        }
+        case tristan::time::Precision::SECONDS:{
+            if (microseconds < microseconds_in_second){
+                return;
+            }
+            _addSeconds(microseconds % microseconds_in_second);
+            break;
+        }
+        case tristan::time::Precision::MILLISECONDS:{
+            if (microseconds < microseconds_in_millisecond){
+                return;
+            }
+            _addMilliseconds(microseconds % microseconds_in_millisecond);
+            break;
+        }
+        case tristan::time::Precision::MICROSECONDS:{
+            _addMicroseconds(microseconds);
+            break;
+        }
+        case tristan::time::Precision::NANOSECONDS:{
+            _addNanoseconds(microseconds * nanoseconds_in_microsecond);
+            break;
+        }
     }
 }
 
@@ -394,23 +410,41 @@ void tristan::time::DayTime::addNanoseconds(uint64_t nanoseconds){
     if (nanoseconds == 0){
         return;
     }
-    uint8_t nanoseconds_to_add;
-    uint8_t microseconds_to_add = 0;
-    if (nanoseconds > 999){
-        microseconds_to_add = nanoseconds / 1000;
-        nanoseconds_to_add = nanoseconds % 1000;
+    if (nanoseconds > nanoseconds_in_day){
+        nanoseconds %= nanoseconds_in_day;
     }
-    else{
-        nanoseconds_to_add = nanoseconds;
-    }
-    this->addMicroseconds(microseconds_to_add);
-    if (nanoseconds_to_add == 0){
-        return;
-    }
-    m_durations.m_nanoseconds += std::chrono::nanoseconds(nanoseconds_to_add);
-    if (m_durations.m_nanoseconds > std::chrono::nanoseconds (1000)){
-        this->addMicroseconds(1);
-        m_durations.m_nanoseconds %= 1000;
+    switch (m_precision){
+        case tristan::time::Precision::MINUTES:{
+            if (nanoseconds < nanoseconds_in_minute){
+                return;
+            }
+            _addMinutes(nanoseconds % nanoseconds_in_minute);
+        }
+        case tristan::time::Precision::SECONDS:{
+            if (nanoseconds < nanoseconds_in_second){
+                return;
+            }
+            _addSeconds(nanoseconds % nanoseconds_in_second);
+            break;
+        }
+        case tristan::time::Precision::MILLISECONDS:{
+            if (nanoseconds < nanoseconds_in_millisecond){
+                return;
+            }
+            _addMilliseconds(nanoseconds % nanoseconds_in_millisecond);
+            break;
+        }
+        case tristan::time::Precision::MICROSECONDS:{
+            if (nanoseconds < nanoseconds_in_microsecond){
+                return;
+            }
+            _addMicroseconds(nanoseconds % nanoseconds_in_microsecond);
+            break;
+        }
+        case tristan::time::Precision::NANOSECONDS:{
+            _addNanoseconds(nanoseconds);
+            break;
+        }
     }
 }
 
@@ -418,46 +452,61 @@ void tristan::time::DayTime::substractHours(uint64_t hours){
     if (hours == 0){
         return;
     }
-    uint8_t hours_to_substract;
     if (hours > 23){
-        hours_to_substract = hours % 24;
+        hours %= 24;
     }
-    else {
-        hours_to_substract = hours;
+    switch (m_precision){
+        case tristan::time::Precision::MINUTES:{
+            _substractMinutes(hours * minutes_in_hour);
+            break;
+        }
+        case tristan::time::Precision::SECONDS:{
+            _substractSeconds(hours * seconds_in_hour);
+            break;
+        }
+        case tristan::time::Precision::MILLISECONDS:{
+            _substractMilliseconds(hours * milliseconds_in_hour);
+            break;
+        }
+        case tristan::time::Precision::MICROSECONDS:{
+            _substractMicroseconds(hours * microseconds_in_hour);
+            break;
+        }
+        case tristan::time::Precision::NANOSECONDS:{
+            _substractNanoseconds(hours * nanoseconds_in_hour);
+            break;
+        }
     }
-    
-    if (hours_to_substract == 0){
-        return;
-    }
-    m_durations.m_hours -= std::chrono::hours(hours_to_substract);
-    if (m_durations.m_hours < std::chrono::hours(0)){
-        m_durations.m_hours += std::chrono::hours(24);
-    }
-    
 }
 
 void tristan::time::DayTime::substractMinutes(uint64_t minutes){
     if (minutes == 0){
         return;
     }
-    uint8_t minutes_to_substract;
-    uint8_t hours_to_substract = 0;
-    if (minutes > 59){
-        hours_to_substract = minutes / 60;
-        minutes_to_substract = minutes % 60;
+    if (minutes > minutes_in_day){
+        minutes %= minutes_in_day;
     }
-    else{
-        minutes_to_substract = minutes;
-    }
-    
-    this->substractHours(hours_to_substract);
-    if (minutes_to_substract == 0){
-        return;
-    }
-    m_durations.m_minutes -= std::chrono::minutes(minutes_to_substract);
-    if (m_durations.m_minutes < std::chrono::minutes(0)){
-        this->substractHours(1);
-        m_durations.m_minutes += std::chrono::minutes(60);
+    switch (m_precision){
+        case tristan::time::Precision::MINUTES:{
+            _substractMinutes(minutes);
+            break;
+        }
+        case tristan::time::Precision::SECONDS:{
+            _substractSeconds(minutes * seconds_in_minute);
+            break;
+        }
+        case tristan::time::Precision::MILLISECONDS:{
+            _substractMilliseconds(minutes * milliseconds_in_minute);
+            break;
+        }
+        case tristan::time::Precision::MICROSECONDS:{
+            _substractMicroseconds(minutes * microseconds_in_minute);
+            break;
+        }
+        case tristan::time::Precision::NANOSECONDS:{
+            _substractNanoseconds(minutes * nanoseconds_in_minute);
+            break;
+        }
     }
 }
 
@@ -465,23 +514,32 @@ void tristan::time::DayTime::substractSeconds(uint64_t seconds){
     if (seconds == 0){
         return;
     }
-    uint8_t seconds_to_substract;
-    uint8_t minutes_to_substract = 0;
-    if (seconds > 59){
-        minutes_to_substract = seconds / 60;
-        seconds_to_substract = seconds % 60;
+    if (seconds > seconds_in_day){
+        seconds %= seconds_in_day;
     }
-    else{
-        seconds_to_substract = seconds;
-    }
-    this->substractMinutes(minutes_to_substract);
-    if (seconds_to_substract == 0){
-        return;
-    }
-    m_durations.m_seconds -= std::chrono::seconds(seconds_to_substract);
-    if (m_durations.m_seconds < std::chrono::seconds(0)){
-        this->substractMinutes(1);
-        m_durations.m_seconds += std::chrono::seconds(60);
+    switch (m_precision){
+        case tristan::time::Precision::MINUTES:{
+            if (seconds < seconds_in_minute){
+                return;
+            }
+            _substractMinutes(seconds % seconds_in_minute);
+        }
+        case tristan::time::Precision::SECONDS:{
+            _substractSeconds(seconds);
+            break;
+        }
+        case tristan::time::Precision::MILLISECONDS:{
+            _substractMilliseconds(seconds * milliseconds_in_second);
+            break;
+        }
+        case tristan::time::Precision::MICROSECONDS:{
+            _substractMicroseconds(seconds * microseconds_in_second);
+            break;
+        }
+        case tristan::time::Precision::NANOSECONDS:{
+            _substractNanoseconds(seconds * nanoseconds_in_second);
+            break;
+        }
     }
 }
 
@@ -489,23 +547,35 @@ void tristan::time::DayTime::substractMilliseconds(uint64_t milliseconds){
     if (milliseconds == 0){
         return;
     }
-    uint8_t milliseconds_to_substract;
-    uint8_t seconds_to_substract = 0;
-    if (milliseconds > 999){
-        seconds_to_substract = milliseconds / 1000;
-        milliseconds_to_substract = milliseconds % 1000;
+    if (milliseconds > milliseconds_in_day){
+        milliseconds %= milliseconds_in_day;
     }
-    else{
-        milliseconds_to_substract = milliseconds;
-    }
-    this->substractSeconds(seconds_to_substract);
-    if (milliseconds_to_substract == 0){
-        return;
-    }
-    m_durations.m_milliseconds -= std::chrono::milliseconds(milliseconds_to_substract);
-    if (m_durations.m_milliseconds < std::chrono::milliseconds(0)){
-        this->substractSeconds(1);
-        m_durations.m_milliseconds += std::chrono::milliseconds(1000);
+    switch (m_precision){
+        case tristan::time::Precision::MINUTES:{
+            if (milliseconds < milliseconds_in_minute){
+                return;
+            }
+            _substractMinutes(milliseconds % milliseconds_in_minute);
+        }
+        case tristan::time::Precision::SECONDS:{
+            if (milliseconds < milliseconds_in_second){
+                return;
+            }
+            _substractSeconds(milliseconds % milliseconds_in_second);
+            break;
+        }
+        case tristan::time::Precision::MILLISECONDS:{
+            _substractMilliseconds(milliseconds);
+            break;
+        }
+        case tristan::time::Precision::MICROSECONDS:{
+            _substractMicroseconds(milliseconds * microseconds_in_millisecond);
+            break;
+        }
+        case tristan::time::Precision::NANOSECONDS:{
+            _substractNanoseconds(milliseconds * nanoseconds_in_millisecond);
+            break;
+        }
     }
 }
 
@@ -513,23 +583,38 @@ void tristan::time::DayTime::substractMicroseconds(uint64_t microseconds){
     if (microseconds == 0){
         return;
     }
-    uint8_t microseconds_to_substract;
-    uint8_t milliseconds_to_substract = 0;
-    if (microseconds > 999){
-        milliseconds_to_substract = microseconds / 1000;
-        microseconds_to_substract = microseconds % 1000;
+    if (microseconds > microseconds_in_day){
+        microseconds %= microseconds_in_day;
     }
-    else{
-        microseconds_to_substract = microseconds;
-    }
-    this->substractMilliseconds(milliseconds_to_substract);
-    if (microseconds_to_substract == 0){
-        return;
-    }
-    m_durations.m_microseconds -= std::chrono::microseconds(microseconds_to_substract);
-    if (m_durations.m_microseconds < std::chrono::microseconds(0)){
-        this->substractMilliseconds(1);
-        m_durations.m_microseconds += std::chrono::microseconds(1000);
+    switch (m_precision){
+        case tristan::time::Precision::MINUTES:{
+            if (microseconds < microseconds_in_minute){
+                return;
+            }
+            _substractMinutes(microseconds % microseconds_in_minute);
+        }
+        case tristan::time::Precision::SECONDS:{
+            if (microseconds < microseconds_in_second){
+                return;
+            }
+            _substractSeconds(microseconds % microseconds_in_second);
+            break;
+        }
+        case tristan::time::Precision::MILLISECONDS:{
+            if (microseconds < microseconds_in_millisecond){
+                return;
+            }
+            _substractMilliseconds(microseconds % microseconds_in_millisecond);
+            break;
+        }
+        case tristan::time::Precision::MICROSECONDS:{
+            _substractMicroseconds(microseconds);
+            break;
+        }
+        case tristan::time::Precision::NANOSECONDS:{
+            _substractNanoseconds(microseconds * nanoseconds_in_microsecond);
+            break;
+        }
     }
 }
 
@@ -537,24 +622,127 @@ void tristan::time::DayTime::substractNanoseconds(uint64_t nanoseconds){
     if (nanoseconds == 0){
         return;
     }
-    uint8_t nanoseconds_to_substract;
-    uint8_t microseconds_to_substract = 0;
-    if (nanoseconds > 999){
-        microseconds_to_substract = nanoseconds / 1000;
-        nanoseconds_to_substract = nanoseconds % 1000;
+    if (nanoseconds > nanoseconds_in_day){
+        nanoseconds %= nanoseconds_in_day;
     }
-    else{
-        nanoseconds_to_substract = nanoseconds;
+    switch (m_precision){
+        case tristan::time::Precision::MINUTES:{
+            if (nanoseconds < nanoseconds_in_minute){
+                return;
+            }
+            _substractMinutes(nanoseconds % nanoseconds_in_minute);
+        }
+        case tristan::time::Precision::SECONDS:{
+            if (nanoseconds < nanoseconds_in_second){
+                return;
+            }
+            _substractSeconds(nanoseconds % nanoseconds_in_second);
+            break;
+        }
+        case tristan::time::Precision::MILLISECONDS:{
+            if (nanoseconds < nanoseconds_in_millisecond){
+                return;
+            }
+            _substractMilliseconds(nanoseconds % nanoseconds_in_millisecond);
+            break;
+        }
+        case tristan::time::Precision::MICROSECONDS:{
+            if (nanoseconds < nanoseconds_in_microsecond){
+                return;
+            }
+            _substractMicroseconds(nanoseconds % nanoseconds_in_microsecond);
+            break;
+        }
+        case tristan::time::Precision::NANOSECONDS:{
+            _substractNanoseconds(nanoseconds);
+            break;
+        }
     }
-    this->substractMicroseconds(microseconds_to_substract);
-    if (nanoseconds_to_substract == 0){
-        return;
+}
+
+auto tristan::time::DayTime::hours() const -> uint8_t{
+    return std::visit(
+            [](const auto& value){
+                return static_cast<uint8_t>(std::chrono::duration_cast<std::chrono::hours>(value).count());
+            },
+            this->m_time_since_day_start
+    );
+}
+
+auto tristan::time::DayTime::minutes() const -> uint8_t{
+    return std::visit(
+            [](const auto& value){
+                auto hours = std::chrono::duration_cast<std::chrono::hours>(value);
+                auto minutes = std::chrono::duration_cast<std::chrono::minutes>(value) -
+                               std::chrono::duration_cast<std::chrono::minutes>(hours);
+                return static_cast<uint8_t>(minutes.count());
+            },
+            this->m_time_since_day_start
+    );
+}
+
+auto tristan::time::DayTime::seconds() const -> uint8_t{
+    if (m_precision < tristan::time::Precision::SECONDS){
+        return 0;
     }
-    m_durations.m_nanoseconds -= std::chrono::nanoseconds(nanoseconds_to_substract);
-    if (m_durations.m_nanoseconds < std::chrono::nanoseconds(0)){
-        this->substractMicroseconds(1);
-        m_durations.m_nanoseconds += std::chrono::nanoseconds(1000);
+    
+    return std::visit(
+            [](const auto& value){
+                auto minutes = std::chrono::duration_cast<std::chrono::minutes>(value);
+                auto seconds = std::chrono::duration_cast<std::chrono::seconds>(value) -
+                               std::chrono::duration_cast<std::chrono::seconds>(minutes);
+                return static_cast<uint8_t>(seconds.count());
+            },
+            this->m_time_since_day_start
+    );
+}
+
+auto tristan::time::DayTime::milliseconds() const -> uint16_t{
+    if (m_precision < tristan::time::Precision::MILLISECONDS){
+        return 0;
     }
+    
+    return std::visit(
+            [](const auto& value){
+                auto seconds = std::chrono::duration_cast<std::chrono::seconds>(value);
+                auto milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(value) -
+                                    std::chrono::duration_cast<std::chrono::milliseconds>(seconds);
+                return static_cast<uint16_t>(milliseconds.count());
+            },
+            this->m_time_since_day_start
+    );
+}
+
+auto tristan::time::DayTime::microseconds() const -> uint16_t{
+    if (m_precision < tristan::time::Precision::MICROSECONDS){
+        return 0;
+    }
+    
+    return std::visit(
+            [](const auto& value){
+                auto milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(value);
+                auto microseconds = std::chrono::duration_cast<std::chrono::microseconds>(value) -
+                                    std::chrono::duration_cast<std::chrono::microseconds>(milliseconds);
+                return static_cast<uint16_t>(microseconds.count());
+            },
+            this->m_time_since_day_start
+    );
+}
+
+auto tristan::time::DayTime::nanoseconds() const -> uint16_t{
+    if (m_precision < tristan::time::Precision::NANOSECONDS){
+        return 0;
+    }
+    
+    return std::visit(
+            [](const auto& value){
+                auto microseconds = std::chrono::duration_cast<std::chrono::microseconds>(value);
+                auto nanoseconds = std::chrono::duration_cast<std::chrono::nanoseconds>(value) -
+                                   std::chrono::duration_cast<std::chrono::nanoseconds>(microseconds);
+                return static_cast<uint16_t>(nanoseconds.count());
+            },
+            this->m_time_since_day_start
+    );
 }
 
 auto tristan::time::DayTime::localTime(Precision precision) -> tristan::time::DayTime{
@@ -569,16 +757,17 @@ auto tristan::time::DayTime::localTime(Precision precision) -> tristan::time::Da
     auto minutes = static_cast<int8_t>(local_time.tm_min - utc_time.tm_min);
     
     if (hours > 14 || hours < -14 || minutes > 59 || minutes < -59){
-        throw std::range_error("tristan::time::DayTime::localTime(Precision precision): Timezone value is out of possible range");
+        throw std::range_error(
+                "tristan::time::DayTime::localTime(Precision precision): Timezone value is out of possible range");
     }
     
-    if (hours >= 0) {
+    if (hours >= 0){
         l_time.addHours(hours);
     }
     else{
         l_time.substractHours(std::abs(hours));
     }
-    if (minutes >= 0) {
+    if (minutes >= 0){
         l_time.addMinutes(minutes);
     }
     else{
@@ -593,55 +782,61 @@ auto tristan::time::DayTime::localTime(Precision precision) -> tristan::time::Da
 std::string tristan::time::DayTime::toString(bool show_offset) const{
     std::string l_time;
     
-    if (m_durations.m_hours.count() < 10){
+    auto hours = this->hours();
+    if (hours < 10){
         l_time += '0';
     }
-    l_time += std::to_string(m_durations.m_hours.count());
+    l_time += std::to_string(hours);
     l_time += ':';
-    if (m_durations.m_minutes.count() < 10){
+    auto minutes = this->minutes();
+    if (minutes < 10){
         l_time += '0';
     }
-    l_time += std::to_string(m_durations.m_minutes.count());
+    l_time += std::to_string(minutes);
     
     if (m_precision >= tristan::time::Precision::SECONDS){
         l_time += ':';
-        if (m_durations.m_seconds.count() < 10){
+        auto seconds = this->seconds();
+        if (seconds < 10){
             l_time += '0';
         }
-        l_time += std::to_string(m_durations.m_seconds.count());
+        l_time += std::to_string(seconds);
     }
     
     if (m_precision >= tristan::time::Precision::MILLISECONDS){
         l_time += '.';
-        if (m_durations.m_milliseconds.count() < 100){
+        auto milliseconds = this->milliseconds();
+        if (milliseconds < 100){
             l_time += '0';
         }
-        if (m_durations.m_milliseconds.count() < 10){
+        if (milliseconds < 10){
             l_time += '0';
         }
-        l_time += std::to_string(m_durations.m_milliseconds.count());
+        l_time += std::to_string(milliseconds);
     }
     
     if (m_precision >= tristan::time::Precision::MICROSECONDS){
         l_time += '.';
-        if (m_durations.m_microseconds.count() < 100){
+        auto microseconds = this->microseconds();
+        if (microseconds < 100){
             l_time += '0';
         }
-        if (m_durations.m_microseconds.count() < 10){
+        if (microseconds < 10){
             l_time += '0';
         }
-        l_time += std::to_string(m_durations.m_microseconds.count());
+        l_time += std::to_string(microseconds);
     }
     
     if (m_precision == tristan::time::Precision::NANOSECONDS){
         l_time += '.';
-        if (m_durations.m_nanoseconds.count() < 100){
+        auto nanoseconds = this->nanoseconds();
+        if (nanoseconds < 100){
             l_time += '0';
         }
-        if (m_durations.m_nanoseconds.count() < 10){
+        if (nanoseconds < 10){
             l_time += '0';
         }
-        l_time += std::to_string(m_durations.m_nanoseconds.count());
+        l_time += std::to_string(nanoseconds);
     }
     if (show_offset){
         if (m_offset >= tristan::time::TimeZone::UTC){
@@ -658,28 +853,29 @@ std::string tristan::time::DayTime::toString(bool show_offset) const{
     return l_time;
 }
 
-bool tristan::time::operator !=(const tristan::time::DayTime &l, const tristan::time::DayTime &r){
-    return !(l==r);
+bool tristan::time::operator!=(const tristan::time::DayTime& l, const tristan::time::DayTime& r){
+    return !(l == r);
 }
 
-bool tristan::time::operator >(const tristan::time::DayTime &l, const tristan::time::DayTime &r){
+bool tristan::time::operator>(const tristan::time::DayTime& l, const tristan::time::DayTime& r){
     return !(l <= r);
 }
 
-bool tristan::time::operator <=(const tristan::time::DayTime &l, const tristan::time::DayTime &r){
+bool tristan::time::operator<=(const tristan::time::DayTime& l, const tristan::time::DayTime& r){
     return (l < r || l == r);
 }
 
-bool tristan::time::operator >=(const tristan::time::DayTime &l, const tristan::time::DayTime &r){
+bool tristan::time::operator>=(const tristan::time::DayTime& l, const tristan::time::DayTime& r){
     return (l > r || l == r);
 }
 
-std::ostream &tristan::time::operator<<(std::ostream &out, const tristan::time::DayTime &Time){
+std::ostream& tristan::time::operator<<(std::ostream& out, const tristan::time::DayTime& Time){
     out << Time.toString(true);
     return out;
 }
 
-auto tristan::time::operator+(const tristan::time::DayTime& l, const tristan::time::DayTime& r) -> tristan::time::DayTime{
+auto
+tristan::time::operator+(const tristan::time::DayTime& l, const tristan::time::DayTime& r) -> tristan::time::DayTime{
     auto time = l;
     time.m_precision = std::max(l.precision(), r.precision());
     switch (time.m_precision){
@@ -708,7 +904,8 @@ auto tristan::time::operator+(const tristan::time::DayTime& l, const tristan::ti
     return time;
 }
 
-auto tristan::time::operator-(const tristan::time::DayTime& l, const tristan::time::DayTime& r) -> tristan::time::DayTime{
+auto
+tristan::time::operator-(const tristan::time::DayTime& l, const tristan::time::DayTime& r) -> tristan::time::DayTime{
     auto time = l;
     time.m_precision = std::max(l.precision(), r.precision());
     switch (time.m_precision){
@@ -738,49 +935,128 @@ auto tristan::time::operator-(const tristan::time::DayTime& l, const tristan::ti
     
 }
 
-namespace
-{
+void tristan::time::DayTime::_addMinutes(uint64_t minutes){
+    auto& l_minutes = std::get<std::chrono::minutes>(m_time_since_day_start);
+    l_minutes += std::chrono::minutes{minutes};
+    if (l_minutes.count() > minutes_in_day){
+        l_minutes %= minutes_in_day;
+    }
+}
+
+void tristan::time::DayTime::_addSeconds(uint64_t seconds){
+    auto& l_seconds = std::get<std::chrono::seconds>(m_time_since_day_start);
+    l_seconds += std::chrono::seconds{seconds};
+    if (l_seconds.count() > seconds_in_day){
+        l_seconds %= seconds_in_day;
+    }
+}
+
+void tristan::time::DayTime::_addMilliseconds(uint64_t milliseconds){
+    auto& l_milliseconds = std::get<std::chrono::milliseconds>(m_time_since_day_start);
+    l_milliseconds += std::chrono::milliseconds{milliseconds};
+    if (l_milliseconds.count() > milliseconds_in_day){
+        l_milliseconds %= milliseconds_in_day;
+    }
+}
+
+void tristan::time::DayTime::_addMicroseconds(uint64_t microseconds){
+    auto& l_microseconds = std::get<std::chrono::microseconds>(m_time_since_day_start);
+    l_microseconds += std::chrono::microseconds{microseconds};
+    if (l_microseconds.count() > microseconds_in_day){
+        l_microseconds %= microseconds_in_day;
+    }
+}
+
+void tristan::time::DayTime::_addNanoseconds(uint64_t nanoseconds){
+    auto& l_nanoseconds = std::get<std::chrono::nanoseconds>(m_time_since_day_start);
+    l_nanoseconds += std::chrono::nanoseconds{nanoseconds};
+    if (l_nanoseconds.count() > nanoseconds_in_day){
+        l_nanoseconds %= nanoseconds_in_day;
+    }
+}
+
+void tristan::time::DayTime::_substractMinutes(uint64_t minutes){
+    auto& l_minutes = std::get<std::chrono::minutes>(m_time_since_day_start);
+    l_minutes -= std::chrono::minutes{minutes};
+    if (l_minutes.count() < 0){
+        l_minutes += std::chrono::minutes{minutes_in_day};
+    }
+}
+
+void tristan::time::DayTime::_substractSeconds(uint64_t seconds){
+    auto& l_seconds = std::get<std::chrono::seconds>(m_time_since_day_start);
+    l_seconds -= std::chrono::seconds{seconds};
+    if (l_seconds.count() < 0){
+        l_seconds += std::chrono::seconds{seconds_in_day};
+    }
+}
+
+void tristan::time::DayTime::_substractMilliseconds(uint64_t milliseconds){
+    auto& l_milliseconds = std::get<std::chrono::milliseconds>(m_time_since_day_start);
+    l_milliseconds -= std::chrono::milliseconds{milliseconds};
+    if (l_milliseconds.count() < 0){
+        l_milliseconds += std::chrono::milliseconds{milliseconds_in_day};
+    }
+}
+
+void tristan::time::DayTime::_substractMicroseconds(uint64_t microseconds){
+    auto& l_microseconds = std::get<std::chrono::microseconds>(m_time_since_day_start);
+    l_microseconds -= std::chrono::microseconds{microseconds};
+    if (l_microseconds.count() < 0){
+        l_microseconds += std::chrono::microseconds{microseconds_in_day};
+    }
+}
+
+void tristan::time::DayTime::_substractNanoseconds(uint64_t nanoseconds){
+    auto& l_nanoseconds = std::get<std::chrono::nanoseconds>(m_time_since_day_start);
+    l_nanoseconds -= std::chrono::nanoseconds{nanoseconds};
+    if (l_nanoseconds.count() < 0){
+        l_nanoseconds += std::chrono::nanoseconds{nanoseconds_in_day};
+    }
+}
+
+namespace{
     auto checkTimeFormat(const std::string& time) -> bool{
         
         auto length = time.length();
-        if (length < 5 || length > 20) {
+        if (length < 5 || length > 20){
             return false;
         }
-        for (size_t i = 0; i < length; ++i) {
-            if ((time[i] < '0' || time[i] > '9') && (time[i] != ':' && time[i] != '.')) {
+        for (size_t i = 0; i < length; ++i){
+            if ((time[i] < '0' || time[i] > '9') && (time[i] != ':' && time[i] != '.')){
                 return false;
             }
-            if (i < 2 && (time[i] < '0' || time[i] > '9')) {
+            if (i < 2 && (time[i] < '0' || time[i] > '9')){
                 return false;
             }
-            if (i == 2 && time[i] != ':') {
+            if (i == 2 && time[i] != ':'){
                 return false;
             }
-            if ((i > 2 && i < 5) && (time[i] < '0' || time[i] > '9')) {
+            if ((i > 2 && i < 5) && (time[i] < '0' || time[i] > '9')){
                 return false;
             }
-            if (i == 5 && time[i] != ':') {
+            if (i == 5 && time[i] != ':'){
                 return false;
             }
-            if ((i > 5 && i < 8) && (time[i] < '0' || time[i] > '9')) {
+            if ((i > 5 && i < 8) && (time[i] < '0' || time[i] > '9')){
                 return false;
             }
-            if (i == 8 && time[i] != '.') {
+            if (i == 8 && time[i] != '.'){
                 return false;
             }
-            if ((i > 8 && i < 12) && (time[i] < '0' || time[i] > '9')) {
+            if ((i > 8 && i < 12) && (time[i] < '0' || time[i] > '9')){
                 return false;
             }
-            if (i == 12 && time[i] != '.') {
+            if (i == 12 && time[i] != '.'){
                 return false;
             }
-            if ((i > 12 && i < 16) && (time[i] < '0' || time[i] > '9')) {
+            if ((i > 12 && i < 16) && (time[i] < '0' || time[i] > '9')){
                 return false;
             }
-            if (i == 16 && time[i] != '.') {
+            if (i == 16 && time[i] != '.'){
                 return false;
             }
-            if ((i > 16 && i < 20) && (time[i] < '0' || time[i] > '9')) {
+            if ((i > 16 && i < 20) && (time[i] < '0' || time[i] > '9')){
                 return false;
             }
         }
