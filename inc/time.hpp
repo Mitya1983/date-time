@@ -17,31 +17,31 @@ namespace tristan::time {
     };
     
     enum class TimeZone : int8_t {
-        WEST_12,
-        WEST_11,
-        WEST_10,
-        WEST_9,
-        WEST_8,
-        WEST_7,
-        WEST_6,
-        WEST_5,
-        WEST_4,
-        WEST_3,
-        WEST_2,
-        WEST_1,
+        WEST_12 [[maybe_unused]],
+        WEST_11 [[maybe_unused]],
+        WEST_10 [[maybe_unused]],
+        WEST_9 [[maybe_unused]],
+        WEST_8 [[maybe_unused]],
+        WEST_7 [[maybe_unused]],
+        WEST_6 [[maybe_unused]],
+        WEST_5 [[maybe_unused]],
+        WEST_4 [[maybe_unused]],
+        WEST_3 [[maybe_unused]],
+        WEST_2 [[maybe_unused]],
+        WEST_1 [[maybe_unused]],
         UTC = 0,
-        EAST_1,
-        EAST_2,
-        EAST_3,
-        EAST_4,
-        EAST_5,
-        EAST_6,
-        EAST_7,
-        EAST_8,
-        EAST_9,
-        EAST_10,
-        EAST_11,
-        EAST_12,
+        EAST_1 [[maybe_unused]],
+        EAST_2 [[maybe_unused]],
+        EAST_3 [[maybe_unused]],
+        EAST_4 [[maybe_unused]],
+        EAST_5 [[maybe_unused]],
+        EAST_6 [[maybe_unused]],
+        EAST_7 [[maybe_unused]],
+        EAST_8 [[maybe_unused]],
+        EAST_9 [[maybe_unused]],
+        EAST_10 [[maybe_unused]],
+        EAST_11 [[maybe_unused]],
+        EAST_12 [[maybe_unused]],
     };
     
 class DayTime
@@ -50,31 +50,42 @@ class DayTime
     friend auto operator - (const DayTime& l, const DayTime &r) -> DayTime;
     
 public:
-    
+    /// \brief Creates DayTime object from system clock. UTC time is expected.
+    /// \param precision Precision = Precision::SECONDS
     explicit DayTime(Precision precision = Precision::SECONDS);
     /// \brief Minutes precision constructor
-    /// \param hours
-    /// \param minutes
+    /// \param hours uint8_t
+    /// \param minutes uint8_t
     /// \throws std::range_error
     explicit DayTime(uint8_t hours, uint8_t minutes);
     /// \brief Seconds precision constructor
-    /// \param hours
-    /// \param minutes
+    /// \param hours uint8_t
+    /// \param minutes uint8_t
+    /// \param seconds uint8_t
     /// \throws std::range_error
     explicit DayTime(uint8_t hours, uint8_t minutes, uint8_t seconds);
     /// \brief Milliseconds precision constructor
-    /// \param hours
-    /// \param minutes
+    /// \param hours uint8_t
+    /// \param minutes uint8_t
+    /// \param seconds uint8_t
+    /// \param milliseconds uint16_t
     /// \throws std::range_error
     explicit DayTime(uint8_t hours, uint8_t minutes, uint8_t seconds, uint16_t milliseconds);
     /// \brief Microseconds precision constructor
-    /// \param hours
-    /// \param minutes
+    /// \param hours uint8_t
+    /// \param minutes uint8_t
+    /// \param seconds uint8_t
+    /// \param milliseconds uint16_t
+    /// \param microseconds uint16_t
     /// \throws std::range_error
     explicit DayTime(uint8_t hours, uint8_t minutes, uint8_t seconds, uint16_t milliseconds, uint16_t microseconds);
     /// \brief Nanoseconds precision constructor
-    /// \param hours
-    /// \param minutes
+    /// \param hours uint8_t
+    /// \param minutes uint8_t
+    /// \param seconds uint8_t
+    /// \param milliseconds uint16_t
+    /// \param microseconds uint16_t
+    /// \param nanoseconds uint16_t
     /// \throws std::range_error
     explicit DayTime(uint8_t hours, uint8_t minutes, uint8_t seconds, uint16_t milliseconds, uint16_t microseconds, uint16_t nanoseconds);
     
@@ -92,7 +103,7 @@ public:
     
     DayTime(const DayTime&) = default;
     DayTime(DayTime&&) = default;
-    //OPERATORS
+
     auto operator=(const DayTime&) -> DayTime& = default;
     auto operator=(DayTime&&) -> DayTime& = default;
     /// \brief Checks if DayTimes objects are equal.
@@ -111,7 +122,10 @@ public:
     
     virtual ~DayTime() = default;
     
-    void setOffset(TimeZone offset) {m_offset = offset;}
+    /// \brief Sets timezone offset. Only ISO hour based offsets are considered
+    /// \param offset TimeZone
+    [[maybe_unused]] void setOffset(TimeZone offset) {m_offset = offset;}
+    
     /// \brief Adds hours to DayTime object. This is a convenience function which converts hours to minutes and invokes addMinutes(uint64_t minutes) function
     /// \param hours uint64_t
     void addHours(uint64_t hours);
@@ -158,19 +172,34 @@ public:
     void subtractNanoseconds(uint64_t nanoseconds);
     
     /// \brief Returns number of hours passed since day start.
-    /// \return
+    /// \return uint8_t
     [[nodiscard]] auto hours() const  -> uint8_t;
+    /// \brief Returns number of minutes passed since hour start.
+    /// \return uint8_t
     [[nodiscard]] auto minutes() const -> uint8_t;
+    /// \brief Returns number of seconds passed since minute start.
+    /// \return uint8_t
     [[nodiscard]] auto seconds() const -> uint8_t;
+    /// \brief Returns number of milliseconds passed since second start.
+    /// \return uint16_t
     [[nodiscard]] auto milliseconds() const -> uint16_t;
+    /// \brief Returns number of microseconds passed since millisecond start.
+    /// \return uint16_t
     [[nodiscard]] auto microseconds() const -> uint16_t;
+    /// \brief Returns number of nanoseconds passed since microsecond start.
+    /// \return uint16_t
     [[nodiscard]] auto nanoseconds() const -> uint16_t;
     
+    /// \brief Returns precision of DayTime object.
+    /// \return Precision
     [[nodiscard]] auto precision() const -> Precision {return m_precision;}
     
+    /// \brief Creates DayTime object which represents localtime
+    /// \param precision Precision::SECONDS
+    /// \return DayTime
     [[nodiscard]] static auto localTime(Precision precision = Precision::SECONDS) -> DayTime;
     /// \brief Generates string representation of time. By default return ISO standard representation in formats represented below. If show_precision is set to true each format will be suffixed by offset in form of +(-)hh
-    /// \return std::string to represent the time.
+    /// \return std::string to represent the time
     /// \formats[hours:minutes] - Minutes precision
     /// \formats[hours:minutes:seconds] - Seconds precision
     /// \formats[hours:minutes:seconds.milliseconds] - Milliseconds precision
