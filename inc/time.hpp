@@ -112,20 +112,53 @@ public:
     virtual ~DayTime() = default;
     
     void setOffset(TimeZone offset) {m_offset = offset;}
-    
+    /// \brief Adds hours to DayTime object. This is a convenience function which converts hours to minutes and invokes addMinutes(uint64_t minutes) function
+    /// \param hours uint64_t
     void addHours(uint64_t hours);
+    /// \brief Adds minutes to DayTime object.
+    /// \param hours uint64_t
     void addMinutes(uint64_t minutes);
+    /// \brief Adds seconds to DayTime object.
+    /// \note Precision is taken into account. That is in case of MINUTES precision if number of seconds is less then 1 minute operation is meaningless and will not have any effect.
+    /// \param hours uint64_t
     void addSeconds(uint64_t seconds);
+    /// \brief Adds milliseconds to DayTime object.
+    /// \note Precision is taken into account. That is in case of SECONDS or MINUTES precision if number of milliseconds is less then 1 second operation is meaningless and will not have any effect.
+    /// \param hours uint64_t
     void addMilliseconds(uint64_t milliseconds);
+    /// \brief Adds microseconds to DayTime object.
+    /// \note Precision is taken into account. That is in case of SECONDS, MINUTES or MILLISECONDS precision if number of microseconds is less then 1 millisecond operation is meaningless and will not have any effect.
+    /// \param hours uint64_t
     void addMicroseconds(uint64_t microseconds);
+    /// \brief Adds nanoseconds to DayTime object.
+    /// \note Precision is taken into account. That is in case of SECONDS, MINUTES, MILLISECONDS or MICROSECONDS precision if number of nanosecond is less then 1 microsecond operation is meaningless and will not have any effect.
+    /// \param hours uint64_t
     void addNanoseconds(uint64_t nanoseconds);
-    void substractHours(uint64_t hours);
-    void substractMinutes(uint64_t minutes);
-    void substractSeconds(uint64_t seconds);
-    void substractMilliseconds(uint64_t milliseconds);
-    void substractMicroseconds(uint64_t microseconds);
-    void substractNanoseconds(uint64_t nanoseconds);
+    /// \brief subtracts hours from DayTime object. This is a convenience function which converts hours to minutes and invokes subtractMinutes(uint64_t minutes) function
+    /// \param hours uint64_t
+    void subtractHours(uint64_t hours);
+    /// \brief subtracts minutes from DayTime object.
+    /// \param hours uint64_t
+    void subtractMinutes(uint64_t minutes);
+    /// \brief subtracts seconds from DayTime object.
+    /// \note Precision is taken into account. That is in case of MINUTES precision if number of seconds is less then 1 minute operation is meaningless and will not have any effect.
+    /// \param hours uint64_t
+    void subtractSeconds(uint64_t seconds);
+    /// \brief subtracts milliseconds from DayTime object.
+    /// \note Precision is taken into account. That is in case of SECONDS or MINUTES precision if number of milliseconds is less then 1 second operation is meaningless and will not have any effect.
+    /// \param hours uint64_t
+    void subtractMilliseconds(uint64_t milliseconds);
+    /// \brief subtracts microseconds from DayTime object.
+    /// \note Precision is taken into account. That is in case of SECONDS, MINUTES, MILLISECONDS or MICROSECONDS precision if number of nanosecond is less then 1 microsecond operation is meaningless and will not have any effect.
+    /// \param hours uint64_t
+    void subtractMicroseconds(uint64_t microseconds);
+    /// \brief subtracts nanoseconds from DayTime object.
+    /// \note Precision is taken into account. That is in case of SECONDS, MINUTES, MILLISECONDS or MICROSECONDS precision if number of nanosecond is less then 1 microsecond operation is meaningless and will not have any effect.
+    /// \param hours uint64_t
+    void subtractNanoseconds(uint64_t nanoseconds);
     
+    /// \brief Returns number of hours passed since day start.
+    /// \return
     [[nodiscard]] auto hours() const  -> uint8_t;
     [[nodiscard]] auto minutes() const -> uint8_t;
     [[nodiscard]] auto seconds() const -> uint8_t;
@@ -159,11 +192,11 @@ private:
     void _addMilliseconds(uint64_t milliseconds);
     void _addMicroseconds(uint64_t microseconds);
     void _addNanoseconds(uint64_t nanoseconds);
-    void _substractMinutes(uint64_t minutes);
-    void _substractSeconds(uint64_t seconds);
-    void _substractMilliseconds(uint64_t milliseconds);
-    void _substractMicroseconds(uint64_t microseconds);
-    void _substractNanoseconds(uint64_t nanoseconds);
+    void _subtractMinutes(uint64_t minutes);
+    void _subtractSeconds(uint64_t seconds);
+    void _subtractMilliseconds(uint64_t milliseconds);
+    void _subtractMicroseconds(uint64_t microseconds);
+    void _subtractNanoseconds(uint64_t nanoseconds);
 };
 
     auto operator != (const DayTime& l, const DayTime& r) -> bool;
