@@ -51,7 +51,7 @@ class DayTime
     friend auto operator - (const DayTime& l, const DayTime &r) -> DayTime;
     
 public:
-    /// \brief Creates DayTime object from system clock. UTC time is expected.
+    /// \brief Creates DayTime object from system clock. UTC time zone is set.
     /// \param precision Precision.
     explicit DayTime(Precision precision = Precision::SECONDS);
     /// \brief Minutes precision constructor.
@@ -59,20 +59,20 @@ public:
     /// \param minutes uint8_t.
     /// \throws std::range_error.
     explicit DayTime(uint8_t hours, uint8_t minutes);
-    /// \brief Seconds precision constructor.
+    /// \brief Seconds precision constructor. UTC time zone is set.
     /// \param hours uint8_t.
     /// \param minutes uint8_t.
     /// \param seconds uint8_t.
     /// \throws std::range_error.
     explicit DayTime(uint8_t hours, uint8_t minutes, uint8_t seconds);
-    /// \brief Milliseconds precision constructor.
+    /// \brief Milliseconds precision constructor. UTC time zone is set.
     /// \param hours uint8_t.
     /// \param minutes uint8_t.
     /// \param seconds uint8_t.
     /// \param milliseconds uint16_t.
     /// \throws std::range_error.
     explicit DayTime(uint8_t hours, uint8_t minutes, uint8_t seconds, uint16_t milliseconds);
-    /// \brief Microseconds precision constructor.
+    /// \brief Microseconds precision constructor. UTC time zone is set.
     /// \param hours uint8_t.
     /// \param minutes uint8_t.
     /// \param seconds uint8_t.
@@ -80,7 +80,7 @@ public:
     /// \param microseconds uint16_t.
     /// \throws std::range_error.
     explicit DayTime(uint8_t hours, uint8_t minutes, uint8_t seconds, uint16_t milliseconds, uint16_t microseconds);
-    /// \brief Nanoseconds precision constructor.
+    /// \brief Nanoseconds precision constructor. UTC time zone is set.
     /// \param hours uint8_t.
     /// \param minutes uint8_t.
     /// \param seconds uint8_t.
@@ -118,9 +118,9 @@ public:
     /// \param r const DayTime&.
     /// \return true if left object is less and false otherwise.
     auto operator<(const DayTime& r) const -> bool;
-    /// \brief Unary plus operator
+    /// \brief Unary plus operator.
     void operator += (const DayTime& r);
-    /// \brief Unary minus operator
+    /// \brief Unary minus operator.
     void operator -= (const DayTime& r);
     /// \brief Destructor
     virtual ~DayTime() = default;
@@ -230,20 +230,20 @@ private:
     void _subtractMicroseconds(uint64_t microseconds);
     void _subtractNanoseconds(uint64_t nanoseconds);
 };
-    /// \brief Operator not equal to
+    /// \brief Operator not equal to.
     auto operator != (const DayTime& l, const DayTime& r) -> bool;
-    /// \brief Operator greater than
+    /// \brief Operator greater than.
     auto operator > (const DayTime& l, const DayTime& r) -> bool;
-    /// \brief Operator less than or equal to
+    /// \brief Operator less than or equal to.
     auto operator <= (const DayTime& l, const DayTime& r) -> bool;
-    /// \brief Operator greater than or equal to
+    /// \brief Operator greater than or equal to.
     auto operator >= (const DayTime& l, const DayTime& r) -> bool;
     
-    /// \brief Addition operator
+    /// \brief Addition operator.
     auto operator + (const DayTime& l, const DayTime &r) -> DayTime;
-    /// \brief Subtraction operator
+    /// \brief Subtraction operator.
     auto operator - (const DayTime& l, const DayTime &r) -> DayTime;
-    /// \brief std::ostream operator
+    /// \brief std::ostream operator.  Date::toString() is used.
     auto operator<<(std::ostream &out, const DayTime &time) -> std::ostream&;
 }//namespace tristan::time
 

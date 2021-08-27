@@ -7,9 +7,9 @@ namespace tristan::date {
     
     using Days = std::chrono::duration<int64_t , std::ratio_divide<std::ratio<86400>, std::chrono::seconds::period>>;
     
-    /// \brief Number of days in regular year
+    /// \brief Number of days in regular year.
     inline const uint16_t non_leap_year_days{365};
-    /// \brief Number of days in leap year
+    /// \brief Number of days in leap year.
     inline const uint16_t leap_year_days{366};
     /// \brief Number of days from 1 January 1900 to 1 January 1970.
     inline const uint16_t days_since_1900_to_1970{25567};
@@ -27,44 +27,44 @@ namespace tristan::date {
         /// \param year uint16_t.
         /// \throws std::range_error.
         explicit Date(uint8_t day, uint8_t month, uint16_t year);
-        /// \brief Creates Date object from std::string representing the date in [YYYYMMDD] or [YYYY-MM-DD] formats
-        /// \param iso_date - std::string
-        /// \throws std::invalid_argument - if time representation has invalid format
-        /// \throws std::range_error - if time representation has invalid values
+        /// \brief Creates Date object from std::string representing the date in [YYYYMMDD] or [YYYY-MM-DD] formats.
+        /// \param iso_date - std::string.
+        /// \throws std::invalid_argument - if time representation has invalid format.
+        /// \throws std::range_error - if time representation has invalid values.
         explicit Date(const std::string &iso_date);
-        /// \brief Copy constructor
+        /// \brief Copy constructor.
         Date(const Date&) = default;
-        /// \brief Move constructor
+        /// \brief Move constructor.
         Date(Date&&) = default;
          
-         /// \brief Copy assignment operator
+         /// \brief Copy assignment operator.
         auto operator=(const Date&) -> Date& = default;
-        /// \brief Move assignment operator
+        /// \brief Move assignment operator.
         auto operator=(Date&&) -> Date& = default;
-        /// \brief Operator equal
+        /// \brief Operator equal.
         auto operator==(const Date& r) const -> bool;
-        /// \brief Operator less
+        /// \brief Operator less.
         auto operator<(const Date& r) const -> bool;
         
         /// \brief Destructor
         virtual ~Date() = default;
         
-        /// \brief Adds days to Date object;
+        /// \brief Adds days to Date object.
         /// \param days uint64_t.
         void addDays(uint64_t days);
-        /// \brief Adds months to Date object;
+        /// \brief Adds months to Date object.
         /// \param days uint64_t.
         void addMonths(uint64_t months);
-        /// \brief Adds years to Date object;
+        /// \brief Adds years to Date object.
         /// \param days uint64_t.
         void addYears(uint64_t years);
-        /// \brief Subtracts days to Date object;
+        /// \brief Subtracts days to Date object.
         /// \param days uint64_t.
         void subtractDays(uint64_t days);
-        /// \brief Subtracts months to Date object;
+        /// \brief Subtracts months to Date object.
         /// \param days uint64_t.
         void subtractMonths(uint64_t months);
-        /// \brief Subtracts years to Date object;
+        /// \brief Subtracts years to Date object.
         /// \param days uint64_t.
         void subtractYears(uint64_t years);
         
@@ -100,11 +100,15 @@ namespace tristan::date {
     private:
         Days m_days_since_1900;
     };
-    
+    /// \brief Operator not equal to.
     auto operator != (const Date &l, const Date &r) -> bool;
+    /// \brief Operator greater than.
     auto operator > (const Date &l, const Date &r) -> bool;
+    /// \brief Operator less than or equal to.
     auto operator <= (const Date &l, const Date &r) -> bool;
+    /// \brief Operator greater than or equal to.
     auto operator >= (const Date &l, const Date &r) -> bool;
+    /// \brief std::ostream operator is used for convenience. Date::toString() is used.
     auto operator<<(std::ostream &out, const Date &date) -> std::ostream&;
     
 }//namespace tristan::date
