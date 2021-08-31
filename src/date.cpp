@@ -1,60 +1,55 @@
 #include "date.hpp"
 #include <algorithm>
 
-tristan::date::Date::Date() : m_durations(){
+
+namespace{
+    using Years = std::chrono::duration<int64_t, std::ratio_divide<std::ratio<31536000>, std::chrono::seconds::period>>;
+    
+    const uint8_t g_february_start_day = 32;
+    const std::pair<uint8_t , uint8_t > g_march_start_day = {60, 61};
+    const std::pair<uint8_t , uint8_t > g_april_start_day = {91, 92};
+    const std::pair<uint8_t , uint8_t > g_may_start_day = {121, 122};
+    const std::pair<uint8_t , uint8_t > g_june_start_day = {152, 153};
+    const std::pair<uint8_t , uint8_t > g_july_start_day = {182, 183};
+    const std::pair<uint8_t , uint8_t > g_august_start_day = {213, 214};
+    const std::pair<uint8_t , uint8_t > g_september_start_day = {244, 245};
+    const std::pair<uint16_t, uint16_t> g_october_start_day = {274, 275};
+    const std::pair<uint16_t, uint16_t> g_november_start_day = {305, 306};
+    const std::pair<uint16_t, uint16_t> g_december_start_day = {335, 336};
+    
+    enum Months : uint8_t{
+        JANUARY = 1,
+        FEBRUARY,
+        MARCH,
+        APRIL,
+        MAY,
+        JUNE,
+        JULY,
+        AUGUST,
+        SEPTEMBER,
+        OCTOBER,
+        NOVEMBER,
+        DECEMBER
+    };
+}//End of unnamed namespace
+
+tristan::date::Date::Date() :
+        m_days_since_1900(Days{tristan::date::days_since_1900_to_1970})
+{
     auto time_since_epoch = std::chrono::duration_cast<std::chrono::seconds>(
             std::chrono::system_clock::duration(std::chrono::system_clock::now().time_since_epoch())
     );
-    uint16_t year = 1970;
-    auto seconds_current_year = time_since_epoch;
-    while (true){
-        if (seconds_current_year < non_leap_year_seconds){
-            break;
-        }
-        if (tristan::date::Date::isLeapYear(year)){
-            seconds_current_year -= leap_year_seconds;
-        }
-        else{
-            seconds_current_year -= non_leap_year_seconds;
-        }
-        ++year;
-    }
-    m_durations.m_years_since_1900 = tristan::date::Years(year - start_year);
-    m_durations.m_weeks_since_1900 = std::chrono::duration_cast<tristan::date::Weeks>(time_since_epoch);
-    m_durations.m_days_since_1900 = std::chrono::duration_cast<tristan::date::Days>(time_since_epoch);
-    m_durations.m_days_since_year_start = std::chrono::duration_cast<tristan::date::Days>(seconds_current_year);
-    m_durations.m_days_since_month_start = m_durations.m_days_since_year_start;
-    for (m_month = 1; m_month <= 12; ++m_month){
-        if (m_month == 1 || m_month == 3 || m_month == 5 || m_month == 7 || m_month == 8 || m_month == 10 || m_month == 12){
-            if (m_durations.m_days_since_month_start.count() <= 31){
-                break;
-            }
-            m_durations.m_days_since_month_start -= tristan::date::Days(31);
-        }
-        else if (m_month == 4 || m_month == 6 || m_month == 9 || m_month == 11){
-            if (m_durations.m_days_since_month_start.count() <= 30){
-                break;
-            }
-            m_durations.m_days_since_month_start -= tristan::date::Days(30);
-        }
-        else{
-            bool leap_year = isLeapYear(year);
-            if ((!leap_year && m_durations.m_days_since_month_start.count() <= 28 || (leap_year && m_durations.m_days_since_month_start.count() <= 29))){
-                break;
-            }
-            if (!leap_year){
-                m_durations.m_days_since_month_start -= tristan::date::Days(28);
-            }
-            else{
-                m_durations.m_days_since_month_start -= tristan::date::Days(29);
-            }
-        }
-    }
-    //That increment is needed as month variable holds current month number and not month passed since start of the year
-    ++m_month;
+    m_days_since_1900 += std::chrono::duration_cast<Days>(time_since_epoch);
+    m_days_since_1900 += Days{1};
+    
 }
 
-tristan::date::Date::Date(int day, int month, int year)  : m_durations(){
+tristan::date::Date::Date(uint8_t day, uint8_t month, uint16_t year) {
+    if (year < start_year){
+        std::string message = "tristan::date::Date(int year, int month, int day): bad [year] value was provided - "
+                              + std::to_string(day) + " the value between 1900 and 2155 is expected";
+        throw std::range_error(message);
+    }
     if (day < 1 || day > 31)
     {
         std::string message = "tristan::date::Date(int year, int month, int day): bad [day] value was provided - "
@@ -67,52 +62,45 @@ tristan::date::Date::Date(int day, int month, int year)  : m_durations(){
                               + std::to_string(month) + " the value between 0 and 12 is expected";
         throw std::range_error(message);
     }
-    if ((m_month == 4 || m_month == 6 || m_month == 9 || m_month == 11) && day == 31){
-        std::string message = "tristan::date::Date(int year, int month, int day): date 31 is not possible for provided month " + std::to_string(m_month);
+    if ((month == 4 || month == 6 || month == 9 || month == 11) && day == 31){
+        std::string message = "tristan::date::Date(int year, int month, int day): date 31 is not possible for provided month " + std::to_string(month);
         throw std::range_error(message);
     }
-    else if (m_month == 2){
+    else if (month == 2){
         bool leap_year = tristan::date::Date::isLeapYear(year);
         if ((leap_year && day > 29) || (!leap_year && day > 28)){
             std::string message =
                     "tristan::date::Date(int year, int month, int day): date " + std::to_string(day) + " is not possible for provided month " +
-                    std::to_string(m_month);
+                    std::to_string(month);
             throw std::range_error(message);
         }
     }
-    if (year < 1900)
-    {
-        std::string message = "tristan::date::Date(int year, int month, int day): bad [year] value was provided - "
-                              + std::to_string(year) + " the value more or equal to 1900 is expected";
-        throw std::range_error(message);
-    }
-    m_durations.m_days_since_month_start = tristan::date::Days(day - 1);
+    m_days_since_1900 = std::chrono::duration_cast<Days>(Years{year - tristan::date::start_year});
+    m_days_since_1900 += Days{static_cast<uint8_t>(_calculateCurrentYear() * 365 / (tristan::date::non_leap_year_days * 4))};
+//    if (tristan::date::Date::isLeapYear(year)){
+//        m_days_since_1900 -= tristan::date::Days{1};
+//    }
     for (int l_month = 1; l_month < month; ++l_month){
-        if (m_month == 1 || m_month == 3 || m_month == 5 || m_month == 7 || m_month == 8 || m_month == 10 || m_month == 12){
-            m_durations.m_days_since_year_start += tristan::date::Days(31);
+        if (l_month == 1 || l_month == 3 || l_month == 5 || l_month == 7 || l_month == 8 || l_month == 10 || l_month == 12){
+            m_days_since_1900 += Days{31};
         }
-        else if (m_month == 4 || m_month == 6 || m_month == 9 || m_month == 11){
-            m_durations.m_days_since_year_start += tristan::date::Days(30);
+        else if (l_month == 4 || l_month == 6 || l_month == 9 || l_month == 11){
+            m_days_since_1900 += Days{30};
         }
         else{
-            bool leap_year = isLeapYear(year);
+            bool leap_year = isLeapYear(std::chrono::duration_cast<Years>(m_days_since_1900).count() + tristan::date::start_year);
             if (!leap_year){
-                m_durations.m_days_since_year_start += tristan::date::Days(28);
+                m_days_since_1900 += Days{28};
             }
             else{
-                m_durations.m_days_since_year_start += tristan::date::Days(29);
+                m_days_since_1900 += Days{29};
             }
         }
     }
-    m_month = month;
-    m_durations.m_years_since_1900 = tristan::date::Years(year - start_year);
-    m_durations.m_days_since_1900 = std::chrono::duration_cast<tristan::date::Days>(m_durations.m_years_since_1900) + m_durations.m_days_since_year_start;
-    m_durations.m_weeks_since_1900 = std::chrono::duration_cast<tristan::date::Weeks>(m_durations.m_days_since_1900);
+    m_days_since_1900 += Days{day};
 }
 
-tristan::date::Date::Date(const std::string &iso_date) :
-        m_durations(),
-        m_month(0)
+tristan::date::Date::Date(const std::string &iso_date)
 {
     auto _length = iso_date.length();
     if (_length != 8 && _length != 10)
@@ -152,62 +140,18 @@ tristan::date::Date::Date(const std::string &iso_date) :
 }
 
 auto tristan::date::Date::operator==(const tristan::date::Date &r) const -> bool{
-    if (m_durations.m_days_since_year_start != r.m_durations.m_days_since_year_start)
-        return false;
-    if (m_durations.m_years_since_1900 != r.m_durations.m_years_since_1900)
-        return false;
-    
-    return true;
+    return m_days_since_1900 == r.m_days_since_1900;
 }
 
 auto tristan::date::Date::operator<(const tristan::date::Date &r) const -> bool{
-    if (m_durations.m_years_since_1900 > r.m_durations.m_years_since_1900) {
-        return false;
-    }
-    if (m_durations.m_years_since_1900 == r.m_durations.m_years_since_1900) {
-        if (m_durations.m_days_since_year_start >= r.m_durations.m_days_since_year_start) {
-            return false;
-        }
-    }
-    return true;
+    return m_days_since_1900 < r.m_days_since_1900;
 }
 
 void tristan::date::Date::addDays(uint64_t days){
     if (days == 0){
         return;
     }
-    m_durations.m_days_since_1900 += tristan::date::Days(days);
-    m_durations.m_years_since_1900 = std::chrono::duration_cast<tristan::date::Years>(m_durations.m_days_since_1900);
-    m_durations.m_days_since_year_start = m_durations.m_days_since_1900 - std::chrono::duration_cast<tristan::date::Days>(m_durations.m_years_since_1900);
-    m_durations.m_days_since_month_start = m_durations.m_days_since_year_start;
-    for (m_month = 1; m_month <= 12; ++m_month){
-        if (m_month == 1 || m_month == 3 || m_month == 5 || m_month == 7 || m_month == 8 || m_month == 10 || m_month == 12){
-            if (m_durations.m_days_since_month_start.count() <= 31){
-                break;
-            }
-            m_durations.m_days_since_month_start -= tristan::date::Days(31);
-        }
-        else if (m_month == 4 || m_month == 6 || m_month == 9 || m_month == 11){
-            if (m_durations.m_days_since_month_start.count() <= 30){
-                break;
-            }
-            m_durations.m_days_since_month_start -= tristan::date::Days(30);
-        }
-        else{
-            bool leap_year = isLeapYear(m_durations.m_years_since_1900.count() + start_year);
-            if ((!leap_year && m_durations.m_days_since_month_start.count() <= 28 || (leap_year && m_durations.m_days_since_month_start.count() <= 29))){
-                break;
-            }
-            if (!leap_year){
-                m_durations.m_days_since_month_start -= tristan::date::Days(28);
-            }
-            else{
-                m_durations.m_days_since_month_start -= tristan::date::Days(29);
-            }
-        }
-    }
-    //That increment is needed as month variable holds current month number and not month passed since start of the year
-    ++m_month;
+    m_days_since_1900 += Days{days};
 }
 
 void tristan::date::Date::addMonths(uint64_t months){
@@ -215,26 +159,81 @@ void tristan::date::Date::addMonths(uint64_t months){
         return;
     }
     uint64_t days_to_add = 0;
+    uint8_t current_month = _calculateCurrentMonth();
+    uint8_t current_date = _calculateDayOfTheMonth();
     for (int l_month = 0; l_month < months; ++l_month){
-        if (m_month == 13){
-            m_month = 1;
+        if (current_month == 13){
+            this->addDays(days_to_add);
+            days_to_add = 0;
+            current_month = _calculateCurrentMonth();
+            current_date = _calculateDayOfTheMonth();
         }
-        if (m_month == 1 || m_month == 3 || m_month == 5 || m_month == 7 || m_month == 8 || m_month == 10 || m_month == 12){
+        if (
+                (current_month == Months::JANUARY && current_date < 29) ||
+                (current_month == Months::MARCH && current_date < 31) ||
+                (current_month == Months::MAY && current_date < 31) ||
+                current_month == Months::JULY ||
+                (current_month == Months::AUGUST && current_date < 31) ||
+                (current_month == Months::OCTOBER && current_date < 31) ||
+                current_month == Months::DECEMBER
+                ){
             days_to_add += 31;
         }
-        else if (m_month == 4 || m_month == 6 || m_month == 9 || m_month == 11){
+        else if (
+                current_month == Months::FEBRUARY ||
+                current_month == Months::APRIL ||
+                current_month == Months::JUNE ||
+                current_month == Months::SEPTEMBER ||
+                current_month == Months::NOVEMBER ||
+                (current_month == Months::MARCH && current_date == 31) ||
+                (current_month == Months::MAY && current_date == 31) ||
+                (current_month == Months::AUGUST && current_date == 31) ||
+                (current_month == Months::OCTOBER && current_date == 31)
+                ){
             days_to_add += 30;
         }
-        else{
-            bool leap_year = isLeapYear(m_durations.m_years_since_1900.count() + start_year);
+        else if (current_month == JANUARY && current_date >= 29){
+            bool leap_year = tristan::date::Date::isLeapYear(_calculateCurrentYear() + start_year);
             if (!leap_year){
-                days_to_add += 28;
+                switch (current_date){
+                    case 29:{
+                        days_to_add += 30;
+                        break;
+                    }
+                    case 30:{
+                        days_to_add += 29;
+                        break;
+                    }
+                    case 31:{
+                        days_to_add += 28;
+                        break;
+                    }
+                    default:{
+                        break;
+                    }
+                }
             }
             else{
-                days_to_add += 29;
+                switch (current_date){
+                    case 29:{
+                        days_to_add += 31;
+                        break;
+                    }
+                    case 30:{
+                        days_to_add += 30;
+                        break;
+                    }
+                    case 31:{
+                        days_to_add += 29;
+                        break;
+                    }
+                    default:{
+                        break;
+                    }
+                }
             }
         }
-        ++m_month;
+        ++current_month;
     }
     this->addDays(days_to_add);
 }
@@ -244,8 +243,9 @@ void tristan::date::Date::addYears(uint64_t years){
         return;
     }
     uint64_t days_to_add = 0;
-    for (uint64_t year = m_durations.m_years_since_1900.count() + start_year, end_year = year + years; year < end_year; ++year){
-        if (m_durations.m_days_since_year_start.count() < 60){
+    uint16_t days_in_year = _calculateDaysInYear();
+    for (uint64_t year = _calculateCurrentYear() + tristan::date::start_year, end_year = year + years; year < end_year; ++year){
+        if (days_in_year < 60){
             if (tristan::date::Date::isLeapYear(year)){
                 days_to_add += 366;
             }
@@ -253,7 +253,7 @@ void tristan::date::Date::addYears(uint64_t years){
                 days_to_add += 364;
             }
         }
-        else if (m_durations.m_days_since_year_start.count() >= 60){
+        else if (days_in_year >= 60){
             if (tristan::date::Date::isLeapYear(year + 1)){
                 days_to_add += 366;
             }
@@ -265,128 +265,128 @@ void tristan::date::Date::addYears(uint64_t years){
     this->addDays(days_to_add);
 }
 
-void tristan::date::Date::substractDays(uint64_t days){
+void tristan::date::Date::subtractDays(uint64_t days){
     if (days == 0){
         return;
     }
-    m_durations.m_days_since_1900 -= tristan::date::Days(days);
-    m_durations.m_years_since_1900 = std::chrono::duration_cast<tristan::date::Years>(m_durations.m_days_since_1900);
-    m_durations.m_days_since_year_start = m_durations.m_days_since_1900 - std::chrono::duration_cast<tristan::date::Days>(m_durations.m_years_since_1900);
-    m_durations.m_days_since_month_start = m_durations.m_days_since_year_start;
-    for (m_month = 1; m_month <= 12; ++m_month){
-        if (m_month == 1 || m_month == 3 || m_month == 5 || m_month == 7 || m_month == 8 || m_month == 10 || m_month == 12){
-            if (m_durations.m_days_since_month_start.count() <= 31){
-                break;
-            }
-            m_durations.m_days_since_month_start -= tristan::date::Days(31);
-        }
-        else if (m_month == 4 || m_month == 6 || m_month == 9 || m_month == 11){
-            if (m_durations.m_days_since_month_start.count() <= 30){
-                break;
-            }
-            m_durations.m_days_since_month_start -= tristan::date::Days(30);
-        }
-        else{
-            bool leap_year = isLeapYear(m_durations.m_years_since_1900.count() + start_year);
-            if ((!leap_year && m_durations.m_days_since_month_start.count() <= 28 || (leap_year && m_durations.m_days_since_month_start.count() <= 29))){
-                break;
-            }
-            if (!leap_year){
-                m_durations.m_days_since_month_start -= tristan::date::Days(28);
-            }
-            else{
-                m_durations.m_days_since_month_start -= tristan::date::Days(29);
-            }
-        }
-    }
-    //That increment is needed as month variable holds current month number and not month passed since start of the year
-    ++m_month;
+    m_days_since_1900 -= Days{days};
 }
 
-void tristan::date::Date::substractMonths(uint64_t months){
+void tristan::date::Date::subtractMonths(uint64_t months){
     if (months == 0){
         return;
     }
-    uint64_t days_to_substract = 0;
+    uint8_t current_month = _calculateCurrentMonth();
+    uint8_t current_date = _calculateDayOfTheMonth();
+    uint64_t days_to_subtract = 0;
     for (int l_month = 0; l_month < months; ++l_month){
-        if (m_month == 13){
-            m_month = 1;
+        if (current_month == 0){
+            this->subtractDays(days_to_subtract);
+            days_to_subtract = 0;
+            current_month = _calculateCurrentMonth();
+            current_date = _calculateDayOfTheMonth();
         }
-        --m_month;
-        if (m_month == 1 || m_month == 3 || m_month == 5 || m_month == 7 || m_month == 8 || m_month == 10 || m_month == 12){
-            days_to_substract += 31;
+        if (
+                current_month == Months::JANUARY ||
+                (current_month == Months::DECEMBER && current_date == 31) ||
+                current_month == Months::NOVEMBER ||
+                (current_month == Months::OCTOBER && current_date == 31) ||
+                current_month == Months::SEPTEMBER ||
+                current_month == Months::AUGUST ||
+                (current_month == Months::JULY && current_date == 31) ||
+                current_month == Months::JUNE ||
+                (current_month == Months::MAY && current_date == 31) ||
+                current_month == Months::FEBRUARY
+                ){
+            days_to_subtract += 31;
         }
-        else if (m_month == 4 || m_month == 6 || m_month == 9 || m_month == 11){
-            days_to_substract += 30;
+        else if (
+                current_month == Months::DECEMBER ||
+                current_month == Months::OCTOBER ||
+                current_month == Months::JULY ||
+                current_month == Months::MAY
+                ){
+            days_to_subtract += 30;
         }
-        else{
-            bool leap_year = isLeapYear(m_durations.m_years_since_1900.count() + start_year);
-            if (!leap_year){
-                days_to_substract += 28;
+        else if (current_month == Months::MARCH){
+            if (current_date > 28){
+                days_to_subtract += current_date;
             }
             else{
-                days_to_substract += 29;
+                bool is_leap_year = tristan::date::Date::isLeapYear(_calculateCurrentYear() + start_year);
+                if (!is_leap_year){
+                    days_to_subtract += 28;
+                }
+                else{
+                    days_to_subtract += 29;
+                }
             }
         }
+        --current_month;
     }
-    this->substractDays(days_to_substract);
+    this->subtractDays(days_to_subtract);
 }
 
-void tristan::date::Date::substractYears(uint64_t years){
+void tristan::date::Date::subtractYears(uint64_t years){
     if (years == 0){
         return;
     }
-    uint64_t days_to_substract = 0;
-    for (uint64_t year = m_durations.m_years_since_1900.count() + start_year, end_year = year - years; year > end_year; --year){
-        if (m_durations.m_days_since_year_start.count() > 60){
-            if (tristan::date::Date::isLeapYear(year)){
-                days_to_substract += 366;
+    uint64_t days_to_subtract = 0;
+    uint16_t days_in_year = _calculateDaysInYear();
+    for (uint64_t year = _calculateCurrentYear() + tristan::date::start_year, end_year = year - years; year > end_year; --year){
+        if (tristan::date::Date::isLeapYear(year)){
+            if (days_in_year < 60){
+                days_to_subtract += tristan::date::non_leap_year_days;
             }
             else{
-                days_to_substract += 365;
+                days_to_subtract += tristan::date::leap_year_days;
             }
         }
-        else if (m_durations.m_days_since_year_start.count() <= 60){
-            if (tristan::date::Date::isLeapYear(year - 1)){
-                days_to_substract += 366;
+        else if(tristan::date::Date::isLeapYear(year - 1)){
+            if (days_in_year <= 59){
+                days_to_subtract += tristan::date::leap_year_days;
             }
             else{
-                days_to_substract += 365;
+                days_to_subtract += tristan::date::non_leap_year_days;
             }
+        }
+        else{
+            days_to_subtract += tristan::date::non_leap_year_days;
         }
     }
-    this->substractDays(days_to_substract);
+    this->subtractDays(days_to_subtract);
 }
 
 auto tristan::date::Date::dayOfTheMonth() const -> uint8_t{
-    return m_durations.m_days_since_month_start.count() + 1;
+    return _calculateDayOfTheMonth();
 }
 
 auto tristan::date::Date::dayOfTheWeek() const -> uint8_t{
-    return (m_durations.m_days_since_1900.count() + 1) % 7 + 1;
+    return (m_days_since_1900.count()) % 7;
 }
 
 auto tristan::date::Date::month() const -> uint8_t{
-    return m_month;
+    return _calculateCurrentMonth();
 }
 
 auto tristan::date::Date::year() const -> uint16_t{
-    return m_durations.m_years_since_1900.count() + start_year;
+    return _calculateCurrentYear() + tristan::date::start_year;
 }
 
-auto tristan::date::Date::is_weekend() const -> bool{
+auto tristan::date::Date::isWeekend() const -> bool{
     return this->dayOfTheWeek() > 5;
 }
 
 std::string tristan::date::Date::toString() const {
     std::string result;
-    result += std::to_string(m_durations.m_years_since_1900.count() + start_year);
+    result += std::to_string(_calculateCurrentYear() + tristan::date::start_year);
     result += '-';
-    if (m_month < 10)
+    uint8_t month = _calculateCurrentMonth();
+    if (month < 10)
         result += '0';
-    result += std::to_string(m_month);
+    result += std::to_string(month);
     result += '-';
-    uint8_t day = m_durations.m_days_since_month_start.count() + 1;
+    uint8_t day = _calculateDayOfTheMonth();
     if (day < 10)
         result += '0';
     result += std::to_string(day);
@@ -411,6 +411,85 @@ bool tristan::date::Date::isLeapYear(uint16_t year){
     else{
         return false;
     }
+}
+
+ auto tristan::date::Date::_calculateCurrentMonth() const -> uint8_t {
+     uint16_t days_since_year_start = _calculateDaysInYear();
+     bool leap_year = tristan::date::Date::isLeapYear(_calculateCurrentYear() + tristan::date::start_year);
+     if ((!leap_year && days_since_year_start >= g_december_start_day.first) || (leap_year && days_since_year_start >= g_december_start_day.second)){
+         return Months::DECEMBER;
+     }
+     else if ((!leap_year && days_since_year_start >= g_november_start_day.first) || (leap_year && days_since_year_start >= g_november_start_day.second)){
+         return Months::NOVEMBER;
+     }
+     else if ((!leap_year && days_since_year_start >= g_october_start_day.first) || (leap_year && days_since_year_start >= g_october_start_day.second)){
+         return Months::OCTOBER;
+     }
+     else if ((!leap_year && days_since_year_start >= g_september_start_day.first) || (leap_year && days_since_year_start >= g_september_start_day.second)){
+         return Months::SEPTEMBER;
+     }
+     else if ((!leap_year && days_since_year_start >= g_august_start_day.first) || (leap_year && days_since_year_start >= g_august_start_day.second)){
+         return Months::AUGUST;
+     }
+     else if ((!leap_year && days_since_year_start >= g_july_start_day.first) || (leap_year && days_since_year_start >= g_july_start_day.second)){
+         return Months::JULY;
+     }
+     else if ((!leap_year && days_since_year_start >= g_june_start_day.first) || (leap_year && days_since_year_start >= g_june_start_day.second)){
+         return Months::JUNE;
+     }
+     else if ((!leap_year && days_since_year_start >= g_may_start_day.first) || (leap_year && days_since_year_start >= g_may_start_day.second)){
+         return Months::MAY;
+     }
+     else if ((!leap_year && days_since_year_start >= g_april_start_day.first) || (leap_year && days_since_year_start >= g_april_start_day.second)){
+         return Months::APRIL;
+     }
+     else if ((!leap_year && days_since_year_start >= g_march_start_day.first) || (leap_year && days_since_year_start >= g_march_start_day.second)){
+         return Months::MARCH;
+     }
+     else if (days_since_year_start >= g_february_start_day){
+         return Months::FEBRUARY;
+     }
+     else {
+         return Months::JANUARY;
+     }
+ }
+
+ auto tristan::date::Date::_calculateCurrentYear() const -> uint8_t {
+     auto number_of_leap_days = static_cast<uint8_t>(m_days_since_1900.count() / (tristan::date::non_leap_year_days * 4));
+     
+     return (m_days_since_1900.count() - number_of_leap_days) / tristan::date::non_leap_year_days;
+}
+
+auto tristan::date::Date::_calculateDayOfTheMonth() const -> uint8_t{
+    
+    uint16_t days_in_month = _calculateDaysInYear();
+    for (int month = _calculateCurrentMonth() - 1; month >= Months::JANUARY; --month){
+        if (month == 1 || month == 3 || month == 5 || month == 7 || month == 8 || month == 10 || month == 12){
+            days_in_month -= 31;
+        }
+        else if (month == 4 || month == 6 || month == 9 || month == 11){
+            days_in_month -= 30;
+        }
+        else{
+            bool leap_year = isLeapYear(_calculateCurrentYear() + tristan::date::start_year);
+            if (!leap_year){
+                days_in_month -= 28;
+            }
+            else{
+                days_in_month -= 29;
+            }
+        }
+    }
+    return days_in_month;
+}
+
+auto tristan::date::Date::_calculateDaysInYear() const -> uint16_t{
+    auto number_of_leap_days = static_cast<uint8_t>(m_days_since_1900.count() / (tristan::date::non_leap_year_days * 4));
+    if (tristan::date::Date::isLeapYear(_calculateCurrentYear() + start_year)){
+        number_of_leap_days -= 1;
+    }
+    uint8_t years = _calculateCurrentYear();
+    return static_cast<uint16_t>(m_days_since_1900.count() - years * tristan::date::non_leap_year_days - number_of_leap_days);
 }
 
 bool tristan::date::operator !=(const tristan::date::Date &l, const tristan::date::Date &r) {

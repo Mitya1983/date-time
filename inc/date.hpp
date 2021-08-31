@@ -5,7 +5,7 @@
 #include <ostream>
 namespace tristan::date {
     
-    using Days = std::chrono::duration<int64_t , std::ratio_divide<std::ratio<86400>, std::chrono::seconds::period>>;
+    using Days = std::chrono::duration<int64_t, std::ratio_divide<std::ratio<86400>, std::chrono::seconds::period>>;
     
     /// \brief Number of days in regular year.
     inline const uint16_t non_leap_year_days{365};
@@ -77,8 +77,8 @@ namespace tristan::date {
         /// \return uint8_t.
         [[nodiscard]] auto dayOfTheWeek() const -> uint8_t;
         /// \brief Returns currently set month of the year.
-        /// \return uint8_t.
-        [[nodiscard]] auto month() const -> uint8_t;
+        /// \return Months.
+        [[nodiscard]] auto month() const -> uint8_t ;
         /// \brief Returns currently set year.
         /// \return uint8_t.
         [[nodiscard]] auto year() const -> uint16_t;
@@ -99,6 +99,12 @@ namespace tristan::date {
     
     private:
         Days m_days_since_1900;
+    
+        [[nodiscard]] auto _calculateCurrentMonth() const -> uint8_t;
+        [[nodiscard]] auto _calculateCurrentYear() const -> uint8_t;
+        [[nodiscard]] auto _calculateDayOfTheMonth() const -> uint8_t;
+        [[nodiscard]] auto _calculateDaysInYear() const -> uint16_t;
+    
     };
     /// \brief Operator not equal to.
     auto operator != (const Date &l, const Date &r) -> bool;
