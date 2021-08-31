@@ -147,69 +147,69 @@ TEST(DayTime, AddNanoseconds){
     ASSERT_EQ(time.microseconds(), 24);
 }
 
-TEST(DayTime, SubstractHours){
+TEST(DayTime, SubtractHours){
     DayTime time(21, 23);
     
-    time.substractHours(1);
+    time.subtractHours(1);
     ASSERT_EQ(time.hours(), 20);
-    time.substractHours(2);
+    time.subtractHours(2);
     ASSERT_EQ(time.hours(), 18);
-    time.substractHours(24);
+    time.subtractHours(24);
     ASSERT_EQ(time.hours(), 18);
-    time.substractHours(25);
+    time.subtractHours(25);
     ASSERT_EQ(time.hours(), 17);
 }
 
-TEST(DayTime, SubstractMinutes){
+TEST(DayTime, SubtractMinutes){
     DayTime time(21, 23);
     
-    time.substractMinutes(1);
+    time.subtractMinutes(1);
     ASSERT_EQ(time.minutes(), 22);
-    time.substractMinutes(60);
+    time.subtractMinutes(60);
     ASSERT_EQ(time.minutes(), 22);
     ASSERT_EQ(time.hours(), 20);
 }
 
-TEST(DayTime, SubstractSeconds){
+TEST(DayTime, SubtractSeconds){
     DayTime time(21, 23, 23);
     
-    time.substractSeconds(1);
+    time.subtractSeconds(1);
     ASSERT_EQ(time.seconds(), 22);
-    time.substractSeconds(60);
+    time.subtractSeconds(60);
     ASSERT_EQ(time.seconds(), 22);
     ASSERT_EQ(time.minutes(), 22);
-    time.substractSeconds(3600);
+    time.subtractSeconds(3600);
     ASSERT_EQ(time.seconds(), 22);
     ASSERT_EQ(time.minutes(), 22);
     ASSERT_EQ(time.hours(), 20);
 }
 
-TEST(DayTime, SubstractMilliseconds){
+TEST(DayTime, SubtractMilliseconds){
     DayTime time(21, 23, 23, 23);
     
-    time.substractMilliseconds(1);
+    time.subtractMilliseconds(1);
     ASSERT_EQ(time.milliseconds(), 22);
-    time.substractMilliseconds(1000);
+    time.subtractMilliseconds(1000);
     ASSERT_EQ(time.milliseconds(), 22);
     ASSERT_EQ(time.seconds(), 22);
 }
 
-TEST(DayTime, SubstractMicroseconds){
+TEST(DayTime, SubtractMicroseconds){
     DayTime time(21, 23, 23, 23, 23);
     
-    time.substractMicroseconds(1);
+    time.subtractMicroseconds(1);
     ASSERT_EQ(time.microseconds(), 22);
-    time.substractMicroseconds(1000);
+    time.subtractMicroseconds(1000);
     ASSERT_EQ(time.microseconds(), 22);
     ASSERT_EQ(time.milliseconds(), 22);
 }
 
-TEST(DayTime, SubstractNanoseconds){
+TEST(DayTime, SubtractNanoseconds){
     DayTime time(21, 23, 23, 23, 23, 23);
     
-    time.substractNanoseconds(1);
+    time.subtractNanoseconds(1);
     ASSERT_EQ(time.nanoseconds(), 22);
-    time.substractNanoseconds(1000);
+    time.subtractNanoseconds(1000);
     ASSERT_EQ(time.nanoseconds(), 22);
     ASSERT_EQ(time.microseconds(), 22);
 }
@@ -230,7 +230,11 @@ TEST(DayTime, toString){
     
     std::string s_time = time.toString(true);
     
-    std::string test_time = std::to_string(time.hours());
+    std::string test_time;
+    if (time.hours() < 10){
+        test_time += '0';
+    }
+    test_time += std::to_string(time.hours());
     test_time += ':';
     auto minutes = time.minutes();
     if (minutes < 10){
@@ -321,6 +325,24 @@ TEST(Date, ExplicitConstructor){
     
     EXPECT_FALSE(date.isWeekend());
     
+    date = Date(1, 1, 2024);
+    ASSERT_EQ(date.dayOfTheMonth(), 1);
+    ASSERT_EQ(date.dayOfTheWeek(), 1);
+    ASSERT_EQ(date.month(), 1);
+    ASSERT_EQ(date.year(), 2024);
+
+    date = Date(1, 2, 2024);
+    ASSERT_EQ(date.dayOfTheMonth(), 1);
+    ASSERT_EQ(date.dayOfTheWeek(), 4);
+    ASSERT_EQ(date.month(), 2);
+    ASSERT_EQ(date.year(), 2024);
+
+    date = Date(1, 3, 2024);
+    ASSERT_EQ(date.dayOfTheMonth(), 1);
+    ASSERT_EQ(date.dayOfTheWeek(), 5);
+    ASSERT_EQ(date.month(), 3);
+    ASSERT_EQ(date.year(), 2024);
+    
     EXPECT_THROW(Date(32, 8, 2021), std::range_error);
     EXPECT_THROW(Date(30, 13, 2021), std::range_error);
     EXPECT_THROW(Date(1, 1, 1899), std::range_error);
@@ -374,7 +396,7 @@ TEST(Date, AddDays){
     
     date.addDays(2);
     ASSERT_EQ(date.dayOfTheMonth(), 1);
-    ASSERT_EQ(date.dayOfTheWeek(), 4);
+    ASSERT_EQ(date.dayOfTheWeek(), 3);
 
     date.addDays(31);
     ASSERT_EQ(date.dayOfTheMonth(), 2);
@@ -407,6 +429,12 @@ TEST(Date, AddMonths){
     ASSERT_EQ(date.dayOfTheMonth(), 29);
     ASSERT_EQ(date.month(), 2);
     ASSERT_EQ(date.dayOfTheWeek(), 4);
+    
+    date = Date(31, 1, 2023);
+    date.addMonths(1);
+    ASSERT_EQ(date.dayOfTheMonth(), 28);
+    ASSERT_EQ(date.month(), 2);
+    ASSERT_EQ(date.dayOfTheWeek(), 2);
 }
 
 TEST(Date, AddYears){
@@ -425,60 +453,93 @@ TEST(Date, AddYears){
     ASSERT_EQ(date.dayOfTheWeek(), 5);
 }
 
-TEST(Date, SubstractDays){
+TEST(Date, SubtractDays){
     Date date(25, 8, 2021);
     
-    date.substractDays(5);
+    date.subtractDays(5);
     ASSERT_EQ(date.dayOfTheMonth(), 20);
     ASSERT_EQ(date.dayOfTheWeek(), 5);
     
-    date.substractDays(31);
+    date.subtractDays(31);
     ASSERT_EQ(date.dayOfTheMonth(), 20);
     ASSERT_EQ(date.dayOfTheWeek(), 2);
     
     date = Date(1, 3, 2024);
     
-    date.substractDays(1);
+    date.subtractDays(1);
     ASSERT_EQ(date.dayOfTheMonth(), 29);
     ASSERT_EQ(date.dayOfTheWeek(), 4);
 }
 
-TEST(Date, SubstractMonths){
+TEST(Date, SubtractMonths){
     Date date(25, 8, 2021);
     
-    date.substractMonths(1);
+    date.subtractMonths(1);
     ASSERT_EQ(date.dayOfTheMonth(), 25);
     ASSERT_EQ(date.month(), 7);
-    ASSERT_EQ(date.dayOfTheWeek(), 7);
+    ASSERT_EQ(date.dayOfTheWeek(), 0);
     
     date = Date(31, 7, 2021);
     
-    date.substractMonths(1);
+    date.subtractMonths(1);
     ASSERT_EQ(date.dayOfTheMonth(), 30);
     ASSERT_EQ(date.month(), 6);
     ASSERT_EQ(date.dayOfTheWeek(), 3);
     
     date = Date(31, 3, 2024);
-    date.substractMonths(1);
+    date.subtractMonths(1);
     ASSERT_EQ(date.dayOfTheMonth(), 29);
     ASSERT_EQ(date.month(), 2);
     ASSERT_EQ(date.dayOfTheWeek(), 4);
+
+    date = Date(28, 3, 2024);
+    date.subtractMonths(1);
+    ASSERT_EQ(date.dayOfTheMonth(), 28);
+    ASSERT_EQ(date.month(), 2);
+
+    date = Date(28, 3, 2023);
+    date.subtractMonths(1);
+    ASSERT_EQ(date.dayOfTheMonth(), 28);
+    ASSERT_EQ(date.month(), 2);
 }
 
-TEST(Date, SubstractYears){
+TEST(Date, SubtractYears){
     Date date(25, 8, 2021);
     
-    date.substractYears(1);
+    date.subtractYears(1);
     ASSERT_EQ(date.dayOfTheMonth(), 25);
     ASSERT_EQ(date.year(), 2020);
     ASSERT_EQ(date.dayOfTheWeek(), 2);
     
     date = Date(29, 2, 2024);
-    
-    date.substractYears(1);
+    date.subtractYears(1);
     ASSERT_EQ(date.dayOfTheMonth(), 28);
     ASSERT_EQ(date.year(), 2023);
     ASSERT_EQ(date.dayOfTheWeek(), 2);
+
+    date = Date(1, 3, 2024);
+    date.subtractYears(1);
+    ASSERT_EQ(date.dayOfTheMonth(), 1);
+    ASSERT_EQ(date.month(), 3);
+    ASSERT_EQ(date.year(), 2023);
+
+    date = Date(28, 2, 2024);
+    date.subtractYears(1);
+    ASSERT_EQ(date.dayOfTheMonth(), 28);
+    ASSERT_EQ(date.month(), 2);
+    ASSERT_EQ(date.year(), 2023);
+
+    date = Date(28, 2, 2025);
+    date.subtractYears(1);
+    ASSERT_EQ(date.dayOfTheMonth(), 28);
+    ASSERT_EQ(date.month(), 2);
+    ASSERT_EQ(date.year(), 2024);
+    
+    date = Date(1, 3, 2025);
+    date.subtractYears(1);
+    ASSERT_EQ(date.dayOfTheMonth(), 1);
+    ASSERT_EQ(date.month(), 3);
+    ASSERT_EQ(date.year(), 2024);
 }
 
 TEST(Date, IsWeekend){
