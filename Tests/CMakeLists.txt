@@ -6,7 +6,7 @@ get_target_property(PARENT_OUTPUT_NAME ${PROJECT_NAME} OUTPUT_NAME)
 
 project(Tests LANGUAGES CXX)
 
-message("Configuring tests")
+message(STATUS "Configuring tests")
 
 if (NOT EXISTS ${PROJECT_SOURCE_DIR}/tests.hpp)
     file(TOUCH ${PROJECT_SOURCE_DIR}/tests.hpp)
@@ -20,7 +20,7 @@ if (NOT EXISTS ${PROJECT_SOURCE_DIR}/tests.cpp)
     file(WRITE ${PROJECT_SOURCE_DIR}/tests.cpp
             "#include \"tests.hpp\"
 
-int main(int argc, char ∗∗argv){
+int main(int argc, char** argv){
     ::testing::InitGoogleTest(&argc, argv);
     return RUN_ALL_TESTS();
 }

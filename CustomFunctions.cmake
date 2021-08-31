@@ -50,3 +50,24 @@ function(set_project_properties)
         message(FATAL_ERROR "Compiler not supported")
     endif()
 endfunction()
+
+function(generate_doxygen_config DESCRIPTION)
+    get_target_property(L_VERSION ${PROJECT_NAME} VERSION)
+    message("Generating doxygen config file")
+    file(TOUCH ${PROJECT_SOURCE_DIR}/doxygen.conf)
+    file(WRITE ${PROJECT_SOURCE_DIR}/doxygen.conf
+                "
+DOXYFILE_ENCODING     = UTF-8
+PROJECT_NAME           = \"${PROJECT_NAME}\"
+PROJECT_NUMBER         = ${L_VERSION}
+PROJECT_BRIEF          = \"${DESCRIPTION}\"
+OUTPUT_DIRECTORY       = Docs
+EXTRACT_ALL            = YES
+EXTRACT_PRIV_VIRTUAL   = YES
+EXTRACT_LOCAL_CLASSES  = YES
+QUIET                  = NO
+INPUT                  = ${PROJECT_SOURCE_DIR}/inc/
+ENUM_VALUES_PER_LINE   = 1
+"
+                )
+endfunction()

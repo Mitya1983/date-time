@@ -2,9 +2,9 @@
 #define DATE_TIME_HPP
 #include "date.hpp"
 #include "time.hpp"
-
+/// \brief Namesapce which unites date and time in one Date_Time object
 namespace tristan::date_time{
-/// \brief Class to store date and day time according
+/// \brief Class to store date and day time
 /// \headerfile date_time.hpp
     class Date_Time
     {
@@ -25,7 +25,7 @@ namespace tristan::date_time{
         auto operator==(const Date_Time& other) const -> bool;
         /// \brief Operator less then.
         auto operator<(const Date_Time& other) const -> bool;
-        
+        /// \brief Destructor
         ~Date_Time() = default;
         /// \brief Setter with copy assignment
         void setDate(const date::Date& date) {m_date = date;}

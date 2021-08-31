@@ -3,6 +3,7 @@
 #include <chrono>
 #include <string>
 #include <ostream>
+/// \brief Namespace which includes date handlers
 namespace tristan::date {
     
     using Days = std::chrono::duration<int64_t, std::ratio_divide<std::ratio<86400>, std::chrono::seconds::period>>;
@@ -14,7 +15,8 @@ namespace tristan::date {
     /// \brief Number of days from 1 January 1900 to 1 January 1970.
     inline const uint16_t days_since_1900_to_1970{25567};
     inline const uint16_t start_year = 1900;
-    
+    /// \brief Class to handle date
+    /// \headerfile date.hpp
     class Date
     {
     
