@@ -752,8 +752,10 @@ auto tristan::time::DayTime::localTime(Precision precision) -> tristan::time::Da
     
     tm local_time = *std::localtime(&time);
     tm utc_time = *std::gmtime(&time);
-    
     auto hours = static_cast<int8_t>(local_time.tm_hour - utc_time.tm_hour);
+    if (hours < -14) {
+        hours += 24;
+    }
     auto minutes = static_cast<int8_t>(local_time.tm_min - utc_time.tm_min);
     
     if (hours > 14 || hours < -14 || minutes > 59 || minutes < -59){

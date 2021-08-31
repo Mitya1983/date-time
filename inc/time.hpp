@@ -5,7 +5,7 @@
 #include <chrono>
 #include <variant>
 
-
+/// \brief Namespace which includes time handlers
 namespace tristan::time {
     
     /// \brief Enum which represents precisions used in implementation.
@@ -44,7 +44,8 @@ namespace tristan::time {
         EAST_11 [[maybe_unused]],
         EAST_12 [[maybe_unused]],
     };
-    
+    /// \brief Class to handle time
+    /// \headerfile time.hpp
 class DayTime
 {
     friend auto operator + (const DayTime& l, const DayTime &r) -> DayTime;
