@@ -38,8 +38,8 @@ if (DOCS)
                 ${PROJECT_SOURCE_DIR}/*.hpp
                 )
         message(STATUS ${DOC_SOURCES})
-        add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-        COMMAND ${DOXYGEN_EXECUTABLE} ${CMAKE_SOURCE_DIR}/doxygen.conf ${CMAKE_SOURCE_DIR}/inc/date_time.hpp
+        add_custom_command(TARGET "${PROJECT_NAME}" POST_BUILD
+        COMMAND ${DOXYGEN_EXECUTABLE} ${CMAKE_SOURCE_DIR}/doxygen.conf
     )
     else()
         message(WARNING "Doxygen not found. Documentation was not generated")

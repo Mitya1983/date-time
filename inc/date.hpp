@@ -55,19 +55,19 @@ namespace tristan::date {
         /// \param days uint64_t.
         void addDays(uint64_t days);
         /// \brief Adds months to Date object.
-        /// \param days uint64_t.
+        /// \param months uint64_t.
         void addMonths(uint64_t months);
         /// \brief Adds years to Date object.
-        /// \param days uint64_t.
+        /// \param years uint64_t.
         void addYears(uint64_t years);
         /// \brief Subtracts days to Date object.
         /// \param days uint64_t.
         void subtractDays(uint64_t days);
         /// \brief Subtracts months to Date object.
-        /// \param days uint64_t.
+        /// \param months uint64_t.
         void subtractMonths(uint64_t months);
         /// \brief Subtracts years to Date object.
-        /// \param days uint64_t.
+        /// \param years uint64_t.
         void subtractYears(uint64_t years);
         
         /// \brief Returns currently set day of the month.

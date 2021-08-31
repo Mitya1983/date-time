@@ -91,14 +91,14 @@ public:
     /// \throws std::range_error.
     explicit DayTime(uint8_t hours, uint8_t minutes, uint8_t seconds, uint16_t milliseconds, uint16_t microseconds, uint16_t nanoseconds);
     /// \brief Parses the string provided and create time object.
-    /// \param time std::string representing time in following formats.
-    /// \format[hours, minutes, seconds] - two digits.
-    /// \format[milliseconds, microseconds and nanoseconds] - three digits.
-    /// \format[hours:minutes] - Minutes precision.
-    /// \format[hours:minutes:seconds] - Seconds precision.
-    /// \format[hours:minutes:seconds.milliseconds] - Milliseconds precision.
-    /// \format[hours:minutes:seconds.milliseconds.microseconds] - Microseconds precision.
-    /// \format[hours:minutes:seconds.milliseconds.microseconds.nanoseconds] - Nanoseconds precision.
+    /// \param time std::string representing time in following <b>formats</b>:
+    /// \n[hours:minutes] - Minutes precision.
+    /// \n[hours:minutes:seconds] - Seconds precision.
+    /// \n[hours:minutes:seconds.milliseconds] - Milliseconds precision.
+    /// \n[hours:minutes:seconds.milliseconds.microseconds] - Microseconds precision.
+    /// \n[hours:minutes:seconds.milliseconds.microseconds.nanoseconds] - Nanoseconds precision.
+    /// \note [hours, minutes, seconds] - two digits.
+    /// \note [milliseconds, microseconds and nanoseconds] - three digits.
     /// \throws std::invali_argument, std::range_error.
     explicit DayTime(const std::string &time);
     /// \brief Copy constructor
@@ -130,45 +130,45 @@ public:
     /// \param hours uint64_t.
     void addHours(uint64_t hours);
     /// \brief Adds minutes to DayTime object.
-    /// \param hours uint64_t.
+    /// \param minutes uint64_t.
     void addMinutes(uint64_t minutes);
     /// \brief Adds seconds to DayTime object.
     /// \note Precision is taken into account. That is in case of MINUTES precision if number of seconds is less then 1 minute operation is meaningless and will not have any effect.
-    /// \param hours uint64_t.
+    /// \param seconds uint64_t.
     void addSeconds(uint64_t seconds);
     /// \brief Adds milliseconds to DayTime object.
     /// \note Precision is taken into account. That is in case of SECONDS or MINUTES precision if number of milliseconds is less then 1 second operation is meaningless and will not have any effect.
-    /// \param hours uint64_t.
+    /// \param milliseconds uint64_t.
     void addMilliseconds(uint64_t milliseconds);
     /// \brief Adds microseconds to DayTime object.
     /// \note Precision is taken into account. That is in case of SECONDS, MINUTES or MILLISECONDS precision if number of microseconds is less then 1 millisecond operation is meaningless and will not have any effect.
-    /// \param hours uint64_t.
+    /// \param microseconds uint64_t.
     void addMicroseconds(uint64_t microseconds);
     /// \brief Adds nanoseconds to DayTime object.
     /// \note Precision is taken into account. That is in case of SECONDS, MINUTES, MILLISECONDS or MICROSECONDS precision if number of nanosecond is less then 1 microsecond operation is meaningless and will not have any effect.
-    /// \param hours uint64_t.
+    /// \param nanoseconds uint64_t.
     void addNanoseconds(uint64_t nanoseconds);
     /// \brief subtracts hours from DayTime object. This is a convenience function which converts hours to minutes and invokes subtractMinutes(uint64_t minutes) function
     /// \param hours uint64_t.
     void subtractHours(uint64_t hours);
     /// \brief subtracts minutes from DayTime object.
-    /// \param hours uint64_t.
+    /// \param minutes uint64_t.
     void subtractMinutes(uint64_t minutes);
     /// \brief subtracts seconds from DayTime object.
     /// \note Precision is taken into account. That is in case of MINUTES precision if number of seconds is less then 1 minute operation is meaningless and will not have any effect.
-    /// \param hours uint64_t.
+    /// \param seconds uint64_t.
     void subtractSeconds(uint64_t seconds);
     /// \brief subtracts milliseconds from DayTime object.
     /// \note Precision is taken into account. That is in case of SECONDS or MINUTES precision if number of milliseconds is less then 1 second operation is meaningless and will not have any effect.
-    /// \param hours uint64_t.
+    /// \param milliseconds uint64_t.
     void subtractMilliseconds(uint64_t milliseconds);
     /// \brief subtracts microseconds from DayTime object.
     /// \note Precision is taken into account. That is in case of SECONDS, MINUTES, MILLISECONDS or MICROSECONDS precision if number of nanosecond is less then 1 microsecond operation is meaningless and will not have any effect.
-    /// \param hours uint64_t.
+    /// \param microseconds uint64_t.
     void subtractMicroseconds(uint64_t microseconds);
     /// \brief subtracts nanoseconds from DayTime object.
     /// \note Precision is taken into account. That is in case of SECONDS, MINUTES, MILLISECONDS or MICROSECONDS precision if number of nanosecond is less then 1 microsecond operation is meaningless and will not have any effect.
-    /// \param hours uint64_t.
+    /// \param nanoseconds uint64_t.
     void subtractNanoseconds(uint64_t nanoseconds);
     
     /// \brief Returns number of hours passed since day start.
@@ -200,11 +200,12 @@ public:
     [[nodiscard]] static auto localTime(Precision precision = Precision::SECONDS) -> DayTime;
     /// \brief Generates string representation of time. By default return ISO standard representation in formats represented below. If show_precision is set to true each format will be suffixed by offset in form of +(-)hh.
     /// \return std::string to represent the time.
-    /// \format[hours:minutes] - Minutes precision.
-    /// \format[hours:minutes:seconds] - Seconds precision.
-    /// \format[hours:minutes:seconds.milliseconds] - Milliseconds precision.
-    /// \format[hours:minutes:seconds.milliseconds.microseconds] - Microseconds precision.
-    /// \format[hours:minutes:seconds.milliseconds.microseconds.nanoseconds] - Nanoseconds precision.
+    /// \n\b Formats:
+    /// \n[hours:minutes] - Minutes precision.
+    /// \n[hours:minutes:seconds] - Seconds precision.
+    /// \n[hours:minutes:seconds.milliseconds] - Milliseconds precision.
+    /// \n[hours:minutes:seconds.milliseconds.microseconds] - Microseconds precision.
+    /// \n[hours:minutes:seconds.milliseconds.microseconds.nanoseconds] - Nanoseconds precision.
     [[nodiscard]] virtual auto toString(bool show_offset) const -> std::string;
 
 protected:
