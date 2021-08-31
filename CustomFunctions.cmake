@@ -53,7 +53,7 @@ endfunction()
 
 function(generate_doxygen_config DESCRIPTION)
     get_target_property(L_VERSION ${PROJECT_NAME} VERSION)
-    message("Generating doxygen config file")
+    message(STATUS "Generating doxygen config file")
     if (NOT EXISTS ${PROJECT_SOURCE_DIR}/doxygen.conf)
         file(TOUCH ${PROJECT_SOURCE_DIR}/doxygen.conf)
         file(WRITE ${PROJECT_SOURCE_DIR}/doxygen.conf
@@ -71,5 +71,5 @@ INPUT                  = ${PROJECT_SOURCE_DIR}/inc/
 ENUM_VALUES_PER_LINE   = 1
 "
                 )
-    endif(${PROJECT_SOURCE_DIR}/doxygen.conf)
+    endif(NOT EXISTS ${PROJECT_SOURCE_DIR}/doxygen.conf)
 endfunction()
