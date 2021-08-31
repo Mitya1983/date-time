@@ -18,31 +18,31 @@ namespace tristan::time {
     };
     /// \brief enum which represents possible time zone offsets.
     enum class TimeZone : int8_t {
-        WEST_12 [[maybe_unused]],
-        WEST_11 [[maybe_unused]],
-        WEST_10 [[maybe_unused]],
-        WEST_9 [[maybe_unused]],
-        WEST_8 [[maybe_unused]],
-        WEST_7 [[maybe_unused]],
-        WEST_6 [[maybe_unused]],
-        WEST_5 [[maybe_unused]],
-        WEST_4 [[maybe_unused]],
-        WEST_3 [[maybe_unused]],
-        WEST_2 [[maybe_unused]],
-        WEST_1 [[maybe_unused]],
+        WEST_12 [[maybe_unused]] = -12,
+        WEST_11 [[maybe_unused]] = -11,
+        WEST_10 [[maybe_unused]] = -10,
+        WEST_9 [[maybe_unused]] = -9,
+        WEST_8 [[maybe_unused]] = -8,
+        WEST_7 [[maybe_unused]] = -7,
+        WEST_6 [[maybe_unused]] = -6,
+        WEST_5 [[maybe_unused]] = -5,
+        WEST_4 [[maybe_unused]] = -4,
+        WEST_3 [[maybe_unused]] = -3,
+        WEST_2 [[maybe_unused]] = -2,
+        WEST_1 [[maybe_unused]] = -1,
         UTC = 0,
-        EAST_1 [[maybe_unused]],
-        EAST_2 [[maybe_unused]],
-        EAST_3 [[maybe_unused]],
-        EAST_4 [[maybe_unused]],
-        EAST_5 [[maybe_unused]],
-        EAST_6 [[maybe_unused]],
-        EAST_7 [[maybe_unused]],
-        EAST_8 [[maybe_unused]],
-        EAST_9 [[maybe_unused]],
-        EAST_10 [[maybe_unused]],
-        EAST_11 [[maybe_unused]],
-        EAST_12 [[maybe_unused]],
+        EAST_1 [[maybe_unused]] = 1,
+        EAST_2 [[maybe_unused]] = 2,
+        EAST_3 [[maybe_unused]] = 3,
+        EAST_4 [[maybe_unused]] = 4,
+        EAST_5 [[maybe_unused]] = 5,
+        EAST_6 [[maybe_unused]] = 6,
+        EAST_7 [[maybe_unused]] = 7,
+        EAST_8 [[maybe_unused]] = 8,
+        EAST_9 [[maybe_unused]] = 9,
+        EAST_10 [[maybe_unused]] = 10,
+        EAST_11 [[maybe_unused]] = 11,
+        EAST_12 [[maybe_unused]] = 12,
     };
     /// \brief Class to handle time
     /// \headerfile time.hpp
@@ -109,15 +109,11 @@ public:
     auto operator=(const DayTime&) -> DayTime& = default;
     /// \brief Move assignment operator
     auto operator=(DayTime&&) -> DayTime& = default;
-    /// \brief Checks if DayTimes objects are equal.
+    /// \brief Operator equal.
     /// \note Precision is taken into account. That is if comparable objects are having different precision - false is returned.
-    /// \param r const DayTime&.
-    /// \return true if objects are equal and false otherwise.
     auto operator==(const DayTime& r) const -> bool;
-    /// \brief Checks if one DayTime object is less then other one.
+    /// \brief Operator less then.
     /// \note Precision is taken into account. That is if comparable objects are having different precision - false is returned.
-    /// \param r const DayTime&.
-    /// \return true if left object is less and false otherwise.
     auto operator<(const DayTime& r) const -> bool;
     /// \brief Unary plus operator.
     void operator += (const DayTime& r);
