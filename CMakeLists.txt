@@ -18,7 +18,7 @@ add_library(${PROJECT_NAME} STATIC ${SRC_FILES})
 set(LIB_VERSION 1.0)
 
 set_target_properties(${PROJECT_NAME} PROPERTIES VERSION ${LIB_VERSION})
-set_target_properties(${PROJECT_NAME} PROPERTIES OUTPUT_NAME "date_time_${LIB_VERSION}")
+set_target_properties(${PROJECT_NAME} PROPERTIES OUTPUT_NAME "date_time")
 
 if (RUN_TESTS)
     message(STATUS "Adding tests")
