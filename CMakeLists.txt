@@ -25,7 +25,7 @@ endforeach()
 set(LIB_VERSION 1.0)
 
 set_target_properties(${PROJECT_NAME} PROPERTIES VERSION ${LIB_VERSION})
-set_target_properties(${PROJECT_NAME} PROPERTIES OUTPUT_NAME "date_time")
+set_target_properties(${PROJECT_NAME} PROPERTIES OUTPUT_NAME ${PROJECT_NAME})
 
 if (RUN_TESTS)
     message(STATUS "Adding tests")
