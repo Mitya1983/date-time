@@ -15,6 +15,13 @@ prepare_source_files(SRC_FILES)
 
 add_library(${PROJECT_NAME} STATIC ${SRC_FILES})
 
+foreach(FILE ${SRC_FILES})
+    string(REGEX MATCHALL ".*cpp" IS_CPP ${FILE})
+    if (IS_CPP)
+        list(REMOVE_ITEM SRC_FILES "${FILE}")
+    endif()
+endforeach()
+
 set(LIB_VERSION 1.0)
 
 set_target_properties(${PROJECT_NAME} PROPERTIES VERSION ${LIB_VERSION})
@@ -34,10 +41,6 @@ if (DOCS)
         endif()
         generate_doxygen_config("Simple library to handle Date and Time")
         message(STATUS "Generating API documentation")
-        file(GLOB_RECURSE DOC_SOURCES
-                ${PROJECT_SOURCE_DIR}/*.hpp
-                )
-        message(STATUS ${DOC_SOURCES})
         add_custom_command(TARGET "${PROJECT_NAME}" POST_BUILD
         COMMAND ${DOXYGEN_EXECUTABLE} ${CMAKE_SOURCE_DIR}/doxygen.conf
     )
@@ -45,3 +48,9 @@ if (DOCS)
         message(WARNING "Doxygen not found. Documentation was not generated")
     endif(DOXYGEN_FOUND)
 endif(DOCS)
+
+install(TARGETS ${PROJECT_NAME}
+        CONFIGURATIONS ${CMAKE_BUILD_TYPE}
+        DESTINATION ${CMAKE_BUILD_TYPE}/lib)
+install(FILES ${SOURCES} DESTINATION include)
+
