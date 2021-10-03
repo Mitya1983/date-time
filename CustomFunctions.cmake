@@ -73,3 +73,58 @@ ENUM_VALUES_PER_LINE   = 1
                 )
     endif(NOT EXISTS ${PROJECT_SOURCE_DIR}/doxygen.conf)
 endfunction()
+
+function(target_link_external_lib TARGET EXTERNAL_LIBS_FOLDER LIB_NAME LIB_BRANCH)
+
+    if(NOT EXISTS ${EXTERNAL_LIBS_FOLDER})
+        message(STATUS "Creating ${EXTERNAL_LIBS_FOLDER}")
+        file(MAKE_DIRECTORY ${EXTERNAL_LIBS_FOLDER})
+    endif(NOT EXISTS ${EXTERNAL_LIBS_FOLDER})
+
+    if(NOT EXISTS ${EXTERNAL_LIBS_FOLDER}/${LIB_NAME})
+        MESSAGE(STATUS "Downloading ${LIB_NAME}")
+        file(MAKE_DIRECTORY ${EXTERNAL_LIBS_FOLDER}/sources_${LIB_NAME})
+        file(DOWNLOAD https://github.com/Mitya1983/${LIB_NAME}/archive/${LIB_BRANCH}.zip
+                SHOW_PROGRESS
+                ${EXTERNAL_LIBS_FOLDER}/sources_${LIB_NAME}/${LIB_NAME}.zip
+                HTTPHEADER "Authorization: token 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"
+                HTTPHEADER "Accept: application/vnd.github.v3.raw"
+                )
+        message(STATUS "Extracting ${LIB_NAME}")
+        file(ARCHIVE_EXTRACT
+                INPUT ${EXTERNAL_LIBS_FOLDER}/sources_${LIB_NAME}/${LIB_NAME}.zip
+                DESTINATION ${EXTERNAL_LIBS_FOLDER}/sources_${LIB_NAME}
+                )
+        file(MAKE_DIRECTORY ${EXTERNAL_LIBS_FOLDER}/sources_${LIB_NAME}/${LIB_NAME}-${LIB_BRANCH}/build)
+        message(STATUS "Configuring ${LIB_NAME}")
+        execute_process(
+                WORKING_DIRECTORY ${EXTERNAL_LIBS_FOLDER}/sources_${LIB_NAME}/${LIB_NAME}-${LIB_BRANCH}/build
+                COMMAND cmake -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE} ../
+        )
+        message(STATUS "Building DateTime")
+        execute_process(
+                WORKING_DIRECTORY ${EXTERNAL_LIBS_FOLDER}/sources_${LIB_NAME}/${LIB_NAME}-${LIB_BRANCH}/build
+                COMMAND cmake --build .
+        )
+        message(STATUS "Installing DateTime")
+        execute_process(
+                WORKING_DIRECTORY ${EXTERNAL_LIBS_FOLDER}/sources_${LIB_NAME}/${LIB_NAME}-${LIB_BRANCH}/build
+                COMMAND cmake --install . --prefix "${EXTERNAL_LIBS_FOLDER}/${LIB_NAME}"
+        )
+        message(STATUS "Cleaning ${LIB_NAME} sources and build files")
+        execute_process(
+                WORKING_DIRECTORY ${EXTERNAL_LIBS_FOLDER}
+                COMMAND rm -r sources_${LIB_NAME}
+        )
+    endif(NOT EXISTS ${EXTERNAL_LIBS_FOLDER}/${LIB_NAME})
+
+    target_include_directories(${TARGET} PRIVATE
+            ${EXTERNAL_LIBS_FOLDER}/${LIB_NAME}/${CMAKE_BUILD_TYPE}/inc
+            )
+    target_link_directories(${TARGET} PRIVATE
+            ${EXTERNAL_LIBS_FOLDER}/${LIB_NAME}/${CMAKE_BUILD_TYPE}/lib
+            )
+    target_link_libraries(${TARGET} PRIVATE
+            -l${LIB_NAME}
+            )
+endfunction()
