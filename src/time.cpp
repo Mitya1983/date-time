@@ -748,15 +748,19 @@ auto tristan::time::DayTime::nanoseconds() const -> uint16_t{
 auto tristan::time::DayTime::localTime(Precision precision) -> tristan::time::DayTime{
     tristan::time::DayTime l_time(precision);
     
-    auto time = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
-    
-    tm local_time = *std::localtime(&time);
-    tm utc_time = *std::gmtime(&time);
-    auto hours = static_cast<int8_t>(local_time.tm_hour - utc_time.tm_hour);
+//    auto time = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
+//
+//    tm local_time = *std::localtime(&time);
+//    tm utc_time = *std::gmtime(&time);
+//    auto hours = static_cast<int8_t>(local_time.tm_hour - utc_time.tm_hour);
+    tm tm_time{};
+    std::time_t time{0};
+    localtime_r(const_cast<const std::time_t*>(&time), &tm_time);
+    auto hours = static_cast<int8_t>(tm_time.tm_hour);
     if (hours < -14) {
         hours += 24;
     }
-    auto minutes = static_cast<int8_t>(local_time.tm_min - utc_time.tm_min);
+    auto minutes = static_cast<int8_t>(tm_time.tm_min);
     
     if (hours > 14 || hours < -14 || minutes > 59 || minutes < -59){
         throw std::range_error(
