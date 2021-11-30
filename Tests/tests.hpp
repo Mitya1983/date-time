@@ -247,7 +247,7 @@ TEST(DayTime, toString){
         test_time += '0';
     }
     test_time += std::to_string(time.seconds());
-    test_time += "+03";
+    test_time += "+02";
     
     ASSERT_EQ(s_time, test_time);
 }
