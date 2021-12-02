@@ -35,6 +35,7 @@ if (DOCS)
     FIND_PACKAGE(Doxygen REQUIRED doxygen)
     set(DOXYGEN_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/Docs)
     set(DOXYGEN_GENERATE_HTML YES)
+    set(DOXYGEN_GENERATE_LATEX NO)
     set(DOXYGEN_SORT_MEMBER_DOCS NO)
     doxygen_add_docs(
             doxygen

@@ -201,6 +201,10 @@ namespace tristan::time{
         /// \return Precision.
         [[nodiscard]] auto precision() const -> Precision{ return m_precision; }
 
+        /**
+         * \brief Returns current offset
+         * \return
+         */
         [[nodiscard]] auto offset() const -> TimeZone{ return m_offset; }
 
         /// \brief Creates Time object which represents localtime.
