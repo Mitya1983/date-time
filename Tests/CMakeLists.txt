@@ -46,10 +46,3 @@ target_link_libraries(${PROJECT_NAME}
         -lpthread
         -l${PARENT_OUTPUT_NAME}
         )
-
-add_custom_command(
-        TARGET ${PROJECT_NAME}
-        COMMENT "Run tests"
-        POST_BUILD
-        COMMAND ${PROJECT_NAME}
-)
