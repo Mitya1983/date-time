@@ -4,6 +4,7 @@
 
 using namespace tristan::time;
 using namespace tristan::date;
+using namespace tristan::date_time;
 
 TEST(Time, Default_constructor){
     Time time;
@@ -566,4 +567,18 @@ TEST(Date, IsLeapYear){
     ASSERT_FALSE(Date::isLeapYear(2021));
     
     ASSERT_TRUE(Date::isLeapYear(2024));
+}
+
+TEST(DateTime, StringConstructor){
+    std::string date = "20210101T10:10:10+02";
+
+    DateTime d_date(date);
+
+    ASSERT_EQ(d_date.date().year(), 2021);
+    ASSERT_EQ(d_date.date().month(), 1);
+    ASSERT_EQ(d_date.date().dayOfTheMonth(), 1);
+    ASSERT_EQ(d_date.time().hours(), 10);
+    ASSERT_EQ(d_date.time().minutes(), 10);
+    ASSERT_EQ(d_date.time().seconds(), 10);
+    ASSERT_EQ(d_date.time().offset(), TimeZone::EAST_2);
 }
