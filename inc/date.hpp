@@ -30,9 +30,9 @@ namespace tristan::date {
         /// \throws std::range_error.
         explicit Date(uint8_t day, uint8_t month, uint16_t year);
         /// \brief Creates Date object from std::string representing the date in [YYYYMMDD] or [YYYY-MM-DD] formats.
-        /// \param iso_date - std::string.
+        /// \param iso_date const std::string&.
         /// \throws std::invalid_argument - if time representation has invalid format.
-        /// \throws std::range_error - if time representation has invalid values.
+        /// \throws std::range_error - if date representation has invalid values.
         explicit Date(const std::string &iso_date);
         /// \brief Copy constructor.
         Date(const Date&) = default;

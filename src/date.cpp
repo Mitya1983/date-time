@@ -130,8 +130,11 @@ tristan::date::Date::Date(const std::string &iso_date)
                 day = std::stoi(iso_date.substr(8, 2));
                 break;
             }
+            default:{
+                break;
+            }
         }
-        *this = std::move(tristan::date::Date(day, month, year));
+        *this = tristan::date::Date(day, month, year);
     }
     else{
         std::string message = "tristan::date::Date::Date(const std::string &iso_date): Bad [iso_date] string format. String should contain only numbers and hyphen";
