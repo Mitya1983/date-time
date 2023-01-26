@@ -7,10 +7,10 @@
 #include <variant>
 
 /// \brief Namespace which includes time handlers
-namespace tristan::time{
+namespace tristan::time {
 
     /// \brief Enum which represents precisions used in implementation.
-    enum class Precision : uint8_t{
+    enum class Precision : uint8_t {
         MINUTES,
         SECONDS,
         MILLISECONDS,
@@ -18,7 +18,7 @@ namespace tristan::time{
         NANOSECONDS
     };
     /// \brief enum which represents possible time zone offsets.
-    enum class TimeZone : int8_t{
+    enum class TimeZone : int8_t {
         WEST_12 [[maybe_unused]] = -12,
         WEST_11 [[maybe_unused]] = -11,
         WEST_10 [[maybe_unused]] = -10,
@@ -48,7 +48,7 @@ namespace tristan::time{
 
     /// \brief Class to handle time
     /// \headerfile time.hpp
-    class Time{
+    class Time {
         friend auto operator+(const Time& l, const Time& r) -> Time;
         friend auto operator-(const Time& l, const Time& r) -> Time;
 
@@ -90,8 +90,7 @@ namespace tristan::time{
         /// \param microseconds uint16_t.
         /// \param nanoseconds uint16_t.
         /// \throws std::range_error.
-        explicit Time(uint8_t hours, uint8_t minutes, uint8_t seconds, uint16_t milliseconds, uint16_t microseconds,
-                      uint16_t nanoseconds);
+        explicit Time(uint8_t hours, uint8_t minutes, uint8_t seconds, uint16_t milliseconds, uint16_t microseconds, uint16_t nanoseconds);
         /// \brief Parses the string provided and create time object.
         /// \param time std::string representing time in following <b>formats</b>:
         /// \li [HH:MM] - Minutes precision.
@@ -129,9 +128,7 @@ namespace tristan::time{
 
         /// \brief Sets timezone offset. Only ISO hour based offsets are considered.
         /// \param offset TimeZone.
-        [[maybe_unused]] void setOffset(TimeZone offset){
-            m_offset = offset;
-        }
+        [[maybe_unused]] void setOffset(TimeZone offset) { m_offset = offset; }
 
         /// \brief Adds hours to Time object. This is a convenience function which converts hours to minutes and invokes addMinutes(uint64_t minutes) function.
         /// \param hours uint64_t.
@@ -199,13 +196,13 @@ namespace tristan::time{
 
         /// \brief Returns precision of Time object.
         /// \return Precision.
-        [[nodiscard]] auto precision() const -> Precision{ return m_precision; }
+        [[nodiscard]] auto precision() const -> Precision { return m_precision; }
 
         /**
          * \brief Returns current offset
          * \return
          */
-        [[nodiscard]] auto offset() const -> TimeZone{ return m_offset; }
+        [[nodiscard]] auto offset() const -> TimeZone { return m_offset; }
 
         /// \brief Creates Time object which represents localtime.
         /// \param precision Precision::SECONDS.
@@ -223,9 +220,9 @@ namespace tristan::time{
         [[nodiscard]] virtual auto toString(bool show_offset) const -> std::string;
 
     protected:
-
     private:
-        std::variant<std::chrono::minutes, std::chrono::seconds, std::chrono::milliseconds, std::chrono::microseconds, std::chrono::nanoseconds> m_time_since_day_start;
+        std::variant< std::chrono::minutes, std::chrono::seconds, std::chrono::milliseconds, std::chrono::microseconds, std::chrono::nanoseconds >
+            m_time_since_day_start;
 
         TimeZone m_offset;
 
@@ -258,6 +255,6 @@ namespace tristan::time{
     auto operator-(const Time& l, const Time& r) -> Time;
     /// \brief std::ostream operator.  Date::toString() is used.
     auto operator<<(std::ostream& out, const Time& time) -> std::ostream&;
-}//namespace tristan::time
+}  //namespace tristan::time
 
-#endif // TIME_HPP
+#endif  // TIME_HPP
