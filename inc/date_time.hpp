@@ -9,7 +9,10 @@ namespace tristan::date_time{
     class DateTime
     {
     public:
-        /// \brief Default constructor. Invokes default constructors for date and daytime objects.
+        /**
+         * \brief Default constructor. Invokes default constructors for date and daytime objects
+         * \param p_precision tristan::time::Precision. Default is set to tristan::time::Precision::SECONDS
+         */
         explicit DateTime(tristan::time::Precision p_precision = tristan::time::Precision::SECONDS);
         /**
          * \brief String constructor.
