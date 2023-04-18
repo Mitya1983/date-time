@@ -2,10 +2,19 @@
 #define DATE_TIME_HPP
 #include "date.hpp"
 #include "time.hpp"
-/// \brief Namespace which unites date and time in one DateTime object
+/**
+ * \brief Namespace which unites date and time in one DateTime object
+ */
 namespace tristan::date_time{
-/// \brief Class to store date and day time
-/// \headerfile date_time.hpp
+
+    class DateTime;
+
+    using Formatter = std::function<std::string(const DateTime&)>;
+
+    /**
+     * \brief Class to store date and day time
+     * \headerfile date_time.hpp
+     */
     class DateTime
     {
     public:
@@ -35,57 +44,146 @@ namespace tristan::date_time{
          * \li [YYYY-MM-DDTHH:MM:SS.mmm.mmm.nnn+(-)HH]
          */
         explicit DateTime(const std::string& date_time);
-        /// \brief Copy constructor
+        /**
+         * \brief Copy constructor
+         */
         DateTime(const DateTime&) = default;
-        /// \brief Move constructor
+        /**
+         * \brief Move constructor
+         */
         DateTime(DateTime&&) = default;
-        
-        /// \brief Copy assignment operator
-        DateTime& operator=(const DateTime&) = default;
-        /// \brief Move assignment operator
-        DateTime& operator=(DateTime&&) = default;
-        
-        /// \brief Operator equal.
+        /**
+         * \brief Copy assignment operator
+         * \return DateTime&
+         */
+        auto operator=(const DateTime&) -> DateTime& = default;
+        /**
+         * \brief Move assignment operator
+         * \return DateTime&
+         */
+        auto operator=(DateTime&&) -> DateTime& = default;
+        /**
+         * \brief Operator ==
+         * \param other const DateTime&
+         * \return bool
+         */
         auto operator==(const DateTime& other) const -> bool;
-        /// \brief Operator less then.
+        /**
+         * \brief Operator <
+         * \param other const DateTime&
+         * \return bool
+         */
         auto operator<(const DateTime& other) const -> bool;
-        /// \brief Destructor
-        virtual ~DateTime() = default;
-        /// \brief Setter with copy assignment
-        void setDate(const date::Date& date) {m_date = date;}
-        /// \brief Setter with move assignment
-        void setDate(date::Date&& date) {m_date = date;}
-        /// \brief Setter with copy assignment
-        void setTime(const time::Time& time) { m_time = time;}
-        /// \brief Setter with move assignment
-        void setTime(time::Time&& time) { m_time = time;}
-        
-        /// \brief Getter for date
-        /// \return const date::Date&
-        [[nodiscard]] auto date() const -> const date::Date& {return m_date;}
-        /// \brief Getter for time
-        /// \return const time::Time&
-        [[nodiscard]] auto time() const -> const time::Time& {return m_time;}
-        /// \brief Generates string representation of time. Returns [Date::toString][T][Time::toString]
-        /// \return std::string
-        [[nodiscard]] virtual auto toString() const -> std::string;
+        /**
+         * \brief Destructor
+         */
+        ~DateTime() = default;
+        /**
+         * \brief Copy assignment setter
+         * \param date const date::Date&
+         */
+        void setDate(const date::Date& p_date);
+        /**
+         * \brief Move assignment setter
+         * \param date date::Date&&
+         */
+        void setDate(date::Date&& p_date);
+        /**
+         * \brief Copy assignment setter
+         * \param p_time const time::Time&
+         */
+        void setTime(const time::Time& p_time);
+        /**
+         * \brief Move assignment setter
+         * \param p_time time::Time&&
+         */
+        void setTime(time::Time&& p_time);
+        /**
+         * \brief Returns date
+         * \return const date::Date&
+         */
+        [[nodiscard]] auto date() const -> const date::Date&;
+        /**
+         * \brief Returns time
+         * \return const time::Time&
+         */
+        [[nodiscard]] auto time() const -> const time::Time&;
+
+        /**
+         * \brief Sets formatter for object of class Time.
+         * Local formatter has higher priority then the global formatter. That is if local formatter is set, the latter will be implemented instead of global one.
+         * \param p_formatter std::function<std::string(const Time&)>
+         */
+        void setTimeLocalFormatter(time::Formatter&& p_formatter);
+        /**
+         * \brief Sets formatter for object of class Date.
+         * Local formatter has higher priority then the global formatter. That is if local formatter is set, the latter will be implemented instead of global one.
+         * \param p_formatter std::function<std::string(const Date&)>
+         */
+        void setDateLocalFormatter(date::Formatter&& p_formatter);
+
+        /**
+         * \brief Sets formatter for class aka for all instances.
+         * \param p_formatter std::function<std::string(const DateTime&)>
+         */
+        static void setGlobalFormatter(Formatter&& p_formatter);
+        /**
+         * \brief Sets formatter for particular object of class DateTime.
+         * Local formatter has higher priority then the global formatter. That is if local formatter is set, the latter will be implemented instead of global one.
+         * \param p_formatter std::function<std::string(const DateTime&)>
+         */
+        void setLocalFormatter(Formatter&& p_formatter);
+        /**
+         * \brief Generates string representation of time. Returns [Date::toString][T][Time::toString]
+         * \return std::string
+         */
+        [[nodiscard]] auto toString() const -> std::string;
     
     protected:
     
     private:
+        static Formatter m_formatter_global;
+        Formatter m_formatter_local;
+
         date::Date m_date;
         time::Time m_time;
     };
     
-    /// \brief Operator not equal to.
+    /**
+     * \brief Operator !=
+     * \param l const DateTime &
+     * \param r const DateTime &
+     * \return bool
+     */
     auto operator != (const DateTime &l, const DateTime &r) -> bool;
-    /// \brief Operator greater than.
+    /**
+     * \brief Operator >
+     * \param l const DateTime &
+     * \param r const DateTime &
+     * \return bool
+     */
     auto operator > (const DateTime &l, const DateTime &r) -> bool;
-    /// \brief Operator less than or equal to.
+    /**
+     * \brief Operator <=
+     * \param l const DateTime &
+     * \param r const DateTime &
+     * \return bool
+     */
     auto operator <= (const DateTime &l, const DateTime &r) -> bool;
-    /// \brief Operator greater than or equal to.
+    /**
+     * \brief Operator >=
+     * \param l const DateTime &
+     * \param r const DateTime &
+     * \return bool
+     */
     auto operator >= (const DateTime &l, const DateTime &r) -> bool;
-    /// \brief std::ostream operator.  DateTime::toString() is used.
+    /**
+     * \brief Operator <<
+     * \param out std::ostream&
+     * \param date const DateTime&
+     * \return std::ostream&
+     * \note Method toString() is used here
+     */
     auto operator<<(std::ostream &out, const DateTime &dt) -> std::ostream&;
     
 }// namespace tristan::date_time

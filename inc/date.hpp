@@ -154,13 +154,13 @@ namespace tristan::date {
         [[nodiscard]] static auto isLeapYear(uint16_t year) -> bool;
         /**
          * \brief Sets formatter for class aka for all instances.
-         * \param p_formatter std::function<std::string(const Time&)>
+         * \param p_formatter std::function<std::string(const Date&)>
          */
         static void setGlobalFormatter(Formatter&& p_formatter);
         /**
          * \brief Sets formatter for particular object of class Time.
          * Local formatter has higher priority then the global formatter. That is if local formatter is set, the latter will be implemented instead of global one.
-         * \param p_formatter std::function<std::string(const Time&)>
+         * \param p_formatter std::function<std::string(const Date&)>
          */
         void setLocalFormatter(Formatter&& p_formatter);
 

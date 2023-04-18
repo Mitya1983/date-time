@@ -848,10 +848,10 @@ void tristan::time::Time::setGlobalFormatter(tristan::time::Formatter&& p_format
 void tristan::time::Time::setLocalFormatter(tristan::time::Formatter&& p_formatter) { m_formatter_local = p_formatter; }
 
 std::string tristan::time::Time::toString() const {
-    if (not m_formatter_global){
+    if (not m_formatter_global) {
         m_formatter_global = g_default_global_formatter;
     }
-    if (m_formatter_local){
+    if (m_formatter_local) {
         return m_formatter_local(*this);
     }
     return m_formatter_global(*this);

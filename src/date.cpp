@@ -3,7 +3,6 @@
 
 namespace {
 
-
     inline constexpr uint16_t g_non_leap_year_days{365};
     inline constexpr uint16_t g_leap_year_days{366};
     inline constexpr uint16_t g_days_since_1900_to_1970{25567};
@@ -38,7 +37,7 @@ namespace {
         DECEMBER
     };
 
-    auto g_default_global_formatter = [](const tristan::date::Date& p_date) -> std::string{
+    auto g_default_global_formatter = [](const tristan::date::Date& p_date) -> std::string {
         std::string result;
         result += std::to_string(p_date.year());
         result += '-';
@@ -364,10 +363,10 @@ void tristan::date::Date::setGlobalFormatter(tristan::date::Formatter&& p_format
 void tristan::date::Date::setLocalFormatter(tristan::date::Formatter&& p_formatter) { m_formatter_local = p_formatter; }
 
 std::string tristan::date::Date::toString() const {
-    if (not m_formatter_global){
+    if (not m_formatter_global) {
         m_formatter_global = g_default_global_formatter;
     }
-    if (m_formatter_local){
+    if (m_formatter_local) {
         return m_formatter_local(*this);
     }
     return m_formatter_global(*this);
