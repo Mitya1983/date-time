@@ -52,7 +52,7 @@ auto tristan::date_time::DateTime::toString() const -> std::string {
     if (m_formatter_local){
         return m_formatter_local(*this);
     }
-    return m_formatter_global(*this)
+    return m_formatter_global(*this);
 }
 
 auto tristan::date_time::DateTime::operator==(const tristan::date_time::DateTime& other) const -> bool {
