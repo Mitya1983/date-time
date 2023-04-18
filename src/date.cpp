@@ -358,9 +358,9 @@ bool tristan::date::Date::isLeapYear(uint16_t year) {
     }
 }
 
-void tristan::date::Date::setGlobalFormatter(tristan::date::Formatter&& p_formatter) { m_formatter_global = p_formatter; }
+void tristan::date::Date::setGlobalFormatter(tristan::date::Formatter&& p_formatter) { m_formatter_global = std::move(p_formatter); }
 
-void tristan::date::Date::setLocalFormatter(tristan::date::Formatter&& p_formatter) { m_formatter_local = p_formatter; }
+void tristan::date::Date::setLocalFormatter(tristan::date::Formatter&& p_formatter) { m_formatter_local = std::move(p_formatter); }
 
 std::string tristan::date::Date::toString() const {
     if (not m_formatter_global) {

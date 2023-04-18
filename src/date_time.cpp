@@ -41,9 +41,9 @@ void tristan::date_time::DateTime::setTimeLocalFormatter(tristan::time::Formatte
 
 void tristan::date_time::DateTime::setDateLocalFormatter(tristan::date::Formatter&& p_formatter) { m_date.setLocalFormatter(std::move(p_formatter)); }
 
-void tristan::date_time::DateTime::setLocalFormatter(tristan::date_time::Formatter&& p_formatter) { }
+void tristan::date_time::DateTime::setLocalFormatter(tristan::date_time::Formatter&& p_formatter) { m_formatter_local = std::move(p_formatter); }
 
-void tristan::date_time::DateTime::setGlobalFormatter(tristan::date_time::Formatter&& p_formatter) { }
+void tristan::date_time::DateTime::setGlobalFormatter(tristan::date_time::Formatter&& p_formatter) { m_formatter_global = std::move(p_formatter); }
 
 auto tristan::date_time::DateTime::toString() const -> std::string {
     if (not m_formatter_global){

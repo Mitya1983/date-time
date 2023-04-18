@@ -843,9 +843,9 @@ auto tristan::time::Time::localTime(Precision precision) -> tristan::time::Time 
     return l_time;
 }
 
-void tristan::time::Time::setGlobalFormatter(tristan::time::Formatter&& p_formatter) { m_formatter_global = p_formatter; }
+void tristan::time::Time::setGlobalFormatter(tristan::time::Formatter&& p_formatter) { m_formatter_global = std::move(p_formatter); }
 
-void tristan::time::Time::setLocalFormatter(tristan::time::Formatter&& p_formatter) { m_formatter_local = p_formatter; }
+void tristan::time::Time::setLocalFormatter(tristan::time::Formatter&& p_formatter) { m_formatter_local = std::move(p_formatter); }
 
 std::string tristan::time::Time::toString() const {
     if (not m_formatter_global) {
