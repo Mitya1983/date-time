@@ -1,8 +1,8 @@
 #include "date_time.hpp"
 
-tristan::date_time::DateTime::DateTime() :
+tristan::date_time::DateTime::DateTime(tristan::time::Precision p_precision) :
     m_date(),
-    m_time() { }
+    m_time(p_precision) { }
 
 tristan::date_time::DateTime::DateTime(const std::string& date) {
     auto delimiter_pos = date.find('T');
