@@ -9,8 +9,11 @@ namespace tristan::date_time{
     class DateTime
     {
     public:
-        /// \brief Default constructor. Invokes default constructors for date and daytime objects.
-        DateTime();
+        /**
+         * \brief Default constructor. Invokes default constructors for date and daytime objects
+         * \param p_precision tristan::time::Precision. Default is set to tristan::time::Precision::SECONDS
+         */
+        explicit DateTime(tristan::time::Precision p_precision = tristan::time::Precision::SECONDS);
         /**
          * \brief String constructor.
          * \param date_time Date and time string representation
@@ -47,7 +50,7 @@ namespace tristan::date_time{
         /// \brief Operator less then.
         auto operator<(const DateTime& other) const -> bool;
         /// \brief Destructor
-        ~DateTime() = default;
+        virtual ~DateTime() = default;
         /// \brief Setter with copy assignment
         void setDate(const date::Date& date) {m_date = date;}
         /// \brief Setter with move assignment
