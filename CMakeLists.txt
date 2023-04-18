@@ -55,7 +55,7 @@ file(GLOB_RECURSE SRC_FILES CONFIGURE_DEPENDS
         src/*.cpp
         )
 
-set(LIB_VERSION 0.1)
+set(LIB_VERSION 0.1.1)
 
 if ("${CMAKE_INSTALL_PREFIX}" STREQUAL "")
     message(STATUS "CMAKE_INSTALL_PREFIX is not set. $ENV{HOME} directory will be used")
@@ -141,7 +141,7 @@ install(FILES
         DESTINATION ${INCLUDE_INSTALL_DIR})
 
 set(CPACK_GENERATOR "DEB")
-set(CPACK_PACKAGE_NAME "Log")
+set(CPACK_PACKAGE_NAME "DateTime")
 set(CPACK_DEBIAN_PACKAGE_MAINTAINER "tristan.it@outlook.com")
 include(CPack)
 
