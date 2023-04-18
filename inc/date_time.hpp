@@ -50,7 +50,7 @@ namespace tristan::date_time{
         /// \brief Operator less then.
         auto operator<(const DateTime& other) const -> bool;
         /// \brief Destructor
-        ~DateTime() = default;
+        virtual ~DateTime() = default;
         /// \brief Setter with copy assignment
         void setDate(const date::Date& date) {m_date = date;}
         /// \brief Setter with move assignment
