@@ -55,7 +55,7 @@ file(GLOB_RECURSE SRC_FILES CONFIGURE_DEPENDS
         src/*.cpp
         )
 
-set(LIB_VERSION 0.1.1)
+set(LIB_VERSION 1.0.0)
 
 if ("${CMAKE_INSTALL_PREFIX}" STREQUAL "")
     message(STATUS "CMAKE_INSTALL_PREFIX is not set. $ENV{HOME} directory will be used")
