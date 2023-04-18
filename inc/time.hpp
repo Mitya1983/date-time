@@ -410,7 +410,7 @@ namespace tristan::time {
      * \param out std::ostream&
      * \param time const Time&
      * \return std::ostream&
-     * \note Method toString is used here
+     * \note Method toString() is used here
      */
     auto operator<<(std::ostream& out, const Time& time) -> std::ostream&;
 }  //namespace tristan::time

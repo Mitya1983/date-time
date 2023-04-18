@@ -26,7 +26,7 @@ namespace {
     const uint64_t nanoseconds_in_microsecond = 1000;
     using Days = std::chrono::duration< int64_t, std::ratio_divide< std::ratio< seconds_in_day >, std::chrono::seconds::period > >;
 
-    auto default_global_formatter = [](const tristan::time::Time& p_time) -> std::string {
+    auto g_default_global_formatter = [](const tristan::time::Time& p_time) -> std::string {
         std::string l_time;
 
         auto hours = p_time.hours();
@@ -286,26 +286,26 @@ tristan::time::Time::Time(const std::string& time) :
     }
 }
 
-auto tristan::time::Time::operator==(const tristan::time::Time& r) const -> bool {
+auto tristan::time::Time::operator==(const tristan::time::Time& other) const -> bool {
 
-    if (m_precision != r.m_precision) {
+    if (m_precision != other.m_precision) {
         return false;
     }
 
-    return m_time_since_day_start == r.m_time_since_day_start;
+    return m_time_since_day_start == other.m_time_since_day_start;
 }
 
-auto tristan::time::Time::operator<(const tristan::time::Time& r) const -> bool {
-    if (m_precision != r.m_precision) {
+auto tristan::time::Time::operator<(const tristan::time::Time& other) const -> bool {
+    if (m_precision != other.m_precision) {
         return false;
     }
 
-    return m_time_since_day_start < r.m_time_since_day_start;
+    return m_time_since_day_start < other.m_time_since_day_start;
 }
 
-void tristan::time::Time::operator+=(const tristan::time::Time& r) { *this = *this + r; }
+void tristan::time::Time::operator+=(const tristan::time::Time& other) { *this = *this + other; }
 
-void tristan::time::Time::operator-=(const tristan::time::Time& r) { *this = *this - r; }
+void tristan::time::Time::operator-=(const tristan::time::Time& other) { *this = *this - other; }
 
 void tristan::time::Time::addHours(uint64_t hours) {
 
@@ -849,7 +849,7 @@ void tristan::time::Time::setLocalFormatter(tristan::time::Formatter&& p_formatt
 
 std::string tristan::time::Time::toString() const {
     if (not m_formatter_global){
-        m_formatter_global = default_global_formatter;
+        m_formatter_global = g_default_global_formatter;
     }
     if (m_formatter_local){
         return m_formatter_local(*this);
