@@ -2,19 +2,25 @@
 #include <algorithm>
 
 namespace {
+
+    inline constexpr uint16_t g_non_leap_year_days{365};
+    inline constexpr uint16_t g_leap_year_days{366};
+    inline constexpr uint16_t g_days_since_1900_to_1970{25567};
+    inline constexpr uint16_t g_start_year = 1900;
+
     using Years = std::chrono::duration< int64_t, std::ratio_divide< std::ratio< 31536000 >, std::chrono::seconds::period > >;
 
-    const uint8_t g_february_start_day = 32;
-    const std::pair< uint8_t, uint8_t > g_march_start_day = {60, 61};
-    const std::pair< uint8_t, uint8_t > g_april_start_day = {91, 92};
-    const std::pair< uint8_t, uint8_t > g_may_start_day = {121, 122};
-    const std::pair< uint8_t, uint8_t > g_june_start_day = {152, 153};
-    const std::pair< uint8_t, uint8_t > g_july_start_day = {182, 183};
-    const std::pair< uint8_t, uint8_t > g_august_start_day = {213, 214};
-    const std::pair< uint8_t, uint8_t > g_september_start_day = {244, 245};
-    const std::pair< uint16_t, uint16_t > g_october_start_day = {274, 275};
-    const std::pair< uint16_t, uint16_t > g_november_start_day = {305, 306};
-    const std::pair< uint16_t, uint16_t > g_december_start_day = {335, 336};
+    inline constexpr uint8_t g_february_start_day = 32;
+    inline constexpr std::pair< uint8_t, uint8_t > g_march_start_day = {60, 61};
+    inline constexpr std::pair< uint8_t, uint8_t > g_april_start_day = {91, 92};
+    inline constexpr std::pair< uint8_t, uint8_t > g_may_start_day = {121, 122};
+    inline constexpr std::pair< uint8_t, uint8_t > g_june_start_day = {152, 153};
+    inline constexpr std::pair< uint8_t, uint8_t > g_july_start_day = {182, 183};
+    inline constexpr std::pair< uint8_t, uint8_t > g_august_start_day = {213, 214};
+    inline constexpr std::pair< uint8_t, uint8_t > g_september_start_day = {244, 245};
+    inline constexpr std::pair< uint16_t, uint16_t > g_october_start_day = {274, 275};
+    inline constexpr std::pair< uint16_t, uint16_t > g_november_start_day = {305, 306};
+    inline constexpr std::pair< uint16_t, uint16_t > g_december_start_day = {335, 336};
 
     enum Months : uint8_t {
         JANUARY = 1,
@@ -30,18 +36,44 @@ namespace {
         NOVEMBER,
         DECEMBER
     };
+
+    auto g_default_global_formatter = [](const tristan::date::Date& p_date) -> std::string {
+        std::string result;
+        result += std::to_string(p_date.year());
+        result += '-';
+        uint8_t month = p_date.month();
+        if (month < 10)
+            result += '0';
+        result += std::to_string(month);
+        result += '-';
+        uint8_t day = p_date.dayOfTheMonth();
+        if (day < 10)
+            result += '0';
+        result += std::to_string(day);
+
+        return result;
+    };
 }  //End of unnamed namespace
 
 tristan::date::Date::Date() :
-    m_days_since_1900(Days{tristan::date::days_since_1900_to_1970}) {
+    m_days_since_1900(Days{g_days_since_1900_to_1970}) {
     auto time_since_epoch
         = std::chrono::duration_cast< std::chrono::seconds >(std::chrono::system_clock::duration(std::chrono::system_clock::now().time_since_epoch()));
     m_days_since_1900 += std::chrono::duration_cast< Days >(time_since_epoch);
     m_days_since_1900 += Days{1};
 }
 
+tristan::date::Date::Date(tristan::TimeZone p_time_zone) :
+    m_days_since_1900(Days{g_days_since_1900_to_1970}) {
+    auto time_since_epoch
+        = std::chrono::duration_cast< std::chrono::seconds >(std::chrono::system_clock::duration(std::chrono::system_clock::now().time_since_epoch()));
+    time_since_epoch += std::chrono::duration_cast< std::chrono::seconds >(std::chrono::hours(static_cast< int8_t >(p_time_zone)));
+    m_days_since_1900 += std::chrono::duration_cast< Days >(time_since_epoch);
+    m_days_since_1900 += Days{1};
+}
+
 tristan::date::Date::Date(uint8_t day, uint8_t month, uint16_t year) {
-    if (year < start_year) {
+    if (year < g_start_year) {
         std::string message = "tristan::date::Date(int year, int month, int day): bad [year] value was provided - " + std::to_string(day)
                               + " the value between 1900 and 2155 is expected";
         throw std::range_error(message);
@@ -67,8 +99,8 @@ tristan::date::Date::Date(uint8_t day, uint8_t month, uint16_t year) {
             throw std::range_error(message);
         }
     }
-    m_days_since_1900 = std::chrono::duration_cast< Days >(Years{year - tristan::date::start_year});
-    m_days_since_1900 += Days{static_cast< uint8_t >(_calculateCurrentYear() * 365 / (tristan::date::non_leap_year_days * 4))};
+    m_days_since_1900 = std::chrono::duration_cast< Days >(Years{year - g_start_year});
+    m_days_since_1900 += Days{static_cast< uint8_t >(_calculateCurrentYear() * 365 / (g_non_leap_year_days * 4))};
     //    if (tristan::date::Date::isLeapYear(year)){
     //        m_days_since_1900 -= tristan::date::Days{1};
     //    }
@@ -78,7 +110,7 @@ tristan::date::Date::Date(uint8_t day, uint8_t month, uint16_t year) {
         } else if (l_month == 4 || l_month == 6 || l_month == 9 || l_month == 11) {
             m_days_since_1900 += Days{30};
         } else {
-            bool leap_year = isLeapYear(std::chrono::duration_cast< Years >(m_days_since_1900).count() + tristan::date::start_year);
+            bool leap_year = isLeapYear(std::chrono::duration_cast< Years >(m_days_since_1900).count() + g_start_year);
             if (!leap_year) {
                 m_days_since_1900 += Days{28};
             } else {
@@ -135,9 +167,9 @@ tristan::date::Date::Date(const std::string& iso_date) {
     }
 }
 
-auto tristan::date::Date::operator==(const tristan::date::Date& r) const -> bool { return m_days_since_1900 == r.m_days_since_1900; }
+auto tristan::date::Date::operator==(const tristan::date::Date& other) const -> bool { return m_days_since_1900 == other.m_days_since_1900; }
 
-auto tristan::date::Date::operator<(const tristan::date::Date& r) const -> bool { return m_days_since_1900 < r.m_days_since_1900; }
+auto tristan::date::Date::operator<(const tristan::date::Date& other) const -> bool { return m_days_since_1900 < other.m_days_since_1900; }
 
 void tristan::date::Date::addDays(uint64_t days) {
     if (days == 0) {
@@ -170,7 +202,7 @@ void tristan::date::Date::addMonths(uint64_t months) {
                    || (current_month == Months::OCTOBER && current_date == 31)) {
             days_to_add += 30;
         } else if (current_month == JANUARY && current_date >= 29) {
-            bool leap_year = tristan::date::Date::isLeapYear(_calculateCurrentYear() + start_year);
+            bool leap_year = tristan::date::Date::isLeapYear(_calculateCurrentYear() + g_start_year);
             if (!leap_year) {
                 switch (current_date) {
                     case 29: {
@@ -220,7 +252,7 @@ void tristan::date::Date::addYears(uint64_t years) {
     }
     uint64_t days_to_add = 0;
     uint16_t days_in_year = _calculateDaysInYear();
-    for (uint64_t year = _calculateCurrentYear() + tristan::date::start_year, end_year = year + years; year < end_year; ++year) {
+    for (uint64_t year = _calculateCurrentYear() + g_start_year, end_year = year + years; year < end_year; ++year) {
         if (days_in_year < 60) {
             if (tristan::date::Date::isLeapYear(year)) {
                 days_to_add += 366;
@@ -270,7 +302,7 @@ void tristan::date::Date::subtractMonths(uint64_t months) {
             if (current_date > 28) {
                 days_to_subtract += current_date;
             } else {
-                bool is_leap_year = tristan::date::Date::isLeapYear(_calculateCurrentYear() + start_year);
+                bool is_leap_year = tristan::date::Date::isLeapYear(_calculateCurrentYear() + g_start_year);
                 if (!is_leap_year) {
                     days_to_subtract += 28;
                 } else {
@@ -289,21 +321,21 @@ void tristan::date::Date::subtractYears(uint64_t years) {
     }
     uint64_t days_to_subtract = 0;
     uint16_t days_in_year = _calculateDaysInYear();
-    for (uint64_t year = _calculateCurrentYear() + tristan::date::start_year, end_year = year - years; year > end_year; --year) {
+    for (uint64_t year = _calculateCurrentYear() + g_start_year, end_year = year - years; year > end_year; --year) {
         if (tristan::date::Date::isLeapYear(year)) {
             if (days_in_year < 60) {
-                days_to_subtract += tristan::date::non_leap_year_days;
+                days_to_subtract += g_non_leap_year_days;
             } else {
-                days_to_subtract += tristan::date::leap_year_days;
+                days_to_subtract += g_leap_year_days;
             }
         } else if (tristan::date::Date::isLeapYear(year - 1)) {
             if (days_in_year <= 59) {
-                days_to_subtract += tristan::date::leap_year_days;
+                days_to_subtract += g_leap_year_days;
             } else {
-                days_to_subtract += tristan::date::non_leap_year_days;
+                days_to_subtract += g_non_leap_year_days;
             }
         } else {
-            days_to_subtract += tristan::date::non_leap_year_days;
+            days_to_subtract += g_non_leap_year_days;
         }
     }
     this->subtractDays(days_to_subtract);
@@ -315,26 +347,9 @@ auto tristan::date::Date::dayOfTheWeek() const -> uint8_t { return (m_days_since
 
 auto tristan::date::Date::month() const -> uint8_t { return _calculateCurrentMonth(); }
 
-auto tristan::date::Date::year() const -> uint16_t { return _calculateCurrentYear() + tristan::date::start_year; }
+auto tristan::date::Date::year() const -> uint16_t { return _calculateCurrentYear() + g_start_year; }
 
 auto tristan::date::Date::isWeekend() const -> bool { return this->dayOfTheWeek() > 5; }
-
-std::string tristan::date::Date::toString() const {
-    std::string result;
-    result += std::to_string(_calculateCurrentYear() + tristan::date::start_year);
-    result += '-';
-    uint8_t month = _calculateCurrentMonth();
-    if (month < 10)
-        result += '0';
-    result += std::to_string(month);
-    result += '-';
-    uint8_t day = _calculateDayOfTheMonth();
-    if (day < 10)
-        result += '0';
-    result += std::to_string(day);
-
-    return result;
-}
 
 bool tristan::date::Date::isLeapYear(uint16_t year) {
     if (year % 4 == 0) {
@@ -352,9 +367,29 @@ bool tristan::date::Date::isLeapYear(uint16_t year) {
     }
 }
 
+void tristan::date::Date::setGlobalFormatter(tristan::date::Formatter&& p_formatter) { m_formatter_global = std::move(p_formatter); }
+
+void tristan::date::Date::setLocalFormatter(tristan::date::Formatter&& p_formatter) { m_formatter_local = std::move(p_formatter); }
+
+std::string tristan::date::Date::toString() const {
+    if (not m_formatter_global) {
+        tristan::date::Date::m_formatter_global = g_default_global_formatter;
+    }
+    if (m_formatter_local) {
+        return m_formatter_local(*this);
+    }
+    return m_formatter_global(*this);
+}
+
+auto tristan::date::Date::localDate() -> tristan::date::Date {
+    auto tm = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
+    auto offset = std::localtime(&tm)->tm_gmtoff;
+    return tristan::date::Date(static_cast< tristan::TimeZone >(offset / 3600));
+}
+
 auto tristan::date::Date::_calculateCurrentMonth() const -> uint8_t {
     uint16_t days_since_year_start = _calculateDaysInYear();
-    bool leap_year = tristan::date::Date::isLeapYear(_calculateCurrentYear() + tristan::date::start_year);
+    bool leap_year = tristan::date::Date::isLeapYear(_calculateCurrentYear() + g_start_year);
     if ((!leap_year && days_since_year_start >= g_december_start_day.first) || (leap_year && days_since_year_start >= g_december_start_day.second)) {
         return Months::DECEMBER;
     } else if ((!leap_year && days_since_year_start >= g_november_start_day.first) || (leap_year && days_since_year_start >= g_november_start_day.second)) {
@@ -383,9 +418,9 @@ auto tristan::date::Date::_calculateCurrentMonth() const -> uint8_t {
 }
 
 auto tristan::date::Date::_calculateCurrentYear() const -> uint8_t {
-    auto number_of_leap_days = static_cast< uint8_t >(m_days_since_1900.count() / (tristan::date::non_leap_year_days * 4));
+    auto number_of_leap_days = static_cast< uint8_t >(m_days_since_1900.count() / (g_non_leap_year_days * 4));
 
-    return (m_days_since_1900.count() - number_of_leap_days) / tristan::date::non_leap_year_days;
+    return (m_days_since_1900.count() - number_of_leap_days) / g_non_leap_year_days;
 }
 
 auto tristan::date::Date::_calculateDayOfTheMonth() const -> uint8_t {
@@ -397,7 +432,7 @@ auto tristan::date::Date::_calculateDayOfTheMonth() const -> uint8_t {
         } else if (month == 4 || month == 6 || month == 9 || month == 11) {
             days_in_month -= 30;
         } else {
-            bool leap_year = isLeapYear(_calculateCurrentYear() + tristan::date::start_year);
+            bool leap_year = isLeapYear(_calculateCurrentYear() + g_start_year);
             if (!leap_year) {
                 days_in_month -= 28;
             } else {
@@ -409,12 +444,12 @@ auto tristan::date::Date::_calculateDayOfTheMonth() const -> uint8_t {
 }
 
 auto tristan::date::Date::_calculateDaysInYear() const -> uint16_t {
-    auto number_of_leap_days = static_cast< uint8_t >(m_days_since_1900.count() / (tristan::date::non_leap_year_days * 4));
-    if (tristan::date::Date::isLeapYear(_calculateCurrentYear() + start_year)) {
+    auto number_of_leap_days = static_cast< uint8_t >(m_days_since_1900.count() / (g_non_leap_year_days * 4));
+    if (tristan::date::Date::isLeapYear(_calculateCurrentYear() + g_start_year)) {
         number_of_leap_days -= 1;
     }
     uint8_t years = _calculateCurrentYear();
-    return static_cast< uint16_t >(m_days_since_1900.count() - years * tristan::date::non_leap_year_days - number_of_leap_days);
+    return static_cast< uint16_t >(m_days_since_1900.count() - years * g_non_leap_year_days - number_of_leap_days);
 }
 
 bool tristan::date::operator!=(const tristan::date::Date& l, const tristan::date::Date& r) { return !(l == r); }
