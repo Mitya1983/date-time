@@ -59,6 +59,14 @@ auto tristan::date_time::DateTime::toString() const -> std::string {
     return m_formatter_global(*this);
 }
 
+auto tristan::date_time::DateTime::localDateTime() -> tristan::date_time::DateTime {
+    tristan::date_time::DateTime l_date_time;
+    l_date_time.setDate(tristan::date::Date::localDate());
+    l_date_time.setTime(tristan::time::Time::localTime());
+
+    return l_date_time;
+}
+
 auto tristan::date_time::DateTime::operator==(const tristan::date_time::DateTime& other) const -> bool {
     return m_date == other.m_date && m_time == other.m_time;
 }

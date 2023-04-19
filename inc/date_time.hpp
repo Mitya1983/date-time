@@ -146,6 +146,12 @@ namespace tristan::date_time {
          */
         [[nodiscard]] auto toString() const -> std::string;
 
+        /**
+         * \brief Creates Date object which represents local date.
+         * \return DateTime.
+         */
+        [[nodiscard]] static auto localDateTime() -> DateTime;
+
     protected:
     private:
         inline static Formatter m_formatter_global;
