@@ -85,14 +85,14 @@ namespace {
             }
             l_time += std::to_string(nanoseconds);
         }
-        if (p_time.offset() >= tristan::time::TimeZone::UTC) {
+        if (p_time.offset() >= tristan::TimeZone::UTC) {
             l_time += '+';
-            if (p_time.offset() < tristan::time::TimeZone::EAST_10) {
+            if (p_time.offset() < tristan::TimeZone::EAST_10) {
                 l_time += '0';
             }
         }
         l_time += std::to_string(static_cast< int8_t >(p_time.offset()));
-        if (p_time.offset() > tristan::time::TimeZone::WEST_10 && p_time.offset() < tristan::time::TimeZone::UTC) {
+        if (p_time.offset() > tristan::TimeZone::WEST_10 && p_time.offset() < tristan::TimeZone::UTC) {
             l_time += '0';
         }
         return l_time;
@@ -101,7 +101,7 @@ namespace {
 }  // End of unnamed namespace
 
 tristan::time::Time::Time(tristan::time::Precision precision) :
-    m_offset{tristan::time::TimeZone::UTC},
+    m_offset{tristan::TimeZone::UTC},
     m_precision{precision} {
 
     auto time_point = std::chrono::system_clock::duration(std::chrono::system_clock::now().time_since_epoch());
@@ -136,8 +136,44 @@ tristan::time::Time::Time(tristan::time::Precision precision) :
     }
 }
 
+tristan::time::Time::Time(tristan::TimeZone p_time_zone, tristan::time::Precision p_precision) :
+    m_offset(p_time_zone),
+    m_precision(p_precision) {
+    auto time_point = std::chrono::system_clock::duration(std::chrono::system_clock::now().time_since_epoch());
+    time_point += std::chrono::duration_cast< std::chrono::system_clock::duration >(std::chrono::hours(static_cast< int8_t >(m_offset)));
+    auto days = std::chrono::duration_cast< Days >(time_point);
+
+    switch (m_precision) {
+        case tristan::time::Precision::MINUTES: {
+            m_time_since_day_start
+                = std::chrono::duration_cast< std::chrono::minutes >(time_point - std::chrono::duration_cast< std::chrono::system_clock::duration >(days));
+            break;
+        }
+        case tristan::time::Precision::SECONDS: {
+            m_time_since_day_start
+                = std::chrono::duration_cast< std::chrono::seconds >(time_point - std::chrono::duration_cast< std::chrono::system_clock::duration >(days));
+            break;
+        }
+        case tristan::time::Precision::MILLISECONDS: {
+            m_time_since_day_start
+                = std::chrono::duration_cast< std::chrono::milliseconds >(time_point - std::chrono::duration_cast< std::chrono::system_clock::duration >(days));
+            break;
+        }
+        case tristan::time::Precision::MICROSECONDS: {
+            m_time_since_day_start
+                = std::chrono::duration_cast< std::chrono::microseconds >(time_point - std::chrono::duration_cast< std::chrono::system_clock::duration >(days));
+            break;
+        }
+        case tristan::time::Precision::NANOSECONDS: {
+            m_time_since_day_start
+                = std::chrono::duration_cast< std::chrono::nanoseconds >(time_point - std::chrono::duration_cast< std::chrono::system_clock::duration >(days));
+            break;
+        }
+    }
+}
+
 tristan::time::Time::Time(uint8_t hours, uint8_t minutes) noexcept(false) :
-    m_offset{tristan::time::TimeZone::UTC},
+    m_offset{tristan::TimeZone::UTC},
     m_precision{tristan::time::Precision::MINUTES} {
     if (hours > 23) {
         std::string message = "tristan::time::Time(int hours, int minutes, int "
@@ -211,15 +247,15 @@ tristan::time::Time::Time(uint8_t hours, uint8_t minutes, uint8_t seconds, uint1
 }
 
 tristan::time::Time::Time(const std::string& time) :
-    m_offset{tristan::time::TimeZone::UTC},
+    m_offset{tristan::TimeZone::UTC},
     m_precision(tristan::time::Precision::MINUTES) {
 
     auto l_time = time;
 
     auto offset_pos = l_time.find_first_of("-+");
-    auto offset = tristan::time::TimeZone::UTC;
+    auto offset = tristan::TimeZone::UTC;
     if (offset_pos != std::string::npos && offset_pos == l_time.size() - 3) {
-        offset = static_cast< tristan::time::TimeZone >(std::stoi(l_time.substr(offset_pos)));
+        offset = static_cast< tristan::TimeZone >(std::stoi(l_time.substr(offset_pos)));
         l_time.erase(offset_pos);
     }
     if (!checkTimeFormat(l_time)) {
@@ -810,37 +846,11 @@ auto tristan::time::Time::nanoseconds() const -> uint16_t {
 }
 
 auto tristan::time::Time::localTime(Precision precision) -> tristan::time::Time {
-    tristan::time::Time l_time(precision);
 
-    auto time = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
+    auto tm = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
+    auto offset = std::localtime(&tm)->tm_gmtoff;
 
-    tm local_time = *std::localtime(&time);
-    tm utc_time = *std::gmtime(&time);
-    auto hours = static_cast< int8_t >(local_time.tm_hour - utc_time.tm_hour);
-    if (hours < -14) {
-        hours += 24;
-    }
-    auto minutes = static_cast< int8_t >(local_time.tm_min - utc_time.tm_min);
-
-    if (hours > 14 || hours < -14 || minutes > 59 || minutes < -59) {
-        throw std::range_error("tristan::time::Time::localTime(Precision precision): Timezone value "
-                               "is out of possible range");
-    }
-
-    if (hours >= 0) {
-        l_time.addHours(hours);
-    } else {
-        l_time.subtractHours(std::abs(hours));
-    }
-    if (minutes >= 0) {
-        l_time.addMinutes(minutes);
-    } else {
-        l_time.subtractMinutes(std::abs(minutes));
-    }
-
-    l_time.m_offset = static_cast< tristan::time::TimeZone >(hours);
-
-    return l_time;
+    return tristan::time::Time(static_cast< tristan::TimeZone >(offset / 3600), precision);
 }
 
 void tristan::time::Time::setGlobalFormatter(tristan::time::Formatter&& p_formatter) { m_formatter_global = std::move(p_formatter); }
@@ -849,7 +859,7 @@ void tristan::time::Time::setLocalFormatter(tristan::time::Formatter&& p_formatt
 
 std::string tristan::time::Time::toString() const {
     if (not m_formatter_global) {
-        m_formatter_global = g_default_global_formatter;
+        tristan::time::Time::m_formatter_global = g_default_global_formatter;
     }
     if (m_formatter_local) {
         return m_formatter_local(*this);
