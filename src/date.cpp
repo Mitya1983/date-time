@@ -63,6 +63,15 @@ tristan::date::Date::Date() :
     m_days_since_1900 += Days{1};
 }
 
+tristan::date::Date::Date(tristan::TimeZone p_time_zone) :
+    m_days_since_1900(Days{g_days_since_1900_to_1970}) {
+    auto time_since_epoch
+        = std::chrono::duration_cast< std::chrono::seconds >(std::chrono::system_clock::duration(std::chrono::system_clock::now().time_since_epoch()));
+    time_since_epoch += std::chrono::duration_cast< std::chrono::seconds >(std::chrono::hours(static_cast< int8_t >(p_time_zone)));
+    m_days_since_1900 += std::chrono::duration_cast< Days >(time_since_epoch);
+    m_days_since_1900 += Days{1};
+}
+
 tristan::date::Date::Date(uint8_t day, uint8_t month, uint16_t year) {
     if (year < g_start_year) {
         std::string message = "tristan::date::Date(int year, int month, int day): bad [year] value was provided - " + std::to_string(day)
@@ -364,12 +373,18 @@ void tristan::date::Date::setLocalFormatter(tristan::date::Formatter&& p_formatt
 
 std::string tristan::date::Date::toString() const {
     if (not m_formatter_global) {
-        m_formatter_global = g_default_global_formatter;
+        tristan::date::Date::m_formatter_global = g_default_global_formatter;
     }
     if (m_formatter_local) {
         return m_formatter_local(*this);
     }
     return m_formatter_global(*this);
+}
+
+auto tristan::date::Date::localDate() -> tristan::date::Date {
+    auto tm = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
+    auto offset = std::localtime(&tm)->tm_gmtoff;
+    return tristan::date::Date(static_cast< tristan::TimeZone >(offset / 3600));
 }
 
 auto tristan::date::Date::_calculateCurrentMonth() const -> uint8_t {

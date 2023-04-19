@@ -1,5 +1,8 @@
 ﻿#ifndef DATE_HPP
 #define DATE_HPP
+
+#include "time_zones.hpp"
+
 #include <chrono>
 #include <string>
 #include <ostream>
@@ -28,9 +31,16 @@ namespace tristan::date {
     public:
         /**
          * \brief Default constructor.
-         * Creates Date object which represent current system date
+         * Creates Date object which represent current date based on UTC time zone
          */
         Date();
+        /**
+         * \overload
+         * \brief Overloaded constructor
+         * Creates Date object which represent current date based on provided time zone
+         * \param p_time_zone
+         */
+        explicit Date(tristan::TimeZone p_time_zone);
         /**
          * \overload
          * \brief Overloaded constructor
@@ -170,9 +180,15 @@ namespace tristan::date {
          */
         [[nodiscard]] auto toString() const -> std::string;
 
+        /**
+         * \brief Creates Date object which represents local date.
+         * \return Date.
+         */
+        [[nodiscard]] static auto localDate() -> Date;
+
     protected:
     private:
-        static Formatter m_formatter_global;
+        inline static Formatter m_formatter_global;
 
         Formatter m_formatter_local;
 
