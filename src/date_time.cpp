@@ -2,19 +2,23 @@
 
 namespace {
 
-    auto g_default_global_formatter = [](const tristan::date_time::DateTime& p_date) -> std::string{
+    auto g_default_global_formatter = [](const tristan::date_time::DateTime& p_date) -> std::string {
         std::string dt;
-        dt += p_date.toString();
+        dt += p_date.date().toString();
         dt += 'T';
-        dt += p_date.toString();
+        dt += p_date.time().toString();
         return dt;
     };
 
-} //End of anonymous namespace
+}  //End of anonymous namespace
 
 tristan::date_time::DateTime::DateTime(tristan::time::Precision p_precision) :
     m_date(),
-    m_time(p_precision) { }
+    m_time(tristan::time::Time::localTime(p_precision)) { }
+
+tristan::date_time::DateTime::DateTime(tristan::TimeZone p_time_zone, tristan::time::Precision p_precision) :
+    m_date(p_time_zone),
+    m_time(p_time_zone, p_precision) { }
 
 tristan::date_time::DateTime::DateTime(const std::string& date) {
     auto delimiter_pos = date.find('T');
@@ -46,10 +50,10 @@ void tristan::date_time::DateTime::setLocalFormatter(tristan::date_time::Formatt
 void tristan::date_time::DateTime::setGlobalFormatter(tristan::date_time::Formatter&& p_formatter) { m_formatter_global = std::move(p_formatter); }
 
 auto tristan::date_time::DateTime::toString() const -> std::string {
-    if (not m_formatter_global){
-        m_formatter_global = g_default_global_formatter;
+    if (not m_formatter_global) {
+        tristan::date_time::DateTime::m_formatter_global = g_default_global_formatter;
     }
-    if (m_formatter_local){
+    if (m_formatter_local) {
         return m_formatter_local(*this);
     }
     return m_formatter_global(*this);

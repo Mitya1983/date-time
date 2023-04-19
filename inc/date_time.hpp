@@ -2,27 +2,34 @@
 #define DATE_TIME_HPP
 #include "date.hpp"
 #include "time.hpp"
+
 /**
  * \brief Namespace which unites date and time in one DateTime object
  */
-namespace tristan::date_time{
+namespace tristan::date_time {
 
     class DateTime;
 
-    using Formatter = std::function<std::string(const DateTime&)>;
+    using Formatter = std::function< std::string(const DateTime&) >;
 
     /**
      * \brief Class to store date and day time
      * \headerfile date_time.hpp
      */
-    class DateTime
-    {
+    class DateTime {
     public:
         /**
-         * \brief Default constructor. Invokes default constructors for date and daytime objects
+         * \brief Default constructor.
+         * Creates DateTime based on UTC time zone
          * \param p_precision tristan::time::Precision. Default is set to tristan::time::Precision::SECONDS
          */
         explicit DateTime(tristan::time::Precision p_precision = tristan::time::Precision::SECONDS);
+        /**
+         * \brief Default constructor.
+         * Creates DateTime based on provided time zone
+         * \param p_precision tristan::time::Precision. Default is set to tristan::time::Precision::SECONDS
+         */
+        explicit DateTime(tristan::TimeZone p_time_zone, tristan::time::Precision p_precision = tristan::time::Precision::SECONDS);
         /**
          * \brief String constructor.
          * \param date_time Date and time string representation
@@ -138,45 +145,44 @@ namespace tristan::date_time{
          * \return std::string
          */
         [[nodiscard]] auto toString() const -> std::string;
-    
+
     protected:
-    
     private:
-        static Formatter m_formatter_global;
+        inline static Formatter m_formatter_global;
         Formatter m_formatter_local;
 
         date::Date m_date;
         time::Time m_time;
     };
-    
+
     /**
      * \brief Operator !=
      * \param l const DateTime &
      * \param r const DateTime &
      * \return bool
      */
-    auto operator != (const DateTime &l, const DateTime &r) -> bool;
+    auto operator!=(const DateTime& l, const DateTime& r) -> bool;
     /**
      * \brief Operator >
      * \param l const DateTime &
      * \param r const DateTime &
      * \return bool
      */
-    auto operator > (const DateTime &l, const DateTime &r) -> bool;
+    auto operator>(const DateTime& l, const DateTime& r) -> bool;
     /**
      * \brief Operator <=
      * \param l const DateTime &
      * \param r const DateTime &
      * \return bool
      */
-    auto operator <= (const DateTime &l, const DateTime &r) -> bool;
+    auto operator<=(const DateTime& l, const DateTime& r) -> bool;
     /**
      * \brief Operator >=
      * \param l const DateTime &
      * \param r const DateTime &
      * \return bool
      */
-    auto operator >= (const DateTime &l, const DateTime &r) -> bool;
+    auto operator>=(const DateTime& l, const DateTime& r) -> bool;
     /**
      * \brief Operator <<
      * \param out std::ostream&
@@ -184,8 +190,8 @@ namespace tristan::date_time{
      * \return std::ostream&
      * \note Method toString() is used here
      */
-    auto operator<<(std::ostream &out, const DateTime &dt) -> std::ostream&;
-    
-}// namespace tristan::date_time
+    auto operator<<(std::ostream& out, const DateTime& dt) -> std::ostream&;
 
-#endif // DATE_TIME_HPP
+}  // namespace tristan::date_time
+
+#endif  // DATE_TIME_HPP
