@@ -16,6 +16,9 @@ namespace tristan::time {
 
     class Time;
 
+    /**
+     * \brief Type definition for function signature which is used to format output
+     */
     using Formatter = std::function<std::string(const Time&)>;
 
     /**
@@ -41,70 +44,71 @@ namespace tristan::time {
         /**
          * \brief Default constructor.
          * Creates time based on UTC time zone
-         * \param precision Precision which is set to SECONDS
+         * \param p_precision Precision which is set to SECONDS
          */
-        explicit Time(Precision precision = Precision::SECONDS);
+        explicit Time(Precision p_precision = Precision::SECONDS);
         /**
          * \brief Default constructor.
          * Creates time based on provided time zone
-         * \param precision Precision which is set to SECONDS
+         * \param p_time_zone tristan::TimeZone
+         * \param p_precision Precision which is set to SECONDS
          */
         explicit Time(tristan::TimeZone p_time_zone, Precision p_precision = Precision::SECONDS);
         /**
          * \overload
          * \brief Overloaded constructor.
          * Precision is set to Precision::MINUTES and offset is set to UTC
-         * \param hours uint8_t
-         * \param minutes uint8_t
+         * \param p_hours uint8_t
+         * \param p_minutes uint8_t
          * \throws std::range_error
          */
-        explicit Time(uint8_t hours, uint8_t minutes);
+        explicit Time(uint8_t p_hours, uint8_t p_minutes);
         /**
          * \overload
          * \brief Overloaded constructor.
          * Precision is set to Precision::SECONDS and offset is set to UTC
-         * \param hours uint8_t.
-         * \param minutes uint8_t.
-         * \param seconds uint8_t.
+         * \param p_hours uint8_t.
+         * \param p_minutes uint8_t.
+         * \param p_seconds uint8_t.
          * \throws std::range_error.
          */
-        explicit Time(uint8_t hours, uint8_t minutes, uint8_t seconds);
+        explicit Time(uint8_t p_hours, uint8_t p_minutes, uint8_t p_seconds);
         /**
          * \overload
          * \brief Overloaded constructor.
          * Precision is set to Precision::MILLISECONDS and offset is set to UTC
-         * \param hours uint8_t.
-         * \param minutes uint8_t.
-         * \param seconds uint8_t.
-         * \param milliseconds uint16_t.
+         * \param p_hours uint8_t.
+         * \param p_minutes uint8_t.
+         * \param p_seconds uint8_t.
+         * \param p_milliseconds uint16_t.
          * \throws std::range_error.
          */
-        explicit Time(uint8_t hours, uint8_t minutes, uint8_t seconds, uint16_t milliseconds);
+        explicit Time(uint8_t p_hours, uint8_t p_minutes, uint8_t p_seconds, uint16_t p_milliseconds);
         /**
          * \overload
          * \brief Overloaded constructor.
          * Precision is set to Precision::MICROSECONDS and offset is set to UTC
-         * \param hours uint8_t.
-         * \param minutes uint8_t.
-         * \param seconds uint8_t.
-         * \param milliseconds uint16_t.
-         * \param microseconds uint16_t.
+         * \param p_hours uint8_t.
+         * \param p_minutes uint8_t.
+         * \param p_seconds uint8_t.
+         * \param p_milliseconds uint16_t.
+         * \param p_microseconds uint16_t.
          * \throws std::range_error.
          */
-        explicit Time(uint8_t hours, uint8_t minutes, uint8_t seconds, uint16_t milliseconds, uint16_t microseconds);
+        explicit Time(uint8_t p_hours, uint8_t p_minutes, uint8_t p_seconds, uint16_t p_milliseconds, uint16_t p_microseconds);
         /**
          * \overload
          * \brief Overloaded constructor.
          * Precision is set to Precision::NANOSECONDS and offset is set to UTC
-         * \param hours uint8_t.
-         * \param minutes uint8_t.
-         * \param seconds uint8_t.
-         * \param milliseconds uint16_t.
-         * \param microseconds uint16_t.
-         * \param nanoseconds uint16_t.
+         * \param p_hours uint8_t.
+         * \param p_minutes uint8_t.
+         * \param p_seconds uint8_t.
+         * \param p_milliseconds uint16_t.
+         * \param p_microseconds uint16_t.
+         * \param p_nanoseconds uint16_t.
          * \throws std::range_error.
          */
-        explicit Time(uint8_t hours, uint8_t minutes, uint8_t seconds, uint16_t milliseconds, uint16_t microseconds, uint16_t nanoseconds);
+        explicit Time(uint8_t p_hours, uint8_t p_minutes, uint8_t p_seconds, uint16_t p_milliseconds, uint16_t p_microseconds, uint16_t p_nanoseconds);
         /**
          * \brief Parses the string provided and create time object.
          * \param time std::string representing time in following <b>formats</b>:
@@ -170,78 +174,78 @@ namespace tristan::time {
 
         /**
          * \brief Sets timezone offset. Only ISO hour based offsets are considered.
-         * \param offset TimeZone
+         * \param p_offset TimeZone
          */
-        [[maybe_unused]] void setOffset(TimeZone offset) { m_offset = offset; }
+        [[maybe_unused]] void setOffset(TimeZone p_offset);
 
         /**
          * \brief Adds hours. This is a convenience function which converts hours to minutes and invokes addMinutes(uint64_t minutes) function.
-         * \param hours uint64_t
+         * \param p_hours uint64_t
          */
-        void addHours(uint64_t hours);
+        void addHours(uint64_t p_hours);
         /**
          * \brief Adds minutes.
-         * \param minutes uint64_t
+         * \param p_minutes uint64_t
          */
-        void addMinutes(uint64_t minutes);
+        void addMinutes(uint64_t p_minutes);
         /**
          * \brief Adds seconds to Time object.
          * \note Precision is taken into account. That is in case of MINUTES precision if number of seconds is less then 1 minute operation is meaningless and will not have any effect.
-         * \param seconds uint64_t.
+         * \param p_seconds uint64_t.
          */
-        void addSeconds(uint64_t seconds);
+        void addSeconds(uint64_t p_seconds);
         /**
          * \brief Adds milliseconds to Time object.
          * \note Precision is taken into account. That is in case of SECONDS or MINUTES precision if number of milliseconds is less then 1 second operation is meaningless and will not have any effect.
-         * \param milliseconds uint64_t.
+         * \param p_milliseconds uint64_t.
          */
-        void addMilliseconds(uint64_t milliseconds);
+        void addMilliseconds(uint64_t p_milliseconds);
         /**
          * \brief Adds microseconds to Time object.
          * \note Precision is taken into account. That is in case of SECONDS, MINUTES or MILLISECONDS precision if number of microseconds is less then 1 millisecond operation is meaningless and will not have any effect.
-         * \param microseconds uint64_t.
+         * \param p_microseconds uint64_t.
          */
-        void addMicroseconds(uint64_t microseconds);
+        void addMicroseconds(uint64_t p_microseconds);
         /**
          * \brief Adds nanoseconds to Time object.
          * \note Precision is taken into account. That is in case of SECONDS, MINUTES, MILLISECONDS or MICROSECONDS precision if number of nanosecond is less then 1 microsecond operation is meaningless and will not have any effect.
-         * \param nanoseconds uint64_t.
+         * \param p_nanoseconds uint64_t.
          */
-        void addNanoseconds(uint64_t nanoseconds);
+        void addNanoseconds(uint64_t p_nanoseconds);
         /**
          * \brief subtracts hours from Time object. This is a convenience function which converts hours to minutes and invokes subtractMinutes(uint64_t minutes) function
-         * \param hours uint64_t.
+         * \param p_hours uint64_t.
          */
-        void subtractHours(uint64_t hours);
+        void subtractHours(uint64_t p_hours);
         /**
          * \brief subtracts minutes from Time object.
-         * \param minutes uint64_t.
+         * \param p_minutes uint64_t.
          */
-        void subtractMinutes(uint64_t minutes);
+        void subtractMinutes(uint64_t p_minutes);
         /**
          * \brief subtracts seconds from Time object.
          * \note Precision is taken into account. That is in case of MINUTES precision if number of seconds is less then 1 minute operation is meaningless and will not have any effect.
-         * \param seconds uint64_t.
+         * \param p_seconds uint64_t.
          */
-        void subtractSeconds(uint64_t seconds);
+        void subtractSeconds(uint64_t p_seconds);
         /**
          * \brief subtracts milliseconds from Time object.
          * \note Precision is taken into account. That is in case of SECONDS or MINUTES precision if number of milliseconds is less then 1 second operation is meaningless and will not have any effect.
-         * \param milliseconds uint64_t.
+         * \param p_milliseconds uint64_t.
          */
-        void subtractMilliseconds(uint64_t milliseconds);
+        void subtractMilliseconds(uint64_t p_milliseconds);
         /**
          * \brief subtracts microseconds from Time object.
          * \note Precision is taken into account. That is in case of SECONDS, MINUTES, MILLISECONDS or MICROSECONDS precision if number of nanosecond is less then 1 microsecond operation is meaningless and will not have any effect.
-         * \param microseconds uint64_t.
+         * \param p_microseconds uint64_t.
          */
-        void subtractMicroseconds(uint64_t microseconds);
+        void subtractMicroseconds(uint64_t p_microseconds);
         /**
          * \brief Subtracts nanoseconds from Time object.
          * \note Precision is taken into account. That is in case of SECONDS, MINUTES, MILLISECONDS or MICROSECONDS precision if number of nanosecond is less then 1 microsecond operation is meaningless and will not have any effect
-         * \param nanoseconds uint64_t
+         * \param p_nanoseconds uint64_t
          */
-        void subtractNanoseconds(uint64_t nanoseconds);
+        void subtractNanoseconds(uint64_t p_nanoseconds);
 
         /**
          * \brief Returns number of hours passed since day start.
@@ -286,10 +290,10 @@ namespace tristan::time {
         [[nodiscard]] auto offset() const -> TimeZone { return m_offset; }
         /**
          * \brief Creates Time object which represents localtime.
-         * \param precision Precision::SECONDS.
+         * \param p_precision Precision::SECONDS.
          * \return Time.
          */
-        [[nodiscard]] static auto localTime(Precision precision = Precision::SECONDS) -> Time;
+        [[nodiscard]] static auto localTime(Precision p_precision = Precision::SECONDS) -> Time;
 
         /**
          * \brief Sets formatter for class aka for all instances.
