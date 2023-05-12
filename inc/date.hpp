@@ -15,6 +15,9 @@ namespace tristan::date {
 
     class Date;
 
+    /**
+     * \brief Type definition for function signature which is used to format output
+     */
     using Formatter = std::function<std::string(const Date&)>;
 
     /**
@@ -45,21 +48,21 @@ namespace tristan::date {
          * \overload
          * \brief Overloaded constructor
          * Creates Date object with specified day, month and year.
-         * \param day uint8_t.
-         * \param month uint8_t.
-         * \param year uint16_t.
+         * \param p_day uint8_t.
+         * \param p_month uint8_t.
+         * \param p_year uint16_t.
          * \throws std::range_error.
          */
-        explicit Date(uint8_t day, uint8_t month, uint16_t year);
+        explicit Date(uint8_t p_day, uint8_t p_month, uint16_t p_year);
         /**
          * \overload
          * \brief Overloaded constructor
          * Creates Date object from std::string representing the date in [YYYYMMDD] or [YYYY-MM-DD] formats.
-         * \param iso_date const std::string&.
+         * \param p_iso_date const std::string&.
          * \throws std::invalid_argument - if time representation has invalid format.
          * \throws std::range_error - if date representation has invalid values.
          */
-        explicit Date(const std::string& iso_date);
+        explicit Date(const std::string& p_iso_date);
         /**
          * \brief Copy constructor
          */
@@ -100,34 +103,34 @@ namespace tristan::date {
 
         /**
          * \brief Adds days
-         * \param days uint64_t
+         * \param p_days uint64_t
          */
-        void addDays(uint64_t days);
+        void addDays(uint64_t p_days);
         /**
          * \brief Adds months
-         * \param months uint64_t
+         * \param p_months uint64_t
          */
-        void addMonths(uint64_t months);
+        void addMonths(uint64_t p_months);
         /**
          * \brief Adds years
-         * \param years uint64_t
+         * \param p_years uint64_t
          */
-        void addYears(uint64_t years);
+        void addYears(uint64_t p_years);
         /**
          * \brief Subtracts days
-         * \param days uint64_t
+         * \param p_days uint64_t
          */
-        void subtractDays(uint64_t days);
+        void subtractDays(uint64_t p_days);
         /**
          * \brief Subtracts months
-         * \param months uint64_t
+         * \param p_months uint64_t
          */
-        void subtractMonths(uint64_t months);
+        void subtractMonths(uint64_t p_months);
         /**
          * \brief Subtracts years
-         * \param years uint64_t
+         * \param p_years uint64_t
          */
-        void subtractYears(uint64_t years);
+        void subtractYears(uint64_t p_years);
         /**
          * \brief Returns currently set day of the month.
          * \note This function returns actual, or otherworldly current, day of the months and not the total number of days passed in the month.
@@ -158,10 +161,10 @@ namespace tristan::date {
         [[nodiscard]] auto isWeekend() const -> bool;
         /**
          * \brief Checks if year is leap year.
-         * \param year uint16_t.
+         * \param p_year uint16_t.
          * \return bool.
          */
-        [[nodiscard]] static auto isLeapYear(uint16_t year) -> bool;
+        [[nodiscard]] static auto isLeapYear(uint16_t p_year) -> bool;
         /**
          * \brief Sets formatter for class aka for all instances.
          * \param p_formatter std::function<std::string(const Date&)>

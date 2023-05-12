@@ -4,26 +4,26 @@
 
 namespace {
     auto checkTimeFormat(const std::string& time) -> bool;
-    const uint32_t minutes_in_day = 1440;
-    const uint32_t seconds_in_day = 86400;
-    const uint32_t milliseconds_in_day = 86400000;
-    const uint64_t microseconds_in_day = 86400000000;
-    const uint64_t nanoseconds_in_day = 86400000000000;
-    const uint32_t minutes_in_hour = 60;
-    const uint32_t seconds_in_hour = 3600;
-    const uint32_t milliseconds_in_hour = 3600000;
-    const uint64_t microseconds_in_hour = 3600000000;
-    const uint64_t nanoseconds_in_hour = 3600000000000;
-    const uint32_t seconds_in_minute = 60;
-    const uint32_t milliseconds_in_minute = 60000;
-    const uint64_t microseconds_in_minute = 60000000;
-    const uint64_t nanoseconds_in_minute = 60000000000;
-    const uint32_t milliseconds_in_second = 1000;
-    const uint64_t microseconds_in_second = 1000000;
-    const uint64_t nanoseconds_in_second = 1000000000;
-    const uint64_t microseconds_in_millisecond = 1000;
-    const uint64_t nanoseconds_in_millisecond = 1000000;
-    const uint64_t nanoseconds_in_microsecond = 1000;
+    constexpr uint64_t microseconds_in_day = 86400000000;
+    constexpr uint64_t nanoseconds_in_day = 86400000000000;
+    constexpr uint64_t nanoseconds_in_hour = 3600000000000;
+    constexpr uint64_t microseconds_in_minute = 60000000;
+    constexpr uint64_t microseconds_in_hour = 3600000000;
+    constexpr uint64_t nanoseconds_in_minute = 60000000000;
+    constexpr uint64_t microseconds_in_second = 1000000;
+    constexpr uint64_t nanoseconds_in_second = 1000000000;
+    constexpr uint64_t nanoseconds_in_millisecond = 1000000;
+    constexpr uint32_t milliseconds_in_minute = 60000;
+    constexpr uint32_t seconds_in_day = 86400;
+    constexpr uint32_t milliseconds_in_day = 86400000;
+    constexpr uint32_t milliseconds_in_hour = 3600000;
+    constexpr uint16_t g_seconds_in_hour = 3600;
+    constexpr uint16_t minutes_in_day = 1440;
+    constexpr uint16_t microseconds_in_millisecond = 1000;
+    constexpr uint16_t nanoseconds_in_microsecond = 1000;
+    constexpr uint16_t milliseconds_in_second = 1000;
+    constexpr uint8_t g_minutes_in_hour = 60;
+    constexpr uint8_t g_seconds_in_minute = 60;
     using Days = std::chrono::duration< int64_t, std::ratio_divide< std::ratio< seconds_in_day >, std::chrono::seconds::period > >;
 
     auto g_default_global_formatter = [](const tristan::time::Time& p_time) -> std::string {
@@ -343,426 +343,428 @@ void tristan::time::Time::operator+=(const tristan::time::Time& other) { *this =
 
 void tristan::time::Time::operator-=(const tristan::time::Time& other) { *this = *this - other; }
 
-void tristan::time::Time::addHours(uint64_t hours) {
+void tristan::time::Time::setOffset(tristan::TimeZone p_offset) { m_offset = p_offset; }
 
-    if (hours == 0) {
+void tristan::time::Time::addHours(uint64_t p_hours) {
+
+    if (p_hours == 0) {
         return;
     }
-    if (hours > 23) {
-        hours %= 24;
+    if (p_hours > 23) {
+        p_hours %= 24;
     }
     switch (m_precision) {
         case tristan::time::Precision::MINUTES: {
-            _addMinutes(hours * minutes_in_hour);
+            _addMinutes(p_hours * g_minutes_in_hour);
             break;
         }
         case tristan::time::Precision::SECONDS: {
-            _addSeconds(hours * seconds_in_hour);
+            _addSeconds(p_hours * g_seconds_in_hour);
             break;
         }
         case tristan::time::Precision::MILLISECONDS: {
-            _addMilliseconds(hours * milliseconds_in_hour);
+            _addMilliseconds(p_hours * milliseconds_in_hour);
             break;
         }
         case tristan::time::Precision::MICROSECONDS: {
-            _addMicroseconds(hours * microseconds_in_hour);
+            _addMicroseconds(p_hours * microseconds_in_hour);
             break;
         }
         case tristan::time::Precision::NANOSECONDS: {
-            _addNanoseconds(hours * nanoseconds_in_hour);
+            _addNanoseconds(p_hours * nanoseconds_in_hour);
             break;
         }
     }
 }
 
-void tristan::time::Time::addMinutes(uint64_t minutes) {
-    if (minutes == 0) {
+void tristan::time::Time::addMinutes(uint64_t p_minutes) {
+    if (p_minutes == 0) {
         return;
     }
-    if (minutes > minutes_in_day) {
-        minutes %= minutes_in_day;
+    if (p_minutes > minutes_in_day) {
+        p_minutes %= minutes_in_day;
     }
     switch (m_precision) {
         case tristan::time::Precision::MINUTES: {
-            _addMinutes(minutes);
+            _addMinutes(p_minutes);
             break;
         }
         case tristan::time::Precision::SECONDS: {
-            _addSeconds(minutes * seconds_in_minute);
+            _addSeconds(p_minutes * g_seconds_in_minute);
             break;
         }
         case tristan::time::Precision::MILLISECONDS: {
-            _addMilliseconds(minutes * milliseconds_in_minute);
+            _addMilliseconds(p_minutes * milliseconds_in_minute);
             break;
         }
         case tristan::time::Precision::MICROSECONDS: {
-            _addMicroseconds(minutes * microseconds_in_minute);
+            _addMicroseconds(p_minutes * microseconds_in_minute);
             break;
         }
         case tristan::time::Precision::NANOSECONDS: {
-            _addNanoseconds(minutes * nanoseconds_in_minute);
+            _addNanoseconds(p_minutes * nanoseconds_in_minute);
             break;
         }
     }
 }
 
-void tristan::time::Time::addSeconds(uint64_t seconds) {
-    if (seconds == 0) {
+void tristan::time::Time::addSeconds(uint64_t p_seconds) {
+    if (p_seconds == 0) {
         return;
     }
-    if (seconds > seconds_in_day) {
-        seconds %= seconds_in_day;
+    if (p_seconds > seconds_in_day) {
+        p_seconds %= seconds_in_day;
     }
     switch (m_precision) {
         case tristan::time::Precision::MINUTES: {
-            if (seconds < seconds_in_minute) {
+            if (p_seconds < g_seconds_in_minute) {
                 return;
             }
-            _addMinutes(seconds % seconds_in_minute);
+            _addMinutes(p_seconds % g_seconds_in_minute);
         }
         case tristan::time::Precision::SECONDS: {
-            _addSeconds(seconds);
+            _addSeconds(p_seconds);
             break;
         }
         case tristan::time::Precision::MILLISECONDS: {
-            _addMilliseconds(seconds * milliseconds_in_second);
+            _addMilliseconds(p_seconds * milliseconds_in_second);
             break;
         }
         case tristan::time::Precision::MICROSECONDS: {
-            _addMicroseconds(seconds * microseconds_in_second);
+            _addMicroseconds(p_seconds * microseconds_in_second);
             break;
         }
         case tristan::time::Precision::NANOSECONDS: {
-            _addNanoseconds(seconds * nanoseconds_in_second);
+            _addNanoseconds(p_seconds * nanoseconds_in_second);
             break;
         }
     }
 }
 
-void tristan::time::Time::addMilliseconds(uint64_t milliseconds) {
-    if (milliseconds == 0) {
+void tristan::time::Time::addMilliseconds(uint64_t p_milliseconds) {
+    if (p_milliseconds == 0) {
         return;
     }
-    if (milliseconds > milliseconds_in_day) {
-        milliseconds %= milliseconds_in_day;
+    if (p_milliseconds > milliseconds_in_day) {
+        p_milliseconds %= milliseconds_in_day;
     }
     switch (m_precision) {
         case tristan::time::Precision::MINUTES: {
-            if (milliseconds < milliseconds_in_minute) {
+            if (p_milliseconds < milliseconds_in_minute) {
                 return;
             }
-            _addMinutes(milliseconds % milliseconds_in_minute);
+            _addMinutes(p_milliseconds % milliseconds_in_minute);
         }
         case tristan::time::Precision::SECONDS: {
-            if (milliseconds < milliseconds_in_second) {
+            if (p_milliseconds < milliseconds_in_second) {
                 return;
             }
-            _addSeconds(milliseconds % milliseconds_in_second);
+            _addSeconds(p_milliseconds % milliseconds_in_second);
             break;
         }
         case tristan::time::Precision::MILLISECONDS: {
-            _addMilliseconds(milliseconds);
+            _addMilliseconds(p_milliseconds);
             break;
         }
         case tristan::time::Precision::MICROSECONDS: {
-            _addMicroseconds(milliseconds * microseconds_in_millisecond);
+            _addMicroseconds(p_milliseconds * microseconds_in_millisecond);
             break;
         }
         case tristan::time::Precision::NANOSECONDS: {
-            _addNanoseconds(milliseconds * nanoseconds_in_millisecond);
+            _addNanoseconds(p_milliseconds * nanoseconds_in_millisecond);
             break;
         }
     }
 }
 
-void tristan::time::Time::addMicroseconds(uint64_t microseconds) {
-    if (microseconds == 0) {
+void tristan::time::Time::addMicroseconds(uint64_t p_microseconds) {
+    if (p_microseconds == 0) {
         return;
     }
-    if (microseconds > microseconds_in_day) {
-        microseconds %= microseconds_in_day;
+    if (p_microseconds > microseconds_in_day) {
+        p_microseconds %= microseconds_in_day;
     }
     switch (m_precision) {
         case tristan::time::Precision::MINUTES: {
-            if (microseconds < microseconds_in_minute) {
+            if (p_microseconds < microseconds_in_minute) {
                 return;
             }
-            _addMinutes(microseconds % microseconds_in_minute);
+            _addMinutes(p_microseconds % microseconds_in_minute);
         }
         case tristan::time::Precision::SECONDS: {
-            if (microseconds < microseconds_in_second) {
+            if (p_microseconds < microseconds_in_second) {
                 return;
             }
-            _addSeconds(microseconds % microseconds_in_second);
+            _addSeconds(p_microseconds % microseconds_in_second);
             break;
         }
         case tristan::time::Precision::MILLISECONDS: {
-            if (microseconds < microseconds_in_millisecond) {
+            if (p_microseconds < microseconds_in_millisecond) {
                 return;
             }
-            _addMilliseconds(microseconds % microseconds_in_millisecond);
+            _addMilliseconds(p_microseconds % microseconds_in_millisecond);
             break;
         }
         case tristan::time::Precision::MICROSECONDS: {
-            _addMicroseconds(microseconds);
+            _addMicroseconds(p_microseconds);
             break;
         }
         case tristan::time::Precision::NANOSECONDS: {
-            _addNanoseconds(microseconds * nanoseconds_in_microsecond);
+            _addNanoseconds(p_microseconds * nanoseconds_in_microsecond);
             break;
         }
     }
 }
 
-void tristan::time::Time::addNanoseconds(uint64_t nanoseconds) {
-    if (nanoseconds == 0) {
+void tristan::time::Time::addNanoseconds(uint64_t p_nanoseconds) {
+    if (p_nanoseconds == 0) {
         return;
     }
-    if (nanoseconds > nanoseconds_in_day) {
-        nanoseconds %= nanoseconds_in_day;
+    if (p_nanoseconds > nanoseconds_in_day) {
+        p_nanoseconds %= nanoseconds_in_day;
     }
     switch (m_precision) {
         case tristan::time::Precision::MINUTES: {
-            if (nanoseconds < nanoseconds_in_minute) {
+            if (p_nanoseconds < nanoseconds_in_minute) {
                 return;
             }
-            _addMinutes(nanoseconds % nanoseconds_in_minute);
+            _addMinutes(p_nanoseconds % nanoseconds_in_minute);
         }
         case tristan::time::Precision::SECONDS: {
-            if (nanoseconds < nanoseconds_in_second) {
+            if (p_nanoseconds < nanoseconds_in_second) {
                 return;
             }
-            _addSeconds(nanoseconds % nanoseconds_in_second);
+            _addSeconds(p_nanoseconds % nanoseconds_in_second);
             break;
         }
         case tristan::time::Precision::MILLISECONDS: {
-            if (nanoseconds < nanoseconds_in_millisecond) {
+            if (p_nanoseconds < nanoseconds_in_millisecond) {
                 return;
             }
-            _addMilliseconds(nanoseconds % nanoseconds_in_millisecond);
+            _addMilliseconds(p_nanoseconds % nanoseconds_in_millisecond);
             break;
         }
         case tristan::time::Precision::MICROSECONDS: {
-            if (nanoseconds < nanoseconds_in_microsecond) {
+            if (p_nanoseconds < nanoseconds_in_microsecond) {
                 return;
             }
-            _addMicroseconds(nanoseconds % nanoseconds_in_microsecond);
+            _addMicroseconds(p_nanoseconds % nanoseconds_in_microsecond);
             break;
         }
         case tristan::time::Precision::NANOSECONDS: {
-            _addNanoseconds(nanoseconds);
+            _addNanoseconds(p_nanoseconds);
             break;
         }
     }
 }
 
-void tristan::time::Time::subtractHours(uint64_t hours) {
-    if (hours == 0) {
+void tristan::time::Time::subtractHours(uint64_t p_hours) {
+    if (p_hours == 0) {
         return;
     }
-    if (hours > 23) {
-        hours %= 24;
+    if (p_hours > 23) {
+        p_hours %= 24;
     }
     switch (m_precision) {
         case tristan::time::Precision::MINUTES: {
-            _subtractMinutes(hours * minutes_in_hour);
+            _subtractMinutes(p_hours * g_minutes_in_hour);
             break;
         }
         case tristan::time::Precision::SECONDS: {
-            _subtractSeconds(hours * seconds_in_hour);
+            _subtractSeconds(p_hours * g_seconds_in_hour);
             break;
         }
         case tristan::time::Precision::MILLISECONDS: {
-            _subtractMilliseconds(hours * milliseconds_in_hour);
+            _subtractMilliseconds(p_hours * milliseconds_in_hour);
             break;
         }
         case tristan::time::Precision::MICROSECONDS: {
-            _subtractMicroseconds(hours * microseconds_in_hour);
+            _subtractMicroseconds(p_hours * microseconds_in_hour);
             break;
         }
         case tristan::time::Precision::NANOSECONDS: {
-            _subtractNanoseconds(hours * nanoseconds_in_hour);
+            _subtractNanoseconds(p_hours * nanoseconds_in_hour);
             break;
         }
     }
 }
 
-void tristan::time::Time::subtractMinutes(uint64_t minutes) {
-    if (minutes == 0) {
+void tristan::time::Time::subtractMinutes(uint64_t p_minutes) {
+    if (p_minutes == 0) {
         return;
     }
-    if (minutes > minutes_in_day) {
-        minutes %= minutes_in_day;
+    if (p_minutes > minutes_in_day) {
+        p_minutes %= minutes_in_day;
     }
     switch (m_precision) {
         case tristan::time::Precision::MINUTES: {
-            _subtractMinutes(minutes);
+            _subtractMinutes(p_minutes);
             break;
         }
         case tristan::time::Precision::SECONDS: {
-            _subtractSeconds(minutes * seconds_in_minute);
+            _subtractSeconds(p_minutes * g_seconds_in_minute);
             break;
         }
         case tristan::time::Precision::MILLISECONDS: {
-            _subtractMilliseconds(minutes * milliseconds_in_minute);
+            _subtractMilliseconds(p_minutes * milliseconds_in_minute);
             break;
         }
         case tristan::time::Precision::MICROSECONDS: {
-            _subtractMicroseconds(minutes * microseconds_in_minute);
+            _subtractMicroseconds(p_minutes * microseconds_in_minute);
             break;
         }
         case tristan::time::Precision::NANOSECONDS: {
-            _subtractNanoseconds(minutes * nanoseconds_in_minute);
+            _subtractNanoseconds(p_minutes * nanoseconds_in_minute);
             break;
         }
     }
 }
 
-void tristan::time::Time::subtractSeconds(uint64_t seconds) {
-    if (seconds == 0) {
+void tristan::time::Time::subtractSeconds(uint64_t p_seconds) {
+    if (p_seconds == 0) {
         return;
     }
-    if (seconds > seconds_in_day) {
-        seconds %= seconds_in_day;
+    if (p_seconds > seconds_in_day) {
+        p_seconds %= seconds_in_day;
     }
     switch (m_precision) {
         case tristan::time::Precision::MINUTES: {
-            if (seconds < seconds_in_minute) {
+            if (p_seconds < g_seconds_in_minute) {
                 return;
             }
-            _subtractMinutes(seconds % seconds_in_minute);
+            _subtractMinutes(p_seconds % g_seconds_in_minute);
         }
         case tristan::time::Precision::SECONDS: {
-            _subtractSeconds(seconds);
+            _subtractSeconds(p_seconds);
             break;
         }
         case tristan::time::Precision::MILLISECONDS: {
-            _subtractMilliseconds(seconds * milliseconds_in_second);
+            _subtractMilliseconds(p_seconds * milliseconds_in_second);
             break;
         }
         case tristan::time::Precision::MICROSECONDS: {
-            _subtractMicroseconds(seconds * microseconds_in_second);
+            _subtractMicroseconds(p_seconds * microseconds_in_second);
             break;
         }
         case tristan::time::Precision::NANOSECONDS: {
-            _subtractNanoseconds(seconds * nanoseconds_in_second);
+            _subtractNanoseconds(p_seconds * nanoseconds_in_second);
             break;
         }
     }
 }
 
-void tristan::time::Time::subtractMilliseconds(uint64_t milliseconds) {
-    if (milliseconds == 0) {
+void tristan::time::Time::subtractMilliseconds(uint64_t p_milliseconds) {
+    if (p_milliseconds == 0) {
         return;
     }
-    if (milliseconds > milliseconds_in_day) {
-        milliseconds %= milliseconds_in_day;
+    if (p_milliseconds > milliseconds_in_day) {
+        p_milliseconds %= milliseconds_in_day;
     }
     switch (m_precision) {
         case tristan::time::Precision::MINUTES: {
-            if (milliseconds < milliseconds_in_minute) {
+            if (p_milliseconds < milliseconds_in_minute) {
                 return;
             }
-            _subtractMinutes(milliseconds % milliseconds_in_minute);
+            _subtractMinutes(p_milliseconds % milliseconds_in_minute);
         }
         case tristan::time::Precision::SECONDS: {
-            if (milliseconds < milliseconds_in_second) {
+            if (p_milliseconds < milliseconds_in_second) {
                 return;
             }
-            _subtractSeconds(milliseconds % milliseconds_in_second);
+            _subtractSeconds(p_milliseconds % milliseconds_in_second);
             break;
         }
         case tristan::time::Precision::MILLISECONDS: {
-            _subtractMilliseconds(milliseconds);
+            _subtractMilliseconds(p_milliseconds);
             break;
         }
         case tristan::time::Precision::MICROSECONDS: {
-            _subtractMicroseconds(milliseconds * microseconds_in_millisecond);
+            _subtractMicroseconds(p_milliseconds * microseconds_in_millisecond);
             break;
         }
         case tristan::time::Precision::NANOSECONDS: {
-            _subtractNanoseconds(milliseconds * nanoseconds_in_millisecond);
+            _subtractNanoseconds(p_milliseconds * nanoseconds_in_millisecond);
             break;
         }
     }
 }
 
-void tristan::time::Time::subtractMicroseconds(uint64_t microseconds) {
-    if (microseconds == 0) {
+void tristan::time::Time::subtractMicroseconds(uint64_t p_microseconds) {
+    if (p_microseconds == 0) {
         return;
     }
-    if (microseconds > microseconds_in_day) {
-        microseconds %= microseconds_in_day;
+    if (p_microseconds > microseconds_in_day) {
+        p_microseconds %= microseconds_in_day;
     }
     switch (m_precision) {
         case tristan::time::Precision::MINUTES: {
-            if (microseconds < microseconds_in_minute) {
+            if (p_microseconds < microseconds_in_minute) {
                 return;
             }
-            _subtractMinutes(microseconds % microseconds_in_minute);
+            _subtractMinutes(p_microseconds % microseconds_in_minute);
         }
         case tristan::time::Precision::SECONDS: {
-            if (microseconds < microseconds_in_second) {
+            if (p_microseconds < microseconds_in_second) {
                 return;
             }
-            _subtractSeconds(microseconds % microseconds_in_second);
+            _subtractSeconds(p_microseconds % microseconds_in_second);
             break;
         }
         case tristan::time::Precision::MILLISECONDS: {
-            if (microseconds < microseconds_in_millisecond) {
+            if (p_microseconds < microseconds_in_millisecond) {
                 return;
             }
-            _subtractMilliseconds(microseconds % microseconds_in_millisecond);
+            _subtractMilliseconds(p_microseconds % microseconds_in_millisecond);
             break;
         }
         case tristan::time::Precision::MICROSECONDS: {
-            _subtractMicroseconds(microseconds);
+            _subtractMicroseconds(p_microseconds);
             break;
         }
         case tristan::time::Precision::NANOSECONDS: {
-            _subtractNanoseconds(microseconds * nanoseconds_in_microsecond);
+            _subtractNanoseconds(p_microseconds * nanoseconds_in_microsecond);
             break;
         }
     }
 }
 
-void tristan::time::Time::subtractNanoseconds(uint64_t nanoseconds) {
-    if (nanoseconds == 0) {
+void tristan::time::Time::subtractNanoseconds(uint64_t p_nanoseconds) {
+    if (p_nanoseconds == 0) {
         return;
     }
-    if (nanoseconds > nanoseconds_in_day) {
-        nanoseconds %= nanoseconds_in_day;
+    if (p_nanoseconds > nanoseconds_in_day) {
+        p_nanoseconds %= nanoseconds_in_day;
     }
     switch (m_precision) {
         case tristan::time::Precision::MINUTES: {
-            if (nanoseconds < nanoseconds_in_minute) {
+            if (p_nanoseconds < nanoseconds_in_minute) {
                 return;
             }
-            _subtractMinutes(nanoseconds % nanoseconds_in_minute);
+            _subtractMinutes(p_nanoseconds % nanoseconds_in_minute);
         }
         case tristan::time::Precision::SECONDS: {
-            if (nanoseconds < nanoseconds_in_second) {
+            if (p_nanoseconds < nanoseconds_in_second) {
                 return;
             }
-            _subtractSeconds(nanoseconds % nanoseconds_in_second);
+            _subtractSeconds(p_nanoseconds % nanoseconds_in_second);
             break;
         }
         case tristan::time::Precision::MILLISECONDS: {
-            if (nanoseconds < nanoseconds_in_millisecond) {
+            if (p_nanoseconds < nanoseconds_in_millisecond) {
                 return;
             }
-            _subtractMilliseconds(nanoseconds % nanoseconds_in_millisecond);
+            _subtractMilliseconds(p_nanoseconds % nanoseconds_in_millisecond);
             break;
         }
         case tristan::time::Precision::MICROSECONDS: {
-            if (nanoseconds < nanoseconds_in_microsecond) {
+            if (p_nanoseconds < nanoseconds_in_microsecond) {
                 return;
             }
-            _subtractMicroseconds(nanoseconds % nanoseconds_in_microsecond);
+            _subtractMicroseconds(p_nanoseconds % nanoseconds_in_microsecond);
             break;
         }
         case tristan::time::Precision::NANOSECONDS: {
-            _subtractNanoseconds(nanoseconds);
+            _subtractNanoseconds(p_nanoseconds);
             break;
         }
     }
@@ -845,12 +847,12 @@ auto tristan::time::Time::nanoseconds() const -> uint16_t {
         this->m_time_since_day_start);
 }
 
-auto tristan::time::Time::localTime(Precision precision) -> tristan::time::Time {
+auto tristan::time::Time::localTime(Precision p_precision) -> tristan::time::Time {
 
     auto tm = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
     auto offset = std::localtime(&tm)->tm_gmtoff;
 
-    return tristan::time::Time(static_cast< tristan::TimeZone >(offset / 3600), precision);
+    return tristan::time::Time(static_cast< tristan::TimeZone >(offset / 3600), p_precision);
 }
 
 void tristan::time::Time::setGlobalFormatter(tristan::time::Formatter&& p_formatter) { m_formatter_global = std::move(p_formatter); }
