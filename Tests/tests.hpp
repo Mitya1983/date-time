@@ -588,3 +588,267 @@ TEST(DateTime, StringConstructor) {
     ASSERT_EQ(d_date.time().seconds(), 10);
     ASSERT_EQ(d_date.time().offset(), TimeZone::EAST_2);
 }
+
+TEST(DateTime, AddSeconds_55){
+    std::string date = "20210101T23:59:10+02";
+
+    DateTime l_date_time(date);
+
+    l_date_time.addSeconds(55);
+    ASSERT_EQ(l_date_time.date().dayOfTheMonth(), 2);
+    ASSERT_EQ(l_date_time.time().hours(), 0);
+    ASSERT_EQ(l_date_time.time().minutes(), 0);
+    ASSERT_EQ(l_date_time.time().seconds(), 5);
+}
+
+TEST(DateTime, AddSeconds_3600){
+    std::string date = "20210101T23:10:10+02";
+
+    DateTime l_date_time(date);
+
+    l_date_time.addSeconds(3600);
+    ASSERT_EQ(l_date_time.date().dayOfTheMonth(), 2);
+    ASSERT_EQ(l_date_time.time().hours(), 0);
+    ASSERT_EQ(l_date_time.time().minutes(), 10);
+    ASSERT_EQ(l_date_time.time().seconds(), 10);
+}
+
+TEST(DateTime, AddMinutes_45){
+    std::string date = "20210101T23:10:10+02";
+
+    DateTime l_date_time(date);
+
+    l_date_time.addMinutes(45);
+    ASSERT_EQ(l_date_time.date().dayOfTheMonth(), 1);
+    ASSERT_EQ(l_date_time.time().hours(), 23);
+    ASSERT_EQ(l_date_time.time().minutes(), 55);
+    ASSERT_EQ(l_date_time.time().seconds(), 10);
+}
+
+TEST(DateTime, AddMinutes_50){
+    std::string date = "20210101T23:10:10+02";
+
+    DateTime l_date_time(date);
+
+    l_date_time.addMinutes(50);
+    ASSERT_EQ(l_date_time.date().dayOfTheMonth(), 2);
+    ASSERT_EQ(l_date_time.time().hours(), 0);
+    ASSERT_EQ(l_date_time.time().minutes(), 0);
+    ASSERT_EQ(l_date_time.time().seconds(), 10);
+}
+
+TEST(DateTime, AddMinutes_55){
+    std::string date = "20210101T23:10:10+02";
+
+    DateTime l_date_time(date);
+
+    l_date_time.addMinutes(55);
+    ASSERT_EQ(l_date_time.date().dayOfTheMonth(), 2);
+    ASSERT_EQ(l_date_time.time().hours(), 0);
+    ASSERT_EQ(l_date_time.time().minutes(), 5);
+    ASSERT_EQ(l_date_time.time().seconds(), 10);
+}
+
+TEST(DateTime, AddMinutes_60){
+    std::string date = "20210101T23:10:10+02";
+
+    DateTime l_date_time(date);
+
+    l_date_time.addMinutes(60);
+    ASSERT_EQ(l_date_time.date().dayOfTheMonth(), 2);
+    ASSERT_EQ(l_date_time.time().hours(), 0);
+    ASSERT_EQ(l_date_time.time().minutes(), 10);
+    ASSERT_EQ(l_date_time.time().seconds(), 10);
+}
+
+TEST(DateTime, AddMinutes_1440){
+    std::string date = "20210101T00:10:10+02";
+
+    DateTime l_date_time(date);
+
+    l_date_time.addMinutes(1440);
+    ASSERT_EQ(l_date_time.date().dayOfTheMonth(), 2);
+    ASSERT_EQ(l_date_time.time().hours(), 0);
+    ASSERT_EQ(l_date_time.time().minutes(), 10);
+    ASSERT_EQ(l_date_time.time().seconds(), 10);
+}
+
+TEST(DateTime, AddMinutes_2880){
+    std::string date = "20210101T00:10:10+02";
+
+    DateTime l_date_time(date);
+
+    l_date_time.addMinutes(2880);
+    ASSERT_EQ(l_date_time.date().dayOfTheMonth(), 3);
+    ASSERT_EQ(l_date_time.time().hours(), 0);
+    ASSERT_EQ(l_date_time.time().minutes(), 10);
+    ASSERT_EQ(l_date_time.time().seconds(), 10);
+}
+
+TEST(DateTime, AddHours_1){
+    std::string date = "20210101T23:10:10+02";
+
+    DateTime l_date_time(date);
+
+    l_date_time.addHours(1);
+    ASSERT_EQ(l_date_time.date().dayOfTheMonth(), 2);
+    ASSERT_EQ(l_date_time.time().hours(), 0);
+    ASSERT_EQ(l_date_time.time().minutes(), 10);
+    ASSERT_EQ(l_date_time.time().seconds(), 10);
+}
+
+TEST(DateTime, AddHours_24){
+    std::string date = "20210101T00:10:10+02";
+
+    DateTime l_date_time(date);
+
+    l_date_time.addHours(24);
+    ASSERT_EQ(l_date_time.date().dayOfTheMonth(), 2);
+    ASSERT_EQ(l_date_time.time().hours(), 0);
+    ASSERT_EQ(l_date_time.time().minutes(), 10);
+    ASSERT_EQ(l_date_time.time().seconds(), 10);
+}
+
+TEST(DateTime, AddHours_48){
+    std::string date = "20210101T00:10:10+02";
+
+    DateTime l_date_time(date);
+
+    l_date_time.addHours(48);
+    ASSERT_EQ(l_date_time.date().dayOfTheMonth(), 3);
+    ASSERT_EQ(l_date_time.time().hours(), 0);
+    ASSERT_EQ(l_date_time.time().minutes(), 10);
+    ASSERT_EQ(l_date_time.time().seconds(), 10);
+}
+
+TEST(DateTime, SubtractSeconds_55){
+    std::string date = "20210102T00:00:05+02";
+
+    DateTime l_date_time(date);
+
+    l_date_time.subtractSeconds(55);
+    ASSERT_EQ(l_date_time.date().dayOfTheMonth(), 1);
+    ASSERT_EQ(l_date_time.time().hours(), 23);
+    ASSERT_EQ(l_date_time.time().minutes(), 59);
+    ASSERT_EQ(l_date_time.time().seconds(), 10);
+}
+
+TEST(DateTime, SubtractSeconds_3600){
+    std::string date = "20210102T00:10:10+02";
+
+    DateTime l_date_time(date);
+
+    l_date_time.subtractSeconds(3600);
+    ASSERT_EQ(l_date_time.date().dayOfTheMonth(), 1);
+    ASSERT_EQ(l_date_time.time().hours(), 23);
+    ASSERT_EQ(l_date_time.time().minutes(), 10);
+    ASSERT_EQ(l_date_time.time().seconds(), 10);
+}
+
+TEST(DateTime, SubtractMinutes_45){
+    std::string date = "20210101T23:55:10+02";
+
+    DateTime l_date_time(date);
+
+    l_date_time.subtractMinutes(45);
+    ASSERT_EQ(l_date_time.date().dayOfTheMonth(), 1);
+    ASSERT_EQ(l_date_time.time().hours(), 23);
+    ASSERT_EQ(l_date_time.time().minutes(), 10);
+    ASSERT_EQ(l_date_time.time().seconds(), 10);
+}
+
+TEST(DateTime, SubtractMinutes_50){
+    std::string date = "20210102T00:00:10+02";
+
+    DateTime l_date_time(date);
+
+    l_date_time.subtractMinutes(50);
+    ASSERT_EQ(l_date_time.date().dayOfTheMonth(), 1);
+    ASSERT_EQ(l_date_time.time().hours(), 23);
+    ASSERT_EQ(l_date_time.time().minutes(), 10);
+    ASSERT_EQ(l_date_time.time().seconds(), 10);
+}
+
+TEST(DateTime, SubtractMinutes_55){
+    std::string date = "20210102T00:05:10+02";
+
+    DateTime l_date_time(date);
+
+    l_date_time.subtractMinutes(55);
+    ASSERT_EQ(l_date_time.date().dayOfTheMonth(), 1);
+    ASSERT_EQ(l_date_time.time().hours(), 23);
+    ASSERT_EQ(l_date_time.time().minutes(), 10);
+    ASSERT_EQ(l_date_time.time().seconds(), 10);
+}
+
+TEST(DateTime, SubtractMinutes_60){
+    std::string date = "20210102T00:10:10+02";
+
+    DateTime l_date_time(date);
+
+    l_date_time.subtractMinutes(60);
+    ASSERT_EQ(l_date_time.date().dayOfTheMonth(), 1);
+    ASSERT_EQ(l_date_time.time().hours(), 23);
+    ASSERT_EQ(l_date_time.time().minutes(), 10);
+    ASSERT_EQ(l_date_time.time().seconds(), 10);
+}
+
+TEST(DateTime, SubtractMinutes_1440){
+    std::string date = "20210102T00:10:10+02";
+
+    DateTime l_date_time(date);
+
+    l_date_time.subtractMinutes(1440);
+    ASSERT_EQ(l_date_time.date().dayOfTheMonth(), 1);
+    ASSERT_EQ(l_date_time.time().hours(), 0);
+    ASSERT_EQ(l_date_time.time().minutes(), 10);
+    ASSERT_EQ(l_date_time.time().seconds(), 10);
+}
+
+TEST(DateTime, SubtractMinutes_2880){
+    std::string date = "20210103T00:10:10+02";
+
+    DateTime l_date_time(date);
+
+    l_date_time.subtractMinutes(2880);
+    ASSERT_EQ(l_date_time.date().dayOfTheMonth(), 1);
+    ASSERT_EQ(l_date_time.time().hours(), 0);
+    ASSERT_EQ(l_date_time.time().minutes(), 10);
+    ASSERT_EQ(l_date_time.time().seconds(), 10);
+}
+
+TEST(DateTime, SubtractHours_1){
+    std::string date = "20210102T00:10:10+02";
+
+    DateTime l_date_time(date);
+
+    l_date_time.subtractHours(1);
+    ASSERT_EQ(l_date_time.date().dayOfTheMonth(), 1);
+    ASSERT_EQ(l_date_time.time().hours(), 23);
+    ASSERT_EQ(l_date_time.time().minutes(), 10);
+    ASSERT_EQ(l_date_time.time().seconds(), 10);
+}
+
+TEST(DateTime, SubtractHours_24){
+    std::string date = "20210102T00:10:10+02";
+
+    DateTime l_date_time(date);
+
+    l_date_time.subtractHours(24);
+    ASSERT_EQ(l_date_time.date().dayOfTheMonth(), 1);
+    ASSERT_EQ(l_date_time.time().hours(), 0);
+    ASSERT_EQ(l_date_time.time().minutes(), 10);
+    ASSERT_EQ(l_date_time.time().seconds(), 10);
+}
+
+TEST(DateTime, SubtractHours_48){
+    std::string date = "20210103T00:10:10+02";
+
+    DateTime l_date_time(date);
+
+    l_date_time.subtractHours(48);
+    ASSERT_EQ(l_date_time.date().dayOfTheMonth(), 1);
+    ASSERT_EQ(l_date_time.time().hours(), 0);
+    ASSERT_EQ(l_date_time.time().minutes(), 10);
+    ASSERT_EQ(l_date_time.time().seconds(), 10);
+}
