@@ -37,22 +37,7 @@ namespace {
         DECEMBER
     };
 
-    auto g_default_global_formatter = [](const tristan::date::Date& p_date) -> std::string {
-        std::string result;
-        result += std::to_string(p_date.year());
-        result += '-';
-        uint8_t month = p_date.month();
-        if (month < 10)
-            result += '0';
-        result += std::to_string(month);
-        result += '-';
-        uint8_t day = p_date.dayOfTheMonth();
-        if (day < 10)
-            result += '0';
-        result += std::to_string(day);
 
-        return result;
-    };
 }  //End of unnamed namespace
 
 tristan::date::Date::Date() :
@@ -361,18 +346,29 @@ bool tristan::date::Date::isLeapYear(uint16_t p_year) {
     }
 }
 
-void tristan::date::Date::setGlobalFormatter(tristan::date::Formatter&& p_formatter) { m_formatter_global = std::move(p_formatter); }
-
-void tristan::date::Date::setLocalFormatter(tristan::date::Formatter&& p_formatter) { m_formatter_local = std::move(p_formatter); }
-
-std::string tristan::date::Date::toString() const {
-    if (not m_formatter_global) {
-        tristan::date::Date::m_formatter_global = g_default_global_formatter;
+std::string tristan::date::Date::toString(const std::function<std::string(const Date&)>& formatter) const {
+    if (not formatter) {
+        return formatter(*this);
     }
-    if (m_formatter_local) {
-        return m_formatter_local(*this);
-    }
-    return m_formatter_global(*this);
+
+    auto default_formatter = [](const tristan::date::Date& p_date) -> std::string {
+        std::string result;
+        result += std::to_string(p_date.year());
+        result += '-';
+        uint8_t month = p_date.month();
+        if (month < 10)
+            result += '0';
+        result += std::to_string(month);
+        result += '-';
+        uint8_t day = p_date.dayOfTheMonth();
+        if (day < 10)
+            result += '0';
+        result += std::to_string(day);
+
+        return result;
+    };
+
+    return default_formatter(*this);
 }
 
 auto tristan::date::Date::localDate() -> tristan::date::Date {
