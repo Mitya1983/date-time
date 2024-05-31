@@ -9,10 +9,6 @@
 namespace tristan::date_time {
 
     class DateTime;
-    /**
-     * \brief Type definition for function signature which is used to format output
-     */
-    using Formatter = std::function< std::string(const DateTime&) >;
 
     /**
      * \brief Class to store date and day time
@@ -182,34 +178,11 @@ namespace tristan::date_time {
         [[nodiscard]] auto time() const -> const time::Time&;
 
         /**
-         * \brief Sets formatter for object of class Time.
-         * Local formatter has higher priority then the global formatter. That is if local formatter is set, the latter will be implemented instead of global one.
-         * \param p_formatter std::function<std::string(const Time&)>
-         */
-        void setTimeLocalFormatter(time::Formatter&& p_formatter);
-        /**
-         * \brief Sets formatter for object of class Date.
-         * Local formatter has higher priority then the global formatter. That is if local formatter is set, the latter will be implemented instead of global one.
-         * \param p_formatter std::function<std::string(const Date&)>
-         */
-        void setDateLocalFormatter(date::Formatter&& p_formatter);
-
-        /**
-         * \brief Sets formatter for class aka for all instances.
-         * \param p_formatter std::function<std::string(const DateTime&)>
-         */
-        static void setGlobalFormatter(Formatter&& p_formatter);
-        /**
-         * \brief Sets formatter for particular object of class DateTime.
-         * Local formatter has higher priority then the global formatter. That is if local formatter is set, the latter will be implemented instead of global one.
-         * \param p_formatter std::function<std::string(const DateTime&)>
-         */
-        void setLocalFormatter(Formatter&& p_formatter);
-        /**
-         * \brief Generates string representation of time. Returns [Date::toString][T][Time::toString]
+         * \brief Generates string representation of date and time which is ISO standard representation. Or by formatter provided.
+         * \param formatter const std::function< std::string(const DateTime&) >
          * \return std::string
          */
-        [[nodiscard]] auto toString() const -> std::string;
+        [[nodiscard]] auto toString(const std::function< std::string(const DateTime&) >& formatter = {}) const -> std::string;
 
         /**
          * \brief Creates Date object which represents local date.
@@ -219,9 +192,6 @@ namespace tristan::date_time {
 
     protected:
     private:
-        inline static Formatter m_formatter_global;
-        Formatter m_formatter_local;
-
         date::Date m_date;
         time::Time m_time;
     };

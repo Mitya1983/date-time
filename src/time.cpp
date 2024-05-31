@@ -26,78 +26,6 @@ namespace {
     constexpr uint8_t g_seconds_in_minute = 60;
     using Days = std::chrono::duration< int64_t, std::ratio_divide< std::ratio< seconds_in_day >, std::chrono::seconds::period > >;
 
-    auto g_default_global_formatter = [](const tristan::time::Time& p_time) -> std::string {
-        std::string l_time;
-
-        auto hours = p_time.hours();
-        if (hours < 10) {
-            l_time += '0';
-        }
-        l_time += std::to_string(hours);
-        l_time += ':';
-        auto minutes = p_time.minutes();
-        if (minutes < 10) {
-            l_time += '0';
-        }
-        l_time += std::to_string(minutes);
-
-        if (p_time.precision() >= tristan::time::Precision::SECONDS) {
-            l_time += ':';
-            auto seconds = p_time.seconds();
-            if (seconds < 10) {
-                l_time += '0';
-            }
-            l_time += std::to_string(seconds);
-        }
-
-        if (p_time.precision() >= tristan::time::Precision::MILLISECONDS) {
-            l_time += '.';
-            auto milliseconds = p_time.milliseconds();
-            if (milliseconds < 100) {
-                l_time += '0';
-            }
-            if (milliseconds < 10) {
-                l_time += '0';
-            }
-            l_time += std::to_string(milliseconds);
-        }
-
-        if (p_time.precision() >= tristan::time::Precision::MICROSECONDS) {
-            l_time += '.';
-            auto microseconds = p_time.microseconds();
-            if (microseconds < 100) {
-                l_time += '0';
-            }
-            if (microseconds < 10) {
-                l_time += '0';
-            }
-            l_time += std::to_string(microseconds);
-        }
-
-        if (p_time.precision() == tristan::time::Precision::NANOSECONDS) {
-            l_time += '.';
-            auto nanoseconds = p_time.nanoseconds();
-            if (nanoseconds < 100) {
-                l_time += '0';
-            }
-            if (nanoseconds < 10) {
-                l_time += '0';
-            }
-            l_time += std::to_string(nanoseconds);
-        }
-        if (p_time.offset() >= tristan::TimeZone::UTC) {
-            l_time += '+';
-            if (p_time.offset() < tristan::TimeZone::EAST_10) {
-                l_time += '0';
-            }
-        }
-        l_time += std::to_string(static_cast< int8_t >(p_time.offset()));
-        if (p_time.offset() > tristan::TimeZone::WEST_10 && p_time.offset() < tristan::TimeZone::UTC) {
-            l_time += '0';
-        }
-        return l_time;
-    };
-
 }  // End of unnamed namespace
 
 tristan::time::Time::Time(tristan::time::Precision precision) :
@@ -855,18 +783,84 @@ auto tristan::time::Time::localTime(Precision p_precision) -> tristan::time::Tim
     return tristan::time::Time(static_cast< tristan::TimeZone >(offset / 3600), p_precision);
 }
 
-void tristan::time::Time::setGlobalFormatter(tristan::time::Formatter&& p_formatter) { m_formatter_global = std::move(p_formatter); }
-
-void tristan::time::Time::setLocalFormatter(tristan::time::Formatter&& p_formatter) { m_formatter_local = std::move(p_formatter); }
-
-std::string tristan::time::Time::toString() const {
-    if (not m_formatter_global) {
-        tristan::time::Time::m_formatter_global = g_default_global_formatter;
+std::string tristan::time::Time::toString(const std::function< std::string(const Time&) >& formatter) const {
+    if (formatter) {
+        return formatter(*this);
     }
-    if (m_formatter_local) {
-        return m_formatter_local(*this);
-    }
-    return m_formatter_global(*this);
+
+    auto default_formatter = [](const tristan::time::Time& p_time) -> std::string {
+        std::string l_time;
+
+        auto hours = p_time.hours();
+        if (hours < 10) {
+            l_time += '0';
+        }
+        l_time += std::to_string(hours);
+        l_time += ':';
+        auto minutes = p_time.minutes();
+        if (minutes < 10) {
+            l_time += '0';
+        }
+        l_time += std::to_string(minutes);
+
+        if (p_time.precision() >= tristan::time::Precision::SECONDS) {
+            l_time += ':';
+            auto seconds = p_time.seconds();
+            if (seconds < 10) {
+                l_time += '0';
+            }
+            l_time += std::to_string(seconds);
+        }
+
+        if (p_time.precision() >= tristan::time::Precision::MILLISECONDS) {
+            l_time += '.';
+            auto milliseconds = p_time.milliseconds();
+            if (milliseconds < 100) {
+                l_time += '0';
+            }
+            if (milliseconds < 10) {
+                l_time += '0';
+            }
+            l_time += std::to_string(milliseconds);
+        }
+
+        if (p_time.precision() >= tristan::time::Precision::MICROSECONDS) {
+            l_time += '.';
+            auto microseconds = p_time.microseconds();
+            if (microseconds < 100) {
+                l_time += '0';
+            }
+            if (microseconds < 10) {
+                l_time += '0';
+            }
+            l_time += std::to_string(microseconds);
+        }
+
+        if (p_time.precision() == tristan::time::Precision::NANOSECONDS) {
+            l_time += '.';
+            auto nanoseconds = p_time.nanoseconds();
+            if (nanoseconds < 100) {
+                l_time += '0';
+            }
+            if (nanoseconds < 10) {
+                l_time += '0';
+            }
+            l_time += std::to_string(nanoseconds);
+        }
+        if (p_time.offset() >= tristan::TimeZone::UTC) {
+            l_time += '+';
+            if (p_time.offset() < tristan::TimeZone::EAST_10) {
+                l_time += '0';
+            }
+        }
+        l_time += std::to_string(static_cast< int8_t >(p_time.offset()));
+        if (p_time.offset() > tristan::TimeZone::WEST_10 && p_time.offset() < tristan::TimeZone::UTC) {
+            l_time += '0';
+        }
+        return l_time;
+    };
+
+    return default_formatter(*this);
 }
 
 bool tristan::time::operator!=(const tristan::time::Time& l, const tristan::time::Time& r) { return !(l == r); }

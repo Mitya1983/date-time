@@ -2,14 +2,6 @@
 
 namespace {
 
-    auto g_default_global_formatter = [](const tristan::date_time::DateTime& p_date) -> std::string {
-        std::string dt;
-        dt += p_date.date().toString();
-        dt += 'T';
-        dt += p_date.time().toString();
-        return dt;
-    };
-
     [[maybe_unused]] constexpr uint16_t g_seconds_in_hour = 3600;
     [[maybe_unused]] constexpr uint8_t g_seconds_in_minute = 60;
     [[maybe_unused]] constexpr uint8_t g_minutes_in_hour = 60;
@@ -36,39 +28,39 @@ tristan::date_time::DateTime::DateTime(const std::string& p_date_time) {
 
 void tristan::date_time::DateTime::setDate(const tristan::date::Date& p_date) { m_date = p_date; }
 
-void tristan::date_time::DateTime::setDate(tristan::date::Date&& p_date) { m_date = std::move(p_date); }
+void tristan::date_time::DateTime::setDate(tristan::date::Date&& p_date) { m_date = p_date; }
 
 void tristan::date_time::DateTime::setTime(const tristan::time::Time& p_time) { m_time = p_time; }
 
-void tristan::date_time::DateTime::setTime(tristan::time::Time&& p_time) { m_time = std::move(p_time); }
+void tristan::date_time::DateTime::setTime(tristan::time::Time&& p_time) { m_time = p_time; }
 
 void tristan::date_time::DateTime::addSeconds([[maybe_unused]] uint64_t p_seconds) {
     uint64_t l_minutes = 0;
-    if (p_seconds >= g_seconds_in_minute){
+    if (p_seconds >= g_seconds_in_minute) {
         l_minutes = p_seconds / g_seconds_in_minute;
         p_seconds -= l_minutes * g_seconds_in_minute;
     }
     auto l_future_number_of_seconds = m_time.seconds() + p_seconds;
-    if (l_future_number_of_seconds >= g_seconds_in_minute){
+    if (l_future_number_of_seconds >= g_seconds_in_minute) {
         ++l_minutes;
         p_seconds = g_seconds_in_minute - p_seconds;
         m_time.subtractSeconds(p_seconds);
     } else {
         m_time.addSeconds(p_seconds);
     }
-    if (l_minutes != 0){
+    if (l_minutes != 0) {
         addMinutes(l_minutes);
     }
 }
 
 void tristan::date_time::DateTime::addMinutes(uint64_t p_minutes) {
     uint64_t l_hours = 0;
-    if (p_minutes >= g_minutes_in_hour){
+    if (p_minutes >= g_minutes_in_hour) {
         l_hours = p_minutes / g_minutes_in_hour;
         p_minutes -= l_hours * g_minutes_in_hour;
     }
     auto l_future_number_of_minutes = m_time.minutes() + p_minutes;
-    if (l_future_number_of_minutes >= g_minutes_in_hour){
+    if (l_future_number_of_minutes >= g_minutes_in_hour) {
         ++l_hours;
         p_minutes = g_minutes_in_hour - p_minutes;
         m_time.subtractMinutes(p_minutes);
@@ -76,23 +68,23 @@ void tristan::date_time::DateTime::addMinutes(uint64_t p_minutes) {
         m_time.addMinutes(p_minutes);
     }
 
-    if (l_hours != 0){
+    if (l_hours != 0) {
         addHours(l_hours);
     }
 }
 
 void tristan::date_time::DateTime::addHours(uint64_t p_hours) {
     uint64_t l_days = 0;
-    if (p_hours >= g_hours_in_day){
+    if (p_hours >= g_hours_in_day) {
         l_days = p_hours / g_hours_in_day;
         p_hours -= l_days * g_hours_in_day;
     }
     auto l_future_number_of_hours = m_time.hours() + p_hours;
-    if (l_future_number_of_hours >= g_hours_in_day){
+    if (l_future_number_of_hours >= g_hours_in_day) {
         ++l_days;
     }
     m_time.addHours(p_hours);
-    if (l_days != 0){
+    if (l_days != 0) {
         m_date.addDays(l_days);
     }
 }
@@ -105,23 +97,23 @@ void tristan::date_time::DateTime::addYears(uint64_t p_years) { m_date.addYears(
 
 void tristan::date_time::DateTime::subtractSeconds([[maybe_unused]] uint64_t p_seconds) {
     uint64_t l_minutes = 0;
-    if (p_seconds >= g_seconds_in_minute){
+    if (p_seconds >= g_seconds_in_minute) {
         l_minutes = p_seconds / g_seconds_in_minute;
         p_seconds -= l_minutes * g_seconds_in_minute;
     }
-    if (l_minutes != 0){
+    if (l_minutes != 0) {
         subtractMinutes(l_minutes);
     }
     auto currentHour = m_time.hours();
     m_time.subtractSeconds(p_seconds);
-    if (currentHour < m_time.hours()){
+    if (currentHour < m_time.hours()) {
         m_date.subtractDays(1);
     }
 }
 
 void tristan::date_time::DateTime::subtractMinutes(uint64_t p_minutes) {
     uint64_t l_hours = 0;
-    if (p_minutes >= g_hours_in_day){
+    if (p_minutes >= g_hours_in_day) {
         l_hours = p_minutes / g_minutes_in_hour;
         p_minutes -= l_hours * g_minutes_in_hour;
     }
@@ -130,23 +122,23 @@ void tristan::date_time::DateTime::subtractMinutes(uint64_t p_minutes) {
     }
     auto currentHour = m_time.hours();
     m_time.subtractMinutes(p_minutes);
-    if (currentHour < m_time.hours()){
+    if (currentHour < m_time.hours()) {
         m_date.subtractDays(1);
     }
 }
 
 void tristan::date_time::DateTime::subtractHours(uint64_t p_hours) {
     uint64_t l_days = 0;
-    if (p_hours >= g_hours_in_day){
+    if (p_hours >= g_hours_in_day) {
         l_days = p_hours / g_hours_in_day;
         p_hours -= l_days * g_hours_in_day;
     }
     auto currentHour = m_time.hours();
     m_time.subtractHours(p_hours);
-    if (currentHour + g_hours_in_day - m_time.hours() == p_hours){
+    if (currentHour + g_hours_in_day - m_time.hours() == p_hours) {
         ++l_days;
     }
-    if (l_days != 0){
+    if (l_days != 0) {
         m_date.subtractDays(l_days);
     }
 }
@@ -161,22 +153,20 @@ auto tristan::date_time::DateTime::date() const -> const tristan::date::Date& { 
 
 auto tristan::date_time::DateTime::time() const -> const tristan::time::Time& { return m_time; }
 
-void tristan::date_time::DateTime::setTimeLocalFormatter(tristan::time::Formatter&& p_formatter) { m_time.setLocalFormatter(std::move(p_formatter)); }
-
-void tristan::date_time::DateTime::setDateLocalFormatter(tristan::date::Formatter&& p_formatter) { m_date.setLocalFormatter(std::move(p_formatter)); }
-
-void tristan::date_time::DateTime::setLocalFormatter(tristan::date_time::Formatter&& p_formatter) { m_formatter_local = std::move(p_formatter); }
-
-void tristan::date_time::DateTime::setGlobalFormatter(tristan::date_time::Formatter&& p_formatter) { m_formatter_global = std::move(p_formatter); }
-
-auto tristan::date_time::DateTime::toString() const -> std::string {
-    if (not m_formatter_global) {
-        tristan::date_time::DateTime::m_formatter_global = g_default_global_formatter;
+auto tristan::date_time::DateTime::toString(const std::function< std::string(const DateTime&) >& formatter) const -> std::string {
+    if (not formatter) {
+        return formatter(*this);
     }
-    if (m_formatter_local) {
-        return m_formatter_local(*this);
-    }
-    return m_formatter_global(*this);
+
+    auto default_formatter = [](const tristan::date_time::DateTime& p_date) -> std::string {
+        std::string dt;
+        dt += p_date.date().toString();
+        dt += 'T';
+        dt += p_date.time().toString();
+        return dt;
+    };
+
+    return default_formatter(*this);
 }
 
 auto tristan::date_time::DateTime::localDateTime() -> tristan::date_time::DateTime {

@@ -16,11 +16,6 @@ namespace tristan::date {
     class Date;
 
     /**
-     * \brief Type definition for function signature which is used to format output
-     */
-    using Formatter = std::function<std::string(const Date&)>;
-
-    /**
      * \brief Days duration
      */
     using Days = std::chrono::duration< int64_t, std::ratio_divide< std::ratio< 86400 >, std::chrono::seconds::period > >;
@@ -166,22 +161,10 @@ namespace tristan::date {
          */
         [[nodiscard]] static auto isLeapYear(uint16_t p_year) -> bool;
         /**
-         * \brief Sets formatter for class aka for all instances.
-         * \param p_formatter std::function<std::string(const Date&)>
-         */
-        static void setGlobalFormatter(Formatter&& p_formatter);
-        /**
-         * \brief Sets formatter for particular object of class Time.
-         * Local formatter has higher priority then the global formatter. That is if local formatter is set, the latter will be implemented instead of global one.
-         * \param p_formatter std::function<std::string(const Date&)>
-         */
-        void setLocalFormatter(Formatter&& p_formatter);
-
-        /**
-         * \brief Return string representation of date in YYYY-MM-DD format.
+         * \brief Generates string representation of date in ISO standard representation format. Or using provided formatter.
          * \return std::string.
          */
-        [[nodiscard]] auto toString() const -> std::string;
+        [[nodiscard]] auto toString(const std::function<std::string(const Date&)>& formatter = {}) const -> std::string;
 
         /**
          * \brief Creates Date object which represents local date.
@@ -191,11 +174,7 @@ namespace tristan::date {
 
     protected:
     private:
-        inline static Formatter m_formatter_global;
-
-        Formatter m_formatter_local;
-
-        Days m_days_since_1900;
+        Days m_days_since_1900{0};
 
         [[nodiscard]] auto _calculateCurrentMonth() const -> uint8_t;
         [[nodiscard]] auto _calculateCurrentYear() const -> uint8_t;

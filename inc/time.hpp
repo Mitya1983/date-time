@@ -17,11 +17,6 @@ namespace tristan::time {
     class Time;
 
     /**
-     * \brief Type definition for function signature which is used to format output
-     */
-    using Formatter = std::function<std::string(const Time&)>;
-
-    /**
      * \brief Enum which represents precisions used in implementation.
      */
     enum class Precision : uint8_t {
@@ -296,37 +291,20 @@ namespace tristan::time {
         [[nodiscard]] static auto localTime(Precision p_precision = Precision::SECONDS) -> Time;
 
         /**
-         * \brief Sets formatter for class aka for all instances.
-         * \param p_formatter std::function<std::string(const Time&)>
-         */
-        static void setGlobalFormatter(Formatter&& p_formatter);
-
-        /**
-         * \brief Sets formatter for particular object of class Time.
-         * Local formatter has higher priority then the global formatter. That is if local formatter is set, the latter will be implemented instead of global one.
-         * \param p_formatter std::function<std::string(const Time&)>
-         */
-        void setLocalFormatter(Formatter&& p_formatter);
-
-        /**
-         * \brief Generates default string representation of time which is ISO standard representation in formats represented below.
+         * \brief Generates string representation of time which is ISO standard representation in formats represented below. Or by formatter provided.
          * \return std::string.
-         * \par Formats:
+         * \par Default formats:
          * \li [hours:minutes] - Minutes precision.
          * \li [hours:minutes:seconds] - Seconds precision.
          * \li [hours:minutes:seconds.milliseconds] - Milliseconds precision.
          * \li [hours:minutes:seconds.milliseconds.microseconds] - Microseconds precision.
          * \li [hours:minutes:seconds.milliseconds.microseconds.nanoseconds] - Nanoseconds precision.
          */
-        [[nodiscard]] auto toString() const -> std::string;
+        [[nodiscard]] auto toString(const std::function<std::string(const Time&)>& formatter = {}) const -> std::string;
 
 
     protected:
     private:
-        inline static Formatter m_formatter_global;
-
-        Formatter m_formatter_local;
-
         std::variant< std::chrono::minutes, std::chrono::seconds, std::chrono::milliseconds, std::chrono::microseconds, std::chrono::nanoseconds >
             m_time_since_day_start;
 
