@@ -347,7 +347,7 @@ bool tristan::date::Date::isLeapYear(uint16_t p_year) {
 }
 
 std::string tristan::date::Date::toString(const std::function<std::string(const Date&)>& formatter) const {
-    if (not formatter) {
+    if (formatter) {
         return formatter(*this);
     }
 

@@ -154,7 +154,7 @@ auto tristan::date_time::DateTime::date() const -> const tristan::date::Date& { 
 auto tristan::date_time::DateTime::time() const -> const tristan::time::Time& { return m_time; }
 
 auto tristan::date_time::DateTime::toString(const std::function< std::string(const DateTime&) >& formatter) const -> std::string {
-    if (not formatter) {
+    if (formatter) {
         return formatter(*this);
     }
 
