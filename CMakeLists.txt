@@ -46,14 +46,14 @@ if (PROJECT_IS_TOP_LEVEL)
     endif ()
 endif ()
 include_directories(
-        inc/
+        include/
 )
 
 file(GLOB_RECURSE INC_FILES CONFIGURE_DEPENDS
-        inc/*.hpp
+        include/*.hpp
 )
 file(GLOB_RECURSE SRC_FILES CONFIGURE_DEPENDS
-        src/*.cpp
+        source/*.cpp
 )
 
 set(LIB_VERSION 2.0.0)
