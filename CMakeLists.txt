@@ -7,7 +7,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 option(BUILD_STATIC "" ON)
 option(DOCS "" OFF)
-option(BUILD_TESTS "" OFF)
+option(BUILD_TESTS "" ON)
 option(ENABLE_ASAN "Enables asan build" OFF)
 
 if (PROJECT_IS_TOP_LEVEL)

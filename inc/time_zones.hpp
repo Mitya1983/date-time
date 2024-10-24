@@ -3,7 +3,7 @@
 
 #include <cstdint>
 
-namespace tristan {
+namespace mt {
 
     /**
      * \brief Enum which represents possible time zone offsets.
@@ -36,6 +36,6 @@ namespace tristan {
         EAST_12 [[maybe_unused]] = 12,
     };
 
-}  // namespace tristan
+}  // namespace mt
 
 #endif  //TIME_ZONES_HPP

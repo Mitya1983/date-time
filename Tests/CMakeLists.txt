@@ -29,7 +29,7 @@ endif()
 
 include_directories(
         ${PARENT_PROJECT_SOURCE_DIR}/inc
-        /home/mitya/LibsInUse/google/googletest/include/
+        /home/mitia/Projects/googletest/googletest/include/
 )
 
 enable_testing()
@@ -37,7 +37,7 @@ enable_testing()
 add_executable(${PROJECT_NAME} tests.cpp tests.hpp)
 
 target_link_directories(${PROJECT_NAME} PUBLIC
-        /home/mitya/LibsInUse/google/googletest/
+        /home/mitia/Projects/googletest/build/lib
         ${PARENT_PROJECT_BINARY_DIR}/
         )
 target_link_libraries(${PROJECT_NAME}

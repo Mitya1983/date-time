@@ -1,69 +1,88 @@
+#ifndef TESTS_HPP
+#define TESTS_HPP
 #include "date_time.hpp"
 
 #include <gtest/gtest.h>
-using namespace tristan;
-using namespace tristan::time;
-using namespace tristan::date;
-using namespace tristan::date_time;
+using namespace mt;
+using namespace mt::time;
+using namespace mt::date;
+using namespace mt::date_time;
 
 TEST(Time, Default_constructor) {
-    Time time;
-    auto time_t = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
+    const Time time;
+    const auto time_t = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
 
-    struct tm t_time = *std::gmtime(&time_t);
+    auto [tm_sec, tm_min, tm_hour, tm_mday, tm_mon, tm_year, tm_wday, tm_yday, tm_isdst, tm_gmtoff, tm_zone] = *std::gmtime(&time_t);
 
-    ASSERT_EQ(time.hours(), t_time.tm_hour) << "Hours are not equal";
-    ASSERT_EQ(time.minutes(), t_time.tm_min) << "Minutes are not equal";
-    ASSERT_EQ(time.seconds(), t_time.tm_sec) << "Seconds are not equal";
+    ASSERT_EQ(time.hours().count(), tm_hour) << "Hours are not equal";
+    ASSERT_EQ(time.minutes().count(), tm_min) << "Minutes are not equal";
+    ASSERT_EQ(time.seconds().count(), tm_sec) << "Seconds are not equal";
 }
 
 TEST(Time, EastTimeZone_constructor) {
-    auto offset = tristan::TimeZone::EAST_2;
-    Time l_time(offset);
-    Time l_time_1;
-    ASSERT_EQ(l_time.hours(), l_time_1.hours() + static_cast<int8_t>(offset));
+    auto offset = mt::TimeZone::EAST_2;
+    const Time time(offset);
+    const Time time_1;
+    ASSERT_EQ(time.hours().count(), time_1.hours().count() + static_cast< int8_t >(offset));
+}
+
+TEST(Time, TimePoint_constructor) {
+    const auto time_point = std::chrono::system_clock::now();
+    const Time time(time_point);
+    const auto time_t = std::chrono::system_clock::to_time_t(time_point);
+
+    auto [tm_sec, tm_min, tm_hour, tm_mday, tm_mon, tm_year, tm_wday, tm_yday, tm_isdst, tm_gmtoff, tm_zone] = *std::gmtime(&time_t);
+
+    ASSERT_EQ(time.hours().count(), tm_hour) << "Hours are not equal";
+    ASSERT_EQ(time.minutes().count(), tm_min) << "Minutes are not equal";
+    ASSERT_EQ(time.seconds().count(), tm_sec) << "Seconds are not equal";
 }
 
 TEST(Time, Minutes_constructor) {
-    Time time(23, 23);
+    const Time time(std::chrono::hours{23}, std::chrono::minutes{23});
 
-    ASSERT_EQ(time.hours(), 23) << "Hours are not equal";
-    ASSERT_EQ(time.minutes(), 23) << "Minutes are not equal";
-    ASSERT_EQ(time.precision(), Precision::MINUTES) << "Precision is not equal";
-    EXPECT_THROW(Time(24, 23), std::range_error) << "Exception on hours range expected";
-    EXPECT_THROW(Time(23, 60), std::range_error) << "Exception on minutes range expected";
+    ASSERT_EQ(time.hours().count(), 23) << "Hours are not equal";
+    ASSERT_EQ(time.minutes().count(), 23) << "Minutes are not equal";
+    EXPECT_THROW(Time(std::chrono::hours{24}, std::chrono::minutes{23}), std::range_error) << "Exception on hours range expected";
+    EXPECT_THROW(Time(std::chrono::hours{23}, std::chrono::minutes{60}), std::range_error) << "Exception on minutes range expected";
 }
 
 TEST(Time, Seconds_constructor) {
-    Time time(23, 23, 23);
+    const Time time(std::chrono::hours{23}, std::chrono::minutes{23}, std::chrono::seconds{23});
 
-    ASSERT_EQ(time.seconds(), 23) << "Seconds are not equal";
-    ASSERT_EQ(time.precision(), Precision::SECONDS) << "Precision is not equal";
-    EXPECT_THROW(Time(23, 23, 60), std::range_error) << "Exception on seconds range expected";
+    ASSERT_EQ(time.seconds().count(), 23) << "Seconds are not equal";
+    EXPECT_THROW(Time(std::chrono::hours{23}, std::chrono::minutes{23}, std::chrono::seconds{60}), std::range_error) << "Exception on seconds range expected";
 }
 
 TEST(Time, Milliseconds_constructor) {
-    Time time(23, 23, 23, 23);
+    const Time time(std::chrono::hours{23}, std::chrono::minutes{23}, std::chrono::seconds{23}, std::chrono::milliseconds{23});
 
-    ASSERT_EQ(time.milliseconds(), 23) << "Milliseconds are not equal";
-    ASSERT_EQ(time.precision(), Precision::MILLISECONDS) << "Precision is not equal";
-    EXPECT_THROW(Time(23, 23, 23, 1000), std::range_error) << "Exception on milliseconds range expected";
+    ASSERT_EQ(time.milliseconds().count(), 23) << "Milliseconds are not equal";
+    EXPECT_THROW(Time(std::chrono::hours{23}, std::chrono::minutes{23}, std::chrono::seconds{23}, std::chrono::milliseconds{1000}), std::range_error)
+        << "Exception on milliseconds range expected";
 }
 
 TEST(Time, Microseconds_constructor) {
-    Time time(23, 23, 23, 23, 23);
+    const Time time(std::chrono::hours{23}, std::chrono::minutes{23}, std::chrono::seconds{23}, std::chrono::milliseconds{23}, std::chrono::microseconds{23});
 
-    ASSERT_EQ(time.microseconds(), 23) << "Microseconds are not equal";
-    ASSERT_EQ(time.precision(), Precision::MICROSECONDS) << "Precision is not equal";
-    EXPECT_THROW(Time(23, 23, 23, 23, 1000), std::range_error) << "Exception on microseconds range expected";
+    ASSERT_EQ(time.microseconds().count(), 23) << "Microseconds are not equal";
+    EXPECT_THROW(Time(std::chrono::hours{23}, std::chrono::minutes{23}, std::chrono::seconds{23}, std::chrono::milliseconds{23}, std::chrono::microseconds{1000}), std::range_error)
+        << "Exception on microseconds range expected";
 }
 
 TEST(Time, Nanoseconds_constructor) {
-    Time time(23, 23, 23, 23, 23, 23);
+    const Time time(
+        std::chrono::hours{23}, std::chrono::minutes{23}, std::chrono::seconds{23}, std::chrono::milliseconds{23}, std::chrono::microseconds{23}, std::chrono::nanoseconds{23});
 
-    ASSERT_EQ(time.nanoseconds(), 23) << "Nanoseconds are not equal";
-    ASSERT_EQ(time.precision(), Precision::NANOSECONDS) << "Precision is not equal";
-    EXPECT_THROW(Time(23, 23, 23, 23, 23, 1000), std::range_error) << "Exception on nanoseconds range expected";
+    ASSERT_EQ(time.nanoseconds().count(), 23) << "Nanoseconds are not equal";
+    EXPECT_THROW(Time(std::chrono::hours{23},
+                      std::chrono::minutes{23},
+                      std::chrono::seconds{23},
+                      std::chrono::milliseconds{23},
+                      std::chrono::microseconds{23},
+                      std::chrono::nanoseconds{1000}),
+                 std::range_error)
+        << "Exception on nanoseconds range expected";
 }
 
 TEST(Time, String_constructor) {
@@ -73,13 +92,12 @@ TEST(Time, String_constructor) {
     std::string invalid_time3 = "23:23:23-023:023:023";
     Time time(s_time);
 
-    ASSERT_EQ(time.hours(), 23) << "Hours are not equal";
-    ASSERT_EQ(time.minutes(), 23) << "Minutes are not equal";
-    ASSERT_EQ(time.seconds(), 23) << "Seconds are not equal";
-    ASSERT_EQ(time.milliseconds(), 23) << "Milliseconds are not equal";
-    ASSERT_EQ(time.microseconds(), 23) << "Microseconds are not equal";
-    ASSERT_EQ(time.nanoseconds(), 23) << "Nanoseconds are not equal";
-    ASSERT_EQ(time.precision(), Precision::NANOSECONDS);
+    ASSERT_EQ(time.hours().count(), 23) << "Hours are not equal";
+    ASSERT_EQ(time.minutes().count(), 23) << "Minutes are not equal";
+    ASSERT_EQ(time.seconds().count(), 23) << "Seconds are not equal";
+    ASSERT_EQ(time.milliseconds().count(), 23) << "Milliseconds are not equal";
+    ASSERT_EQ(time.microseconds().count(), 23) << "Microseconds are not equal";
+    ASSERT_EQ(time.nanoseconds().count(), 23) << "Nanoseconds are not equal";
     ASSERT_EQ(time.offset(), TimeZone::EAST_2);
 
     EXPECT_THROW(Time{invalid_time1}, std::invalid_argument) << "Exception on invalid_time1 expected";
@@ -88,767 +106,345 @@ TEST(Time, String_constructor) {
 }
 
 TEST(Time, AddHours) {
-    Time time(21, 23);
-
-    time.addHours(1);
-    ASSERT_EQ(time.hours(), 22);
-    time.addHours(2);
-    ASSERT_EQ(time.hours(), 0);
-    time.addHours(1);
-    time.addHours(24);
-    ASSERT_EQ(time.hours(), 1);
-    time.addHours(25);
-    ASSERT_EQ(time.hours(), 2);
+    Time time(std::chrono::hours{21}, std::chrono::minutes{23});
+    time += std::chrono::hours{1};
+    ASSERT_EQ(time.hours().count(), 22);
+    time += std::chrono::hours{2};
+    ASSERT_EQ(time.hours().count(), 0);
+    time += std::chrono::hours{1};
+    time += std::chrono::hours{24};
+    ASSERT_EQ(time.hours().count(), 1);
+    time += std::chrono::hours{25};
+    ASSERT_EQ(time.hours().count(), 2);
 }
 
 TEST(Time, AddMinutes) {
-    Time time(21, 23);
+    Time time(std::chrono::hours{21}, std::chrono::minutes{23});
 
-    time.addMinutes(1);
-    ASSERT_EQ(time.minutes(), 24);
-    time.addMinutes(60);
-    ASSERT_EQ(time.minutes(), 24);
-    ASSERT_EQ(time.hours(), 22);
+    time += std::chrono::minutes{1};
+    ASSERT_EQ(time.minutes().count(), 24);
+    time += std::chrono::minutes{60};
+    ASSERT_EQ(time.minutes().count(), 24);
+    ASSERT_EQ(time.hours().count(), 22);
 }
 
 TEST(Time, AddSeconds) {
-    Time time(21, 23, 23);
+    Time time(std::chrono::hours{21}, std::chrono::minutes{23}, std::chrono::seconds{23});
 
-    time.addSeconds(1);
-    ASSERT_EQ(time.seconds(), 24);
-    time.addSeconds(60);
-    ASSERT_EQ(time.seconds(), 24);
-    ASSERT_EQ(time.minutes(), 24);
-    time.addSeconds(3600);
-    ASSERT_EQ(time.seconds(), 24);
-    ASSERT_EQ(time.minutes(), 24);
-    ASSERT_EQ(time.hours(), 22);
+    time += std::chrono::seconds{1};
+    ASSERT_EQ(time.seconds().count(), 24);
+    time += std::chrono::seconds{60};
+    ASSERT_EQ(time.seconds().count(), 24);
+    ASSERT_EQ(time.minutes().count(), 24);
+    time += std::chrono::seconds{3600};
+    ASSERT_EQ(time.seconds().count(), 24);
+    ASSERT_EQ(time.minutes().count(), 24);
+    ASSERT_EQ(time.hours().count(), 22);
 }
 
 TEST(Time, AddMilliseconds) {
-    Time time(21, 23, 23, 23);
+    Time time(std::chrono::hours{21}, std::chrono::minutes{23}, std::chrono::seconds{23}, std::chrono::milliseconds{23});
 
-    time.addMilliseconds(1);
-    ASSERT_EQ(time.milliseconds(), 24);
-    time.addMilliseconds(1000);
-    ASSERT_EQ(time.milliseconds(), 24);
-    ASSERT_EQ(time.seconds(), 24);
+    time += std::chrono::milliseconds{1};
+    ASSERT_EQ(time.milliseconds().count(), 24);
+    time += std::chrono::milliseconds{1000};
+    ASSERT_EQ(time.milliseconds().count(), 24);
+    ASSERT_EQ(time.seconds().count(), 24);
 }
 
 TEST(Time, AddMicroseconds) {
-    Time time(21, 23, 23, 23, 23);
+    Time time(std::chrono::hours{21}, std::chrono::minutes{23}, std::chrono::seconds{23}, std::chrono::milliseconds{23}, std::chrono::microseconds{23});
 
-    time.addMicroseconds(1);
-    ASSERT_EQ(time.microseconds(), 24);
-    time.addMicroseconds(1000);
-    ASSERT_EQ(time.microseconds(), 24);
-    ASSERT_EQ(time.milliseconds(), 24);
+    time += std::chrono::microseconds{1};
+    ASSERT_EQ(time.microseconds().count(), 24);
+    time += std::chrono::microseconds{1000};
+    ASSERT_EQ(time.microseconds().count(), 24);
+    ASSERT_EQ(time.milliseconds().count(), 24);
 }
 
 TEST(Time, AddNanoseconds) {
-    Time time(21, 23, 23, 23, 23, 23);
+    Time time(
+        std::chrono::hours{21}, std::chrono::minutes{23}, std::chrono::seconds{23}, std::chrono::milliseconds{23}, std::chrono::microseconds{23}, std::chrono::nanoseconds{23});
 
-    time.addNanoseconds(1);
-    ASSERT_EQ(time.nanoseconds(), 24);
-    time.addNanoseconds(1000);
-    ASSERT_EQ(time.nanoseconds(), 24);
-    ASSERT_EQ(time.microseconds(), 24);
+    time += std::chrono::nanoseconds{1};
+    ASSERT_EQ(time.nanoseconds().count(), 24);
+    time += std::chrono::nanoseconds{1000};
+    ASSERT_EQ(time.nanoseconds().count(), 24);
+    ASSERT_EQ(time.microseconds().count(), 24);
 }
 
 TEST(Time, SubtractHours) {
-    Time time(21, 23);
+    Time time(std::chrono::hours{21}, std::chrono::minutes{23});
 
-    time.subtractHours(1);
-    ASSERT_EQ(time.hours(), 20);
-    time.subtractHours(2);
-    ASSERT_EQ(time.hours(), 18);
-    time.subtractHours(24);
-    ASSERT_EQ(time.hours(), 18);
-    time.subtractHours(25);
-    ASSERT_EQ(time.hours(), 17);
+    time -= std::chrono::hours{1};
+    ASSERT_EQ(time.hours().count(), 20);
+    time -= std::chrono::hours{2};
+    ASSERT_EQ(time.hours().count(), 18);
+    time -= std::chrono::hours{24};
+    ASSERT_EQ(time.hours().count(), 18);
+    time -= std::chrono::hours{25};
+    ASSERT_EQ(time.hours().count(), 17);
 }
 
 TEST(Time, SubtractMinutes) {
-    Time time(21, 23);
+    Time time(std::chrono::hours{21}, std::chrono::minutes{23});
 
-    time.subtractMinutes(1);
-    ASSERT_EQ(time.minutes(), 22);
-    time.subtractMinutes(60);
-    ASSERT_EQ(time.minutes(), 22);
-    ASSERT_EQ(time.hours(), 20);
+    time -= std::chrono::minutes{1};
+    ASSERT_EQ(time.minutes().count(), 22);
+    time -= std::chrono::minutes{60};
+    ASSERT_EQ(time.minutes().count(), 22);
+    ASSERT_EQ(time.hours().count(), 20);
 }
 
 TEST(Time, SubtractSeconds) {
-    Time time(21, 23, 23);
+    Time time(std::chrono::hours{21}, std::chrono::minutes{23}, std::chrono::seconds{23});
 
-    time.subtractSeconds(1);
-    ASSERT_EQ(time.seconds(), 22);
-    time.subtractSeconds(60);
-    ASSERT_EQ(time.seconds(), 22);
-    ASSERT_EQ(time.minutes(), 22);
-    time.subtractSeconds(3600);
-    ASSERT_EQ(time.seconds(), 22);
-    ASSERT_EQ(time.minutes(), 22);
-    ASSERT_EQ(time.hours(), 20);
+    time -= std::chrono::seconds{1};
+    ASSERT_EQ(time.seconds().count(), 22);
+    time -= std::chrono::seconds{60};
+    ASSERT_EQ(time.seconds().count(), 22);
+    ASSERT_EQ(time.minutes().count(), 22);
+    time -= std::chrono::seconds{3600};
+    ASSERT_EQ(time.seconds().count(), 22);
+    ASSERT_EQ(time.minutes().count(), 22);
+    ASSERT_EQ(time.hours().count(), 20);
 }
 
 TEST(Time, SubtractMilliseconds) {
-    Time time(21, 23, 23, 23);
+    Time time(std::chrono::hours{21}, std::chrono::minutes{23}, std::chrono::seconds{23}, std::chrono::milliseconds{23});
 
-    time.subtractMilliseconds(1);
-    ASSERT_EQ(time.milliseconds(), 22);
-    time.subtractMilliseconds(1000);
-    ASSERT_EQ(time.milliseconds(), 22);
-    ASSERT_EQ(time.seconds(), 22);
+    time -= std::chrono::milliseconds{1};
+    ASSERT_EQ(time.milliseconds().count(), 22);
+    time -= std::chrono::milliseconds{1000};
+    ASSERT_EQ(time.milliseconds().count(), 22);
+    ASSERT_EQ(time.seconds().count(), 22);
 }
 
 TEST(Time, SubtractMicroseconds) {
-    Time time(21, 23, 23, 23, 23);
+    Time time(std::chrono::hours{21}, std::chrono::minutes{23}, std::chrono::seconds{23}, std::chrono::milliseconds{23}, std::chrono::microseconds{23});
 
-    time.subtractMicroseconds(1);
-    ASSERT_EQ(time.microseconds(), 22);
-    time.subtractMicroseconds(1000);
-    ASSERT_EQ(time.microseconds(), 22);
-    ASSERT_EQ(time.milliseconds(), 22);
+    time -= std::chrono::microseconds{1};
+    ASSERT_EQ(time.microseconds().count(), 22);
+    time -= std::chrono::microseconds{1000};
+    ASSERT_EQ(time.microseconds().count(), 22);
+    ASSERT_EQ(time.milliseconds().count(), 22);
 }
 
 TEST(Time, SubtractNanoseconds) {
-    Time time(21, 23, 23, 23, 23, 23);
+    Time time(
+        std::chrono::hours{21}, std::chrono::minutes{23}, std::chrono::seconds{23}, std::chrono::milliseconds{23}, std::chrono::microseconds{23}, std::chrono::nanoseconds{23});
 
-    time.subtractNanoseconds(1);
-    ASSERT_EQ(time.nanoseconds(), 22);
-    time.subtractNanoseconds(1000);
-    ASSERT_EQ(time.nanoseconds(), 22);
-    ASSERT_EQ(time.microseconds(), 22);
+    time -= std::chrono::nanoseconds{1};
+    ASSERT_EQ(time.nanoseconds().count(), 22);
+    time -= std::chrono::nanoseconds{1000};
+    ASSERT_EQ(time.nanoseconds().count(), 22);
+    ASSERT_EQ(time.microseconds().count(), 22);
 }
 
 TEST(Time, LocalTime) {
-    auto time = Time::localTime();
-    auto time_t = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
+    const auto time = Time::localTime();
+    const auto time_t = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
 
-    struct tm t_time = *std::localtime(&time_t);
+    auto [tm_sec, tm_min, tm_hour, tm_mday, tm_mon, tm_year, tm_wday, tm_yday, tm_isdst, tm_gmtoff, tm_zone] = *std::localtime(&time_t);
 
-    ASSERT_EQ(time.hours(), t_time.tm_hour) << "Hours are not equal";
-    ASSERT_EQ(time.minutes(), t_time.tm_min) << "Minutes are not equal";
-    ASSERT_EQ(time.seconds(), t_time.tm_sec) << "Seconds are not equal";
-}
-
-TEST(Time, toString) {
-    auto time = Time::localTime();
-
-    std::string s_time = time.toString();
-
-    std::string test_time;
-    if (time.hours() < 10) {
-        test_time += '0';
-    }
-    test_time += std::to_string(time.hours());
-    test_time += ':';
-    auto minutes = time.minutes();
-    if (minutes < 10) {
-        test_time += '0';
-    }
-    test_time += std::to_string(minutes);
-    test_time += ':';
-    auto seconds = time.seconds();
-    if (seconds < 10) {
-        test_time += '0';
-    }
-    test_time += std::to_string(time.seconds());
-    test_time += "+02";
-
-    ASSERT_EQ(s_time, test_time);
+    ASSERT_EQ(time.hours().count(), tm_hour) << "Hours are not equal";
+    ASSERT_EQ(time.minutes().count(), tm_min) << "Minutes are not equal";
+    ASSERT_EQ(time.seconds().count(), tm_sec) << "Seconds are not equal";
 }
 
 TEST(Time, OperatorEqual) {
-    Time left_time(23, 23, 23);
-    Time right_time(23, 23, 23);
+    const Time left_time(std::chrono::hours{23}, std::chrono::minutes{23}, std::chrono::seconds{23});
+    Time right_time(std::chrono::hours{23}, std::chrono::minutes{23}, std::chrono::seconds{23});
 
     ASSERT_TRUE(left_time == right_time);
-    right_time.addHours(1);
+    right_time += std::chrono::hours{1};
     ASSERT_FALSE(left_time == right_time);
 }
 
 TEST(Time, OperatorLess) {
-    Time left_time(23, 23, 22);
-    Time right_time(23, 23, 23);
+    const Time left_time(std::chrono::hours{23}, std::chrono::minutes{23}, std::chrono::seconds{22});
+    const Time right_time(std::chrono::hours{23}, std::chrono::minutes{23}, std::chrono::seconds{23});
 
     ASSERT_TRUE(left_time < right_time);
 }
 
 TEST(Time, OperatorPlus) {
-    Time left_time(23, 23, 23);
-    Time right_time(23, 23, 23);
+    const Time left_time(std::chrono::hours{23}, std::chrono::minutes{23}, std::chrono::seconds{23});
+    const Time right_time(std::chrono::hours{23}, std::chrono::minutes{23}, std::chrono::seconds{23});
 
-    auto day_time = left_time + right_time;
-    Time test_time(22, 46, 46);
+    const auto day_time = left_time + right_time;
+    const Time test_time(std::chrono::hours{22}, std::chrono::minutes{46}, std::chrono::seconds{46});
     ASSERT_TRUE(day_time == test_time);
 }
 
 TEST(Time, OperatorMinus) {
-    Time left_time(23, 23, 23);
-    Time right_time(22, 24, 24);
+    const Time left_time(std::chrono::hours{23}, std::chrono::minutes{23}, std::chrono::seconds{23});
+    const Time right_time(std::chrono::hours{22}, std::chrono::minutes{24}, std::chrono::seconds{24});
 
-    auto day_time = left_time - right_time;
+    const auto day_time = left_time - right_time;
 
-    ASSERT_TRUE(day_time == Time(0, 58, 59));
+    ASSERT_TRUE(day_time == Time(std::chrono::hours{0}, std::chrono::minutes{58}, std::chrono::seconds{59}));
 }
 
 TEST(Time, OperatorPlusAssign) {
-    Time left_time(23, 23, 23);
-    Time right_time(23, 23, 23);
+    Time left_time(std::chrono::hours{23}, std::chrono::minutes{23}, std::chrono::seconds{23});
+    const Time right_time(std::chrono::hours{23}, std::chrono::minutes{23}, std::chrono::seconds{23});
 
-    auto day_time = left_time + right_time;
+    const auto day_time = left_time + right_time;
     left_time += right_time;
     ASSERT_TRUE(day_time == left_time);
 }
 
 TEST(Time, OperatorMinusAssign) {
-    Time left_time(23, 23, 23);
-    Time right_time(22, 24, 24);
+    Time left_time(std::chrono::hours{23}, std::chrono::minutes{23}, std::chrono::seconds{23});
+    const Time right_time(std::chrono::hours{22}, std::chrono::minutes{24}, std::chrono::seconds{24});
 
-    auto day_time = left_time - right_time;
+    const auto day_time = left_time - right_time;
     left_time -= right_time;
     ASSERT_TRUE(day_time == left_time);
 }
 
 TEST(Date, DefaultConstructor) {
-    Date date;
-    auto time_t = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
+    const Date date;
+    const auto time_t = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
 
-    struct tm t_time = *std::gmtime(&time_t);
-    ASSERT_EQ(date.dayOfTheMonth(), t_time.tm_mday);
-    ASSERT_EQ(date.dayOfTheWeek(), t_time.tm_wday);
-    ASSERT_EQ(date.month(), t_time.tm_mon + 1);
-    ASSERT_EQ(date.year(), t_time.tm_year + 1900);
+    auto [tm_sec, tm_min, tm_hour, tm_mday, tm_mon, tm_year, tm_wday, tm_yday, tm_isdst, tm_gmtoff, tm_zone] = *std::gmtime(&time_t);
+    ASSERT_EQ(date.monthDay< int32_t >(), tm_mday);
+    ASSERT_EQ(date.weekDay< int32_t >(), tm_wday);
+    ASSERT_EQ(date.month< int32_t >(), tm_mon + 1);
+    ASSERT_EQ(date.year< int32_t >(), tm_year + 1900);
 }
 
-TEST(Date, ExplicitConstructor) {
-    Date date(25, 8, 2021);
-
-    ASSERT_EQ(date.dayOfTheMonth(), 25);
-    ASSERT_EQ(date.dayOfTheWeek(), 3);
-    ASSERT_EQ(date.month(), 8);
-    ASSERT_EQ(date.year(), 2021);
-
-    EXPECT_FALSE(date.isWeekend());
-
-    date = Date(1, 1, 2024);
-    ASSERT_EQ(date.dayOfTheMonth(), 1);
-    ASSERT_EQ(date.dayOfTheWeek(), 1);
-    ASSERT_EQ(date.month(), 1);
-    ASSERT_EQ(date.year(), 2024);
-
-    date = Date(1, 2, 2024);
-    ASSERT_EQ(date.dayOfTheMonth(), 1);
-    ASSERT_EQ(date.dayOfTheWeek(), 4);
-    ASSERT_EQ(date.month(), 2);
-    ASSERT_EQ(date.year(), 2024);
-
-    date = Date(1, 3, 2024);
-    ASSERT_EQ(date.dayOfTheMonth(), 1);
-    ASSERT_EQ(date.dayOfTheWeek(), 5);
-    ASSERT_EQ(date.month(), 3);
-    ASSERT_EQ(date.year(), 2024);
-
-    EXPECT_THROW(Date(32, 8, 2021), std::range_error);
-    EXPECT_THROW(Date(30, 13, 2021), std::range_error);
-    EXPECT_THROW(Date(1, 1, 1899), std::range_error);
-    EXPECT_THROW(Date(30, 2, 2021), std::range_error);
-    EXPECT_THROW(Date(31, 6, 2021), std::range_error);
+TEST(Date, SecondsConstructor) {
+    const std::vector< std::pair< std::chrono::seconds, int16_t > > time_stamps{
+        std::pair< std::chrono::seconds, uint16_t >{std::chrono::seconds{1577836801}, 2020},
+        std::pair< std::chrono::seconds, uint16_t >{std::chrono::seconds{1609459199}, 2020},
+        std::pair< std::chrono::seconds, uint16_t >{std::chrono::seconds{1609459201}, 2021},
+        std::pair< std::chrono::seconds, uint16_t >{std::chrono::seconds{1640995199}, 2021},
+        std::pair< std::chrono::seconds, uint16_t >{std::chrono::seconds{1640995201}, 2022},
+        std::pair< std::chrono::seconds, uint16_t >{std::chrono::seconds{1672531199}, 2022},
+        std::pair< std::chrono::seconds, uint16_t >{std::chrono::seconds{1672531201}, 2023},
+        std::pair< std::chrono::seconds, uint16_t >{std::chrono::seconds{1704067199}, 2023},
+        std::pair< std::chrono::seconds, uint16_t >{std::chrono::seconds{1704067201}, 2024},
+        std::pair< std::chrono::seconds, uint16_t >{std::chrono::seconds{1735689599}, 2024},
+        std::pair< std::chrono::seconds, uint16_t >{std::chrono::seconds{1735689601}, 2025},
+    };
+    bool january = true;
+    for (auto [time_stamp, year]: time_stamps) {
+        Date date{time_stamp};
+        ASSERT_EQ(date.year< uint16_t >(), year);
+        if (january) {
+            ASSERT_EQ(date.month< uint8_t >(), uint8_t{1});
+            ASSERT_EQ(date.monthDay< uint8_t >(), uint8_t{1});
+            if (year == 2020) {
+                ASSERT_EQ(date.weekDay(), std::chrono::Wednesday);
+            }
+            else if (year == 2021) {
+                ASSERT_EQ(date.weekDay(), std::chrono::Friday);
+            }
+            else if (year == 2022) {
+                ASSERT_EQ(date.weekDay(), std::chrono::Saturday);
+            }
+            else if (year == 2023) {
+                ASSERT_EQ(date.weekDay(), std::chrono::Sunday);
+            }
+            else if (year == 2024) {
+                ASSERT_EQ(date.weekDay(), std::chrono::Monday);
+            } else {
+                ASSERT_EQ(date.weekDay(), std::chrono::Wednesday);
+            }
+        } else {
+            ASSERT_EQ(date.month< uint8_t >(), uint8_t{12});
+            ASSERT_EQ(date.monthDay< uint8_t >(), uint8_t{31});
+            if (year == 2020) {
+                ASSERT_EQ(date.weekDay(), std::chrono::Thursday);
+            }
+            else if (year == 2021) {
+                ASSERT_EQ(date.weekDay(), std::chrono::Friday);
+            }
+            else if (year == 2022) {
+                ASSERT_EQ(date.weekDay(), std::chrono::Saturday);
+            }
+            else if (year == 2023) {
+                ASSERT_EQ(date.weekDay(), std::chrono::Sunday);
+            }
+            else {
+                ASSERT_EQ(date.weekDay(), std::chrono::Tuesday);
+            }
+        }
+        january = !january;
+    }
 }
 
-TEST(Date, StringConstructor) {
-    Date date("2021-08-25");
-
-    ASSERT_EQ(date.dayOfTheMonth(), 25);
-    ASSERT_EQ(date.dayOfTheWeek(), 3);
-    ASSERT_EQ(date.month(), 8);
-    ASSERT_EQ(date.year(), 2021);
-
-    EXPECT_FALSE(date.isWeekend());
-
-    std::string invalid_date1 = "2021825";
-    std::string invalid_date2 = "2021-0825";
-    std::string invalid_date3 = "2021-8-25";
-
-    EXPECT_THROW(Date{invalid_date1}, std::invalid_argument);
-    EXPECT_THROW(Date{invalid_date2}, std::invalid_argument);
-    EXPECT_THROW(Date{invalid_date3}, std::invalid_argument);
+TEST(Date, OperatorPlusMinus) {
+    Date date(std::chrono::years{2024}, std::chrono::months{1}, std::chrono::days{1});
+    date += std::chrono::years{1};
+    ASSERT_EQ(date.year(), std::chrono::year{2025});
+    date -= std::chrono::years{1};
+    ASSERT_EQ(date.year(), std::chrono::year{2024});
+    date += std::chrono::days{30};
+    date += std::chrono::months{1};
+    ASSERT_EQ(date.month(), std::chrono::February);
+    ASSERT_EQ(date.monthDay(), std::chrono::day{29});
+    date += std::chrono::months{1};
+    ASSERT_EQ(date.month(), std::chrono::March);
+    ASSERT_EQ(date.monthDay(), std::chrono::day{29});
+    date += std::chrono::days{1};
+    ASSERT_EQ(date.month(), std::chrono::March);
+    ASSERT_EQ(date.monthDay(), std::chrono::day{30});
+    date -= std::chrono::months{1};
+    ASSERT_EQ(date.month(), std::chrono::February);
+    ASSERT_EQ(date.monthDay(), std::chrono::day{29});
+    date -= std::chrono::years{1};
+    ASSERT_EQ(date.year(), std::chrono::year{2023});
+    ASSERT_EQ(date.month(), std::chrono::February);
+    ASSERT_EQ(date.monthDay(), std::chrono::day{28});
+    date += std::chrono::years{1};
+    ASSERT_EQ(date.year(), std::chrono::year{2024});
+    ASSERT_EQ(date.month(), std::chrono::February);
+    ASSERT_EQ(date.monthDay(), std::chrono::day{28});
+    date += std::chrono::days{1};
+    ASSERT_EQ(date.month(), std::chrono::February);
+    ASSERT_EQ(date.monthDay(), std::chrono::day{29});
+    date += std::chrono::years{1};
+    ASSERT_EQ(date.year(), std::chrono::year{2025});
+    ASSERT_EQ(date.month(), std::chrono::February);
+    ASSERT_EQ(date.monthDay(), std::chrono::day{28});
+    date += std::chrono::months{1};
+    ASSERT_EQ(date.year(), std::chrono::year{2025});
+    ASSERT_EQ(date.month(), std::chrono::March);
+    ASSERT_EQ(date.monthDay(), std::chrono::day{28});
+    date += std::chrono::days{3};
+    ASSERT_EQ(date.year(), std::chrono::year{2025});
+    ASSERT_EQ(date.month(), std::chrono::March);
+    ASSERT_EQ(date.monthDay(), std::chrono::day{31});
+    date += std::chrono::months{1};
+    ASSERT_EQ(date.year(), std::chrono::year{2025});
+    ASSERT_EQ(date.month(), std::chrono::April);
+    ASSERT_EQ(date.monthDay(), std::chrono::day{30});
+    date += std::chrono::months{1};
+    date += std::chrono::days{1};
+    ASSERT_EQ(date.year(), std::chrono::year{2025});
+    ASSERT_EQ(date.month(), std::chrono::May);
+    ASSERT_EQ(date.monthDay(), std::chrono::day{31});
+    date -= std::chrono::months{1};
+    ASSERT_EQ(date.year(), std::chrono::year{2025});
+    ASSERT_EQ(date.month(), std::chrono::April);
+    ASSERT_EQ(date.monthDay(), std::chrono::day{30});
+    date = Date(std::chrono::years{2024}, std::chrono::months{1}, std::chrono::days{1});
+    date += std::chrono::days{31};
+    ASSERT_EQ(date.month(), std::chrono::February);
+    ASSERT_EQ(date.monthDay(), std::chrono::day{1});
+    date += std::chrono::days{28};
+    ASSERT_EQ(date.month(), std::chrono::February);
+    ASSERT_EQ(date.monthDay(), std::chrono::day{29});
+    date += std::chrono::days{31};
+    ASSERT_EQ(date.month(), std::chrono::March);
+    ASSERT_EQ(date.monthDay(), std::chrono::day{31});
+    date += std::chrono::days{365};
+    ASSERT_EQ(date.year(), std::chrono::year{2025});
+    ASSERT_EQ(date.month(), std::chrono::March);
+    ASSERT_EQ(date.monthDay(), std::chrono::day{31});
 }
 
-TEST(Date, OperatorEqual) {
-    Date date_one("2021-08-25");
-    Date date_two(25, 8, 2021);
-    EXPECT_TRUE(date_one == date_two);
-}
-
-TEST(Date, OperatorLess) {
-    Date date_one("2021-08-25");
-    Date date_two(25, 8, 2021);
-    EXPECT_FALSE(date_one < date_two);
-    Date date_three(26, 8, 2021);
-    EXPECT_TRUE(date_one < date_three);
-    Date date_four(25, 9, 2021);
-    EXPECT_TRUE(date_one < date_four);
-    Date date_five(25, 8, 2022);
-    EXPECT_TRUE(date_one < date_five);
-}
-
-TEST(Date, AddDays) {
-    Date date(25, 8, 2021);
-
-    date.addDays(5);
-    ASSERT_EQ(date.dayOfTheMonth(), 30);
-    ASSERT_EQ(date.dayOfTheWeek(), 1);
-
-    date.addDays(2);
-    ASSERT_EQ(date.dayOfTheMonth(), 1);
-    ASSERT_EQ(date.dayOfTheWeek(), 3);
-
-    date.addDays(31);
-    ASSERT_EQ(date.dayOfTheMonth(), 2);
-    ASSERT_EQ(date.dayOfTheWeek(), 6);
-
-    date = Date(28, 2, 2024);
-
-    date.addDays(1);
-    ASSERT_EQ(date.dayOfTheMonth(), 29);
-    ASSERT_EQ(date.dayOfTheWeek(), 4);
-}
-
-TEST(Date, AddMonths) {
-    Date date(25, 8, 2021);
-
-    date.addMonths(1);
-    ASSERT_EQ(date.dayOfTheMonth(), 25);
-    ASSERT_EQ(date.month(), 9);
-    ASSERT_EQ(date.dayOfTheWeek(), 6);
-
-    date = Date(31, 8, 2021);
-
-    date.addMonths(1);
-    ASSERT_EQ(date.dayOfTheMonth(), 30);
-    ASSERT_EQ(date.month(), 9);
-    ASSERT_EQ(date.dayOfTheWeek(), 4);
-
-    date = Date(31, 1, 2024);
-    date.addMonths(1);
-    ASSERT_EQ(date.dayOfTheMonth(), 29);
-    ASSERT_EQ(date.month(), 2);
-    ASSERT_EQ(date.dayOfTheWeek(), 4);
-
-    date = Date(31, 1, 2023);
-    date.addMonths(1);
-    ASSERT_EQ(date.dayOfTheMonth(), 28);
-    ASSERT_EQ(date.month(), 2);
-    ASSERT_EQ(date.dayOfTheWeek(), 2);
-}
-
-TEST(Date, AddYears) {
-    Date date(25, 8, 2021);
-
-    date.addYears(1);
-    ASSERT_EQ(date.dayOfTheMonth(), 25);
-    ASSERT_EQ(date.year(), 2022);
-    ASSERT_EQ(date.dayOfTheWeek(), 4);
-
-    date = Date(29, 2, 2024);
-
-    date.addYears(1);
-    ASSERT_EQ(date.dayOfTheMonth(), 28);
-    ASSERT_EQ(date.year(), 2025);
-    ASSERT_EQ(date.dayOfTheWeek(), 5);
-}
-
-TEST(Date, SubtractDays) {
-    Date date(25, 8, 2021);
-
-    date.subtractDays(5);
-    ASSERT_EQ(date.dayOfTheMonth(), 20);
-    ASSERT_EQ(date.dayOfTheWeek(), 5);
-
-    date.subtractDays(31);
-    ASSERT_EQ(date.dayOfTheMonth(), 20);
-    ASSERT_EQ(date.dayOfTheWeek(), 2);
-
-    date = Date(1, 3, 2024);
-
-    date.subtractDays(1);
-    ASSERT_EQ(date.dayOfTheMonth(), 29);
-    ASSERT_EQ(date.dayOfTheWeek(), 4);
-}
-
-TEST(Date, SubtractMonths) {
-    Date date(25, 8, 2021);
-
-    date.subtractMonths(1);
-    ASSERT_EQ(date.dayOfTheMonth(), 25);
-    ASSERT_EQ(date.month(), 7);
-    ASSERT_EQ(date.dayOfTheWeek(), 0);
-
-    date = Date(31, 7, 2021);
-
-    date.subtractMonths(1);
-    ASSERT_EQ(date.dayOfTheMonth(), 30);
-    ASSERT_EQ(date.month(), 6);
-    ASSERT_EQ(date.dayOfTheWeek(), 3);
-
-    date = Date(31, 3, 2024);
-    date.subtractMonths(1);
-    ASSERT_EQ(date.dayOfTheMonth(), 29);
-    ASSERT_EQ(date.month(), 2);
-    ASSERT_EQ(date.dayOfTheWeek(), 4);
-
-    date = Date(28, 3, 2024);
-    date.subtractMonths(1);
-    ASSERT_EQ(date.dayOfTheMonth(), 28);
-    ASSERT_EQ(date.month(), 2);
-
-    date = Date(28, 3, 2023);
-    date.subtractMonths(1);
-    ASSERT_EQ(date.dayOfTheMonth(), 28);
-    ASSERT_EQ(date.month(), 2);
-}
-
-TEST(Date, SubtractYears) {
-    Date date(25, 8, 2021);
-
-    date.subtractYears(1);
-    ASSERT_EQ(date.dayOfTheMonth(), 25);
-    ASSERT_EQ(date.year(), 2020);
-    ASSERT_EQ(date.dayOfTheWeek(), 2);
-
-    date = Date(29, 2, 2024);
-    date.subtractYears(1);
-    ASSERT_EQ(date.dayOfTheMonth(), 28);
-    ASSERT_EQ(date.year(), 2023);
-    ASSERT_EQ(date.dayOfTheWeek(), 2);
-
-    date = Date(1, 3, 2024);
-    date.subtractYears(1);
-    ASSERT_EQ(date.dayOfTheMonth(), 1);
-    ASSERT_EQ(date.month(), 3);
-    ASSERT_EQ(date.year(), 2023);
-
-    date = Date(28, 2, 2024);
-    date.subtractYears(1);
-    ASSERT_EQ(date.dayOfTheMonth(), 28);
-    ASSERT_EQ(date.month(), 2);
-    ASSERT_EQ(date.year(), 2023);
-
-    date = Date(28, 2, 2025);
-    date.subtractYears(1);
-    ASSERT_EQ(date.dayOfTheMonth(), 28);
-    ASSERT_EQ(date.month(), 2);
-    ASSERT_EQ(date.year(), 2024);
-
-    date = Date(1, 3, 2025);
-    date.subtractYears(1);
-    ASSERT_EQ(date.dayOfTheMonth(), 1);
-    ASSERT_EQ(date.month(), 3);
-    ASSERT_EQ(date.year(), 2024);
-}
-
-TEST(Date, IsWeekend) {
-    Date date(25, 8, 2021);
-
-    ASSERT_FALSE(date.isWeekend());
-
-    date = Date(4, 9, 2021);
-
-    ASSERT_TRUE(date.isWeekend());
-}
-
-TEST(Date, ToString) {
-    Date date(25, 8, 2021);
-
-    std::string s_date = date.toString();
-    std::string t_date = "2021-08-25";
-
-    ASSERT_EQ(s_date, t_date);
-}
-
-TEST(Date, IsLeapYear) {
-    ASSERT_FALSE(Date::isLeapYear(2021));
-
-    ASSERT_TRUE(Date::isLeapYear(2024));
-}
-
-TEST(DateTime, StringConstructor) {
-    std::string date = "20210101T10:10:10+02";
-
-    DateTime d_date(date);
-
-    ASSERT_EQ(d_date.date().year(), 2021);
-    ASSERT_EQ(d_date.date().month(), 1);
-    ASSERT_EQ(d_date.date().dayOfTheMonth(), 1);
-    ASSERT_EQ(d_date.time().hours(), 10);
-    ASSERT_EQ(d_date.time().minutes(), 10);
-    ASSERT_EQ(d_date.time().seconds(), 10);
-    ASSERT_EQ(d_date.time().offset(), TimeZone::EAST_2);
-}
-
-TEST(DateTime, AddSeconds_55){
-    std::string date = "20210101T23:59:10+02";
-
-    DateTime l_date_time(date);
-
-    l_date_time.addSeconds(55);
-    ASSERT_EQ(l_date_time.date().dayOfTheMonth(), 2);
-    ASSERT_EQ(l_date_time.time().hours(), 0);
-    ASSERT_EQ(l_date_time.time().minutes(), 0);
-    ASSERT_EQ(l_date_time.time().seconds(), 5);
-}
-
-TEST(DateTime, AddSeconds_3600){
-    std::string date = "20210101T23:10:10+02";
-
-    DateTime l_date_time(date);
-
-    l_date_time.addSeconds(3600);
-    ASSERT_EQ(l_date_time.date().dayOfTheMonth(), 2);
-    ASSERT_EQ(l_date_time.time().hours(), 0);
-    ASSERT_EQ(l_date_time.time().minutes(), 10);
-    ASSERT_EQ(l_date_time.time().seconds(), 10);
-}
-
-TEST(DateTime, AddMinutes_45){
-    std::string date = "20210101T23:10:10+02";
-
-    DateTime l_date_time(date);
-
-    l_date_time.addMinutes(45);
-    ASSERT_EQ(l_date_time.date().dayOfTheMonth(), 1);
-    ASSERT_EQ(l_date_time.time().hours(), 23);
-    ASSERT_EQ(l_date_time.time().minutes(), 55);
-    ASSERT_EQ(l_date_time.time().seconds(), 10);
-}
-
-TEST(DateTime, AddMinutes_50){
-    std::string date = "20210101T23:10:10+02";
-
-    DateTime l_date_time(date);
-
-    l_date_time.addMinutes(50);
-    ASSERT_EQ(l_date_time.date().dayOfTheMonth(), 2);
-    ASSERT_EQ(l_date_time.time().hours(), 0);
-    ASSERT_EQ(l_date_time.time().minutes(), 0);
-    ASSERT_EQ(l_date_time.time().seconds(), 10);
-}
-
-TEST(DateTime, AddMinutes_55){
-    std::string date = "20210101T23:10:10+02";
-
-    DateTime l_date_time(date);
-
-    l_date_time.addMinutes(55);
-    ASSERT_EQ(l_date_time.date().dayOfTheMonth(), 2);
-    ASSERT_EQ(l_date_time.time().hours(), 0);
-    ASSERT_EQ(l_date_time.time().minutes(), 5);
-    ASSERT_EQ(l_date_time.time().seconds(), 10);
-}
-
-TEST(DateTime, AddMinutes_60){
-    std::string date = "20210101T23:10:10+02";
-
-    DateTime l_date_time(date);
-
-    l_date_time.addMinutes(60);
-    ASSERT_EQ(l_date_time.date().dayOfTheMonth(), 2);
-    ASSERT_EQ(l_date_time.time().hours(), 0);
-    ASSERT_EQ(l_date_time.time().minutes(), 10);
-    ASSERT_EQ(l_date_time.time().seconds(), 10);
-}
-
-TEST(DateTime, AddMinutes_1440){
-    std::string date = "20210101T00:10:10+02";
-
-    DateTime l_date_time(date);
-
-    l_date_time.addMinutes(1440);
-    ASSERT_EQ(l_date_time.date().dayOfTheMonth(), 2);
-    ASSERT_EQ(l_date_time.time().hours(), 0);
-    ASSERT_EQ(l_date_time.time().minutes(), 10);
-    ASSERT_EQ(l_date_time.time().seconds(), 10);
-}
-
-TEST(DateTime, AddMinutes_2880){
-    std::string date = "20210101T00:10:10+02";
-
-    DateTime l_date_time(date);
-
-    l_date_time.addMinutes(2880);
-    ASSERT_EQ(l_date_time.date().dayOfTheMonth(), 3);
-    ASSERT_EQ(l_date_time.time().hours(), 0);
-    ASSERT_EQ(l_date_time.time().minutes(), 10);
-    ASSERT_EQ(l_date_time.time().seconds(), 10);
-}
-
-TEST(DateTime, AddHours_1){
-    std::string date = "20210101T23:10:10+02";
-
-    DateTime l_date_time(date);
-
-    l_date_time.addHours(1);
-    ASSERT_EQ(l_date_time.date().dayOfTheMonth(), 2);
-    ASSERT_EQ(l_date_time.time().hours(), 0);
-    ASSERT_EQ(l_date_time.time().minutes(), 10);
-    ASSERT_EQ(l_date_time.time().seconds(), 10);
-}
-
-TEST(DateTime, AddHours_24){
-    std::string date = "20210101T00:10:10+02";
-
-    DateTime l_date_time(date);
-
-    l_date_time.addHours(24);
-    ASSERT_EQ(l_date_time.date().dayOfTheMonth(), 2);
-    ASSERT_EQ(l_date_time.time().hours(), 0);
-    ASSERT_EQ(l_date_time.time().minutes(), 10);
-    ASSERT_EQ(l_date_time.time().seconds(), 10);
-}
-
-TEST(DateTime, AddHours_48){
-    std::string date = "20210101T00:10:10+02";
-
-    DateTime l_date_time(date);
-
-    l_date_time.addHours(48);
-    ASSERT_EQ(l_date_time.date().dayOfTheMonth(), 3);
-    ASSERT_EQ(l_date_time.time().hours(), 0);
-    ASSERT_EQ(l_date_time.time().minutes(), 10);
-    ASSERT_EQ(l_date_time.time().seconds(), 10);
-}
-
-TEST(DateTime, SubtractSeconds_55){
-    std::string date = "20210102T00:00:05+02";
-
-    DateTime l_date_time(date);
-
-    l_date_time.subtractSeconds(55);
-    ASSERT_EQ(l_date_time.date().dayOfTheMonth(), 1);
-    ASSERT_EQ(l_date_time.time().hours(), 23);
-    ASSERT_EQ(l_date_time.time().minutes(), 59);
-    ASSERT_EQ(l_date_time.time().seconds(), 10);
-}
-
-TEST(DateTime, SubtractSeconds_3600){
-    std::string date = "20210102T00:10:10+02";
-
-    DateTime l_date_time(date);
-
-    l_date_time.subtractSeconds(3600);
-    ASSERT_EQ(l_date_time.date().dayOfTheMonth(), 1);
-    ASSERT_EQ(l_date_time.time().hours(), 23);
-    ASSERT_EQ(l_date_time.time().minutes(), 10);
-    ASSERT_EQ(l_date_time.time().seconds(), 10);
-}
-
-TEST(DateTime, SubtractMinutes_45){
-    std::string date = "20210101T23:55:10+02";
-
-    DateTime l_date_time(date);
-
-    l_date_time.subtractMinutes(45);
-    ASSERT_EQ(l_date_time.date().dayOfTheMonth(), 1);
-    ASSERT_EQ(l_date_time.time().hours(), 23);
-    ASSERT_EQ(l_date_time.time().minutes(), 10);
-    ASSERT_EQ(l_date_time.time().seconds(), 10);
-}
-
-TEST(DateTime, SubtractMinutes_50){
-    std::string date = "20210102T00:00:10+02";
-
-    DateTime l_date_time(date);
-
-    l_date_time.subtractMinutes(50);
-    ASSERT_EQ(l_date_time.date().dayOfTheMonth(), 1);
-    ASSERT_EQ(l_date_time.time().hours(), 23);
-    ASSERT_EQ(l_date_time.time().minutes(), 10);
-    ASSERT_EQ(l_date_time.time().seconds(), 10);
-}
-
-TEST(DateTime, SubtractMinutes_55){
-    std::string date = "20210102T00:05:10+02";
-
-    DateTime l_date_time(date);
-
-    l_date_time.subtractMinutes(55);
-    ASSERT_EQ(l_date_time.date().dayOfTheMonth(), 1);
-    ASSERT_EQ(l_date_time.time().hours(), 23);
-    ASSERT_EQ(l_date_time.time().minutes(), 10);
-    ASSERT_EQ(l_date_time.time().seconds(), 10);
-}
-
-TEST(DateTime, SubtractMinutes_60){
-    std::string date = "20210102T00:10:10+02";
-
-    DateTime l_date_time(date);
-
-    l_date_time.subtractMinutes(60);
-    ASSERT_EQ(l_date_time.date().dayOfTheMonth(), 1);
-    ASSERT_EQ(l_date_time.time().hours(), 23);
-    ASSERT_EQ(l_date_time.time().minutes(), 10);
-    ASSERT_EQ(l_date_time.time().seconds(), 10);
-}
-
-TEST(DateTime, SubtractMinutes_1440){
-    std::string date = "20210102T00:10:10+02";
-
-    DateTime l_date_time(date);
-
-    l_date_time.subtractMinutes(1440);
-    ASSERT_EQ(l_date_time.date().dayOfTheMonth(), 1);
-    ASSERT_EQ(l_date_time.time().hours(), 0);
-    ASSERT_EQ(l_date_time.time().minutes(), 10);
-    ASSERT_EQ(l_date_time.time().seconds(), 10);
-}
-
-TEST(DateTime, SubtractMinutes_2880){
-    std::string date = "20210103T00:10:10+02";
-
-    DateTime l_date_time(date);
-
-    l_date_time.subtractMinutes(2880);
-    ASSERT_EQ(l_date_time.date().dayOfTheMonth(), 1);
-    ASSERT_EQ(l_date_time.time().hours(), 0);
-    ASSERT_EQ(l_date_time.time().minutes(), 10);
-    ASSERT_EQ(l_date_time.time().seconds(), 10);
-}
-
-TEST(DateTime, SubtractHours_1){
-    std::string date = "20210102T00:10:10+02";
-
-    DateTime l_date_time(date);
-
-    l_date_time.subtractHours(1);
-    ASSERT_EQ(l_date_time.date().dayOfTheMonth(), 1);
-    ASSERT_EQ(l_date_time.time().hours(), 23);
-    ASSERT_EQ(l_date_time.time().minutes(), 10);
-    ASSERT_EQ(l_date_time.time().seconds(), 10);
-}
-
-TEST(DateTime, SubtractHours_24){
-    std::string date = "20210102T00:10:10+02";
-
-    DateTime l_date_time(date);
-
-    l_date_time.subtractHours(24);
-    ASSERT_EQ(l_date_time.date().dayOfTheMonth(), 1);
-    ASSERT_EQ(l_date_time.time().hours(), 0);
-    ASSERT_EQ(l_date_time.time().minutes(), 10);
-    ASSERT_EQ(l_date_time.time().seconds(), 10);
-}
-
-TEST(DateTime, SubtractHours_48){
-    std::string date = "20210103T00:10:10+02";
-
-    DateTime l_date_time(date);
-
-    l_date_time.subtractHours(48);
-    ASSERT_EQ(l_date_time.date().dayOfTheMonth(), 1);
-    ASSERT_EQ(l_date_time.time().hours(), 0);
-    ASSERT_EQ(l_date_time.time().minutes(), 10);
-    ASSERT_EQ(l_date_time.time().seconds(), 10);
-}
+#endif  // TESTS_HPP
