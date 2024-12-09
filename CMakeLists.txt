@@ -5,9 +5,8 @@ project(date-time LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-option(BUILD_STATIC "" ON)
-option(DOCS "" OFF)
-option(BUILD_TESTS "" ON)
+option(BUILD_STATIC "Build static library" ON)
+option(DOCS "Build docs" OFF)
 option(ENABLE_ASAN "Enables asan build" OFF)
 
 if (PROJECT_IS_TOP_LEVEL)
@@ -49,29 +48,31 @@ include_directories(
         include/
 )
 
-file(GLOB_RECURSE INC_FILES CONFIGURE_DEPENDS
+file(GLOB INC_FILES CONFIGURE_DEPENDS
         include/*.hpp
 )
-file(GLOB_RECURSE SRC_FILES CONFIGURE_DEPENDS
+file(GLOB SRC_FILES CONFIGURE_DEPENDS
         source/*.cpp
 )
 
 set(LIB_VERSION 2.0.0)
 
 if ("${CMAKE_INSTALL_PREFIX}" STREQUAL "")
-    message(STATUS "${PROJECT_NAME}: CMAKE_INSTALL_PREFIX is not set. $ENV{HOME} directory will be used")
-    set(INSTALL_PREFIX "$ENV{HOME}/tristan_libs")
-else ()
-    set(INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}")
+    message(STATUS "${PROJECT_NAME}: CMAKE_INSTALL_PREFIX is not set. ${CMAKE_BINARY_DIR} directory will be used")
+    set(CMAKE_INSTALL_PREFIX "${CMAKE_BINARY_DIR}/mt_libs")
+else()
+    set(CMAKE_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}/mt_libs")
 endif ()
 
-set(PROJECT_INSTALL_DIR ${INSTALL_PREFIX}/${PROJECT_NAME})
-set(LIBRARY_INSTALL_DIR ${PROJECT_INSTALL_DIR}/${CMAKE_BUILD_TYPE})
+string(TOLOWER ${CMAKE_BUILD_TYPE} BUILD_TYPE)
+
+set(PROJECT_INSTALL_DIR ${CMAKE_INSTALL_PREFIX}/${PROJECT_NAME})
+set(LIBRARY_INSTALL_DIR ${PROJECT_INSTALL_DIR}/${BUILD_TYPE})
+set(DATE_TIME_LIBRARY_DIR ${LIBRARY_INSTALL_DIR} PARENT_SCOPE)
 message(STATUS "${PROJECT_NAME}: Library install directory is set to ${LIBRARY_INSTALL_DIR}")
-set(INCLUDE_INSTALL_DIR ${LIBRARY_INSTALL_DIR}/inc)
+set(INCLUDE_INSTALL_DIR ${LIBRARY_INSTALL_DIR}/include)
+set(DATE_TIME_INCLUDE_DIR ${INCLUDE_INSTALL_DIR} PARENT_SCOPE)
 message(STATUS "${PROJECT_NAME}: Include install directory is set to ${INCLUDE_INSTALL_DIR}")
-set(CMAKE_CONFIG_INSTALL_DIR ${INSTALL_PREFIX}/cmake/${CMAKE_BUILD_TYPE})
-message(STATUS "${PROJECT_NAME}: CMake config files install directory is set to ${CMAKE_CONFIG_INSTALL_DIR}")
 
 if (BUILD_STATIC)
     message(STATUS "${PROJECT_NAME}: Will build static library")
@@ -83,7 +84,7 @@ endif ()
 
 if (PROJECT_IS_TOP_LEVEL)
     if (CMAKE_BUILD_TYPE STREQUAL "Debug")
-        target_compile_definitions(${PROJECT_NAME} PUBLIC TRISTAN_DEBUG)
+        target_compile_definitions(${PROJECT_NAME} PUBLIC MT_DEBUG)
     endif ()
 endif ()
 
@@ -117,9 +118,6 @@ set_target_properties(
         VERSION ${LIB_VERSION}
         OUTPUT_NAME ${PROJECT_NAME}
 )
-if (BUILD_TESTS)
-    add_subdirectory(Tests)
-endif ()
 if (DOCS)
     find_package(Doxygen REQUIRED doxygen)
     set(DOXYGEN_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/Docs)
