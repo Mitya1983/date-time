@@ -20,6 +20,10 @@ mt::date::Date::Date(mt::TimeZone p_time_zone) {
     m_date = std::chrono::year_month_day{std::chrono::floor< std::chrono::days >(time_point_now)};
 }
 
+mt::date::Date::Date(const std::chrono::time_point< std::chrono::system_clock > p_time_point) :
+    m_date{std::chrono::year_month_day{std::chrono::floor< std::chrono::days >(p_time_point)}} {
+}
+
 mt::date::Date::Date(const std::chrono::year p_year, const std::chrono::month p_month, const std::chrono::day p_day) {
     if (!p_day.ok()) {
 #if defined __cpp_lib_format
@@ -214,8 +218,9 @@ mt::date::Date mt::date::operator+(Date p_date, const DateDuration p_value) {
                     } else {
                         p_date.m_date = std::chrono::year_month_day{p_date.year(), p_date.month(), std::chrono::day{29}};
                     }
-                } else if (const auto month = p_date.month(); (month == std::chrono::April || month == std::chrono::June || month == std::chrono::September
-                                                              || month == std::chrono::November) && p_date.monthDay() == std::chrono::day{31}) {
+                } else if (const auto month = p_date.month();
+                           (month == std::chrono::April || month == std::chrono::June || month == std::chrono::September || month == std::chrono::November)
+                           && p_date.monthDay() == std::chrono::day{31}) {
                     p_date.m_date = std::chrono::year_month_day{p_date.year(), p_date.month(), std::chrono::day{30}};
                 }
             } else {
@@ -228,8 +233,9 @@ mt::date::Date mt::date::operator+(Date p_date, const DateDuration p_value) {
                     } else {
                         p_date.m_date = std::chrono::year_month_day{p_date.year(), p_date.month(), std::chrono::day{29}};
                     }
-                } else if (const auto month = p_date.month(); (month == std::chrono::April || month == std::chrono::June || month == std::chrono::September
-                                                              || month == std::chrono::November) && p_date.monthDay() == std::chrono::day{31}) {
+                } else if (const auto month = p_date.month();
+                           (month == std::chrono::April || month == std::chrono::June || month == std::chrono::September || month == std::chrono::November)
+                           && p_date.monthDay() == std::chrono::day{31}) {
                     p_date.m_date = std::chrono::year_month_day{p_date.year(), p_date.month(), std::chrono::day{30}};
                 }
             }
@@ -254,8 +260,9 @@ mt::date::Date mt::date::operator-(Date p_date, const DateDuration p_value) {
                     } else {
                         p_date.m_date = std::chrono::year_month_day{p_date.year(), p_date.month(), std::chrono::day{29}};
                     }
-                } else if (const auto month = p_date.month(); (month == std::chrono::April || month == std::chrono::June || month == std::chrono::September
-                                                              || month == std::chrono::November) && p_date.monthDay() == std::chrono::day{31}) {
+                } else if (const auto month = p_date.month();
+                           (month == std::chrono::April || month == std::chrono::June || month == std::chrono::September || month == std::chrono::November)
+                           && p_date.monthDay() == std::chrono::day{31}) {
                     p_date.m_date = std::chrono::year_month_day{p_date.year(), p_date.month(), std::chrono::day{30}};
                 }
             } else {
@@ -268,8 +275,9 @@ mt::date::Date mt::date::operator-(Date p_date, const DateDuration p_value) {
                     } else {
                         p_date.m_date = std::chrono::year_month_day{p_date.year(), p_date.month(), std::chrono::day{29}};
                     }
-                } else if (const auto month = p_date.month(); (month == std::chrono::April || month == std::chrono::June || month == std::chrono::September
-                                                              || month == std::chrono::November) && p_date.monthDay() == std::chrono::day{31}) {
+                } else if (const auto month = p_date.month();
+                           (month == std::chrono::April || month == std::chrono::June || month == std::chrono::September || month == std::chrono::November)
+                           && p_date.monthDay() == std::chrono::day{31}) {
                     p_date.m_date = std::chrono::year_month_day{p_date.year(), p_date.month(), std::chrono::day{30}};
                 }
             }

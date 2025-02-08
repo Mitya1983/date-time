@@ -4,6 +4,10 @@
   #include <format>
 #endif
 
+mt::date_time::DateTime::DateTime(const std::chrono::time_point< std::chrono::system_clock > p_time_point) :
+    m_date{p_time_point},
+    m_time(p_time_point) { }
+
 mt::date_time::DateTime::DateTime(const mt::TimeZone p_time_zone) :
     m_date(p_time_zone),
     m_time(p_time_zone) { }
