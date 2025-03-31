@@ -26,9 +26,15 @@ namespace mt::date_time {
          */
         DateTime() = default;
         /**
-         * \brief Default constructor.
+         * \brief TimeZone constructor.
          * Creates DateTime based on provided time zone
-         * \param p_time_zone tristan::TimeZone
+         * \param p_time_point std::chrono::time_point< std::chrono::system_clock >
+         */
+        explicit DateTime(std::chrono::time_point< std::chrono::system_clock > p_time_point);
+        /**
+         * \brief TimeZone constructor.
+         * Creates DateTime based on provided time zone
+         * \param p_time_zone mt::TimeZone
          */
         explicit DateTime(mt::TimeZone p_time_zone);
         /**

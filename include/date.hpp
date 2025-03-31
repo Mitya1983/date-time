@@ -49,6 +49,14 @@ namespace mt::date {
          * \overload
          * \brief Overloaded constructor
          * Creates Date object with specified day, month and year.
+         * \param p_time_point std::chrono::time_point< std::chrono::system_clock >.
+
+         */
+        explicit Date(std::chrono::time_point< std::chrono::system_clock > p_time_point);
+        /**
+         * \overload
+         * \brief Overloaded constructor
+         * Creates Date object with specified day, month and year.
          * \param p_year std::chrono::year.
          * \param p_month std::chrono::month.
          * \param p_day std::chrono::day.
