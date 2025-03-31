@@ -58,19 +58,26 @@ file(GLOB SRC_FILES CONFIGURE_DEPENDS
 set(LIB_VERSION 3.0.0)
 
 if ("${CMAKE_INSTALL_PREFIX}" STREQUAL "")
-    message(STATUS "${PROJECT_NAME}: CMAKE_INSTALL_PREFIX is not set. ${CMAKE_BINARY_DIR} directory will be used")
-    set(CMAKE_INSTALL_PREFIX "${CMAKE_BINARY_DIR}/mt_libs")
-else ()
+    message(STATUS "${PROJECT_NAME}: CMAKE_INSTALL_PREFIX is not set. ${CMAKE_CURRENT_BINARY_DIR} directory will be used")
+    set(CMAKE_INSTALL_PREFIX ${CMAKE_CURRENT_BINARY_DIR})
+else()
     set(CMAKE_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}/mt_libs")
 endif ()
 
 string(TOLOWER ${CMAKE_BUILD_TYPE} BUILD_TYPE)
 
-set(PROJECT_INSTALL_DIR ${CMAKE_INSTALL_PREFIX}/${PROJECT_NAME})
-set(LIBRARY_INSTALL_DIR ${PROJECT_INSTALL_DIR}/${BUILD_TYPE})
-message(STATUS "${PROJECT_NAME}: Library install directory is set to ${LIBRARY_INSTALL_DIR}")
-set(INCLUDE_INSTALL_DIR ${LIBRARY_INSTALL_DIR}/include)
-message(STATUS "${PROJECT_NAME}: Include install directory is set to ${INCLUDE_INSTALL_DIR}")
+set(LIBRARY_DIR ${CMAKE_INSTALL_PREFIX}/${BUILD_TYPE})
+message(STATUS "${PROJECT_NAME}: Library install directory is set to ${LIBRARY_DIR}")
+set(INCLUDE_DIR ${LIBRARY_DIR}/include)
+message(STATUS "${PROJECT_NAME}: Include install directory is set to ${INCLUDE_DIR}")
+
+if (NOT ${PROJECT_IS_TOP_LEVEL})
+    if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+        add_compile_definitions(MT_DEBUG)
+    endif ()
+    set(DATE_TIME_LIB_DIR ${LIBRARY_DIR} PARENT_SCOPE)
+    set(DATE_TIME_INCLUDE_DIR ${INCLUDE_DIR} PARENT_SCOPE)
+endif ()
 
 if (BUILD_STATIC)
     message(STATUS "${PROJECT_NAME}: Will build static library")
@@ -78,14 +85,6 @@ if (BUILD_STATIC)
 else ()
     message(STATUS "${PROJECT_NAME}: Will build shared library")
     add_library(${PROJECT_NAME} SHARED)
-endif ()
-
-if (NOT ${PROJECT_IS_TOP_LEVEL})
-    if (CMAKE_BUILD_TYPE STREQUAL "Debug")
-        target_compile_definitions(${PROJECT_NAME} PUBLIC MT_DEBUG)
-    endif ()
-    set(DATE_TIME_LIBRARY_DIR ${LIBRARY_INSTALL_DIR} PARENT_SCOPE)
-    set(DATE_TIME_INCLUDE_DIR ${INCLUDE_INSTALL_DIR} PARENT_SCOPE)
 endif ()
 
 if (${ENABLE_ASAN} AND CMAKE_CXX_COMPILER_ID STREQUAL "Clang" AND CMAKE_BUILD_TYPE STREQUAL "Debug")
@@ -118,16 +117,3 @@ set_target_properties(
         VERSION ${LIB_VERSION}
         OUTPUT_NAME ${PROJECT_NAME}
 )
-if (DOCS)
-    find_package(Doxygen REQUIRED doxygen)
-    set(DOXYGEN_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/Docs)
-    set(DOXYGEN_GENERATE_HTML YES)
-    set(DOXYGEN_GENERATE_LATEX NO)
-    set(DOXYGEN_SORT_MEMBER_DOCS NO)
-    doxygen_add_docs(
-            doxygen
-            ${PROJECT_SOURCE_DIR}/inc
-            ALL
-    )
-endif ()
-
