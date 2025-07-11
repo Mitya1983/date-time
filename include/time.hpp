@@ -262,6 +262,13 @@ namespace mt::time {
      */
     auto operator-(Time l, Time r) -> Time;
     /**
+     *
+     * @param p_time Time
+     * @param p_value TimeValue
+     * @return Time
+     */
+    auto operator-(Time p_time, mt::time::TimeDuration p_value) -> Time;
+    /**
      * \brief Operator <<
      * \param out std::ostream&
      * \param time const Time&

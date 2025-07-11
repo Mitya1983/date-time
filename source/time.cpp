@@ -298,7 +298,7 @@ mt::time::Time mt::time::operator+(Time p_time, const TimeDuration p_value) {
 
 auto mt::time::operator-(const mt::time::Time l, mt::time::Time r) -> mt::time::Time { return l - r.m_nanoseconds_since_day_start; }
 
-mt::time::Time mt::time::operator-(Time p_time, const TimeDuration p_value) {
+auto mt::time::operator-(mt::time::Time p_time, const mt::time::TimeDuration p_value) -> mt::time::Time {
     std::visit(
         [&p_time]< typename TimeValueType >(TimeValueType&& value) -> void {
             p_time.m_nanoseconds_since_day_start -= value;
