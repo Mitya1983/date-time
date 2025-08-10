@@ -105,12 +105,19 @@ endif ()
 
 set(LIB_VERSION 3.0.0)
 
+SET(PUBLIC_HEADERS
+    include/time.hpp
+    include/time_zones.hpp
+    include/date.hpp
+    include/date_time.hpp
+    )
+
 set_target_properties(
         ${PROJECT_NAME}
         PROPERTIES
         VERSION ${LIB_VERSION}
         OUTPUT_NAME ${PROJECT_NAME}
-        PUBLIC_HEADER include/time.hpp include/time_zones.hpp include/date.hpp include/date_time.hpp
+        PUBLIC_HEADER "${PUBLIC_HEADERS}"
         )
 
 install(TARGETS ${PROJECT_NAME}
