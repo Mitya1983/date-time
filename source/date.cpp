@@ -189,9 +189,7 @@ std::string mt::date::Date::toString(const std::function< std::string(const Date
 }
 
 auto mt::date::Date::localDate() -> mt::date::Date {
-    const auto tm = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
-    const auto offset = std::localtime(&tm)->tm_gmtoff;
-    return mt::date::Date(static_cast< mt::TimeZone >(offset / 3600));
+    return mt::date::Date(static_cast< mt::TimeZone >(std::chrono::local_info().first.offset.count() / 3600));
 }
 
 bool mt::date::operator!=(const mt::date::Date& l, const mt::date::Date& r) { return !(l == r); }

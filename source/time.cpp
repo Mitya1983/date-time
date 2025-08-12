@@ -225,10 +225,7 @@ auto mt::time::Time::nanoseconds() const -> std::chrono::nanoseconds {
 
 auto mt::time::Time::localTime() -> mt::time::Time {
 
-    const auto tm = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
-    const auto offset = std::localtime(&tm)->tm_gmtoff;
-
-    return mt::time::Time(static_cast< mt::TimeZone >(offset / 3600));
+    return mt::time::Time(static_cast< mt::TimeZone >(std::chrono::local_info().first.offset.count() / 3600));
 }
 
 //
