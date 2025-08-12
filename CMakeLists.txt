@@ -5,9 +5,8 @@ project(date-time LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-option(BUILD_STATIC "" ON)
-option(DOCS "" OFF)
-option(BUILD_TESTS "" OFF)
+option(BUILD_STATIC "Build static library" ON)
+option(DOCS "Build docs" OFF)
 option(ENABLE_ASAN "Enables asan build" OFF)
 
 if (PROJECT_IS_TOP_LEVEL)
@@ -20,7 +19,7 @@ if (PROJECT_IS_TOP_LEVEL)
             endif ()
         endif ()
         if (CMAKE_BUILD_TYPE STREQUAL "Release")
-            set(CMAKE_CXX_FLAGS "-g0 -ggdb0 -glldb0 -O3")
+            set(CMAKE_CXX_FLAGS "-g0 -O3")
         endif ()
     elseif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
         # using GCC
@@ -36,100 +35,93 @@ if (PROJECT_IS_TOP_LEVEL)
     elseif (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
         # using Visual Studio C++
         if (CMAKE_BUILD_TYPE STREQUAL "Debug")
-            set(CMAKE_CXX_FLAGS "/Zi /Od /JMC /WX")
+            set(CMAKE_CXX_FLAGS "/Zi /Od /JMC /WX /EHsc")
         endif ()
         if (CMAKE_BUILD_TYPE STREQUAL "Release")
-            set(CMAKE_CXX_FLAGS "/Ot /O2")
+            set(CMAKE_CXX_FLAGS "/Ot /O2 /EHsc")
         endif ()
     else ()
         message(FATAL_ERROR "Compiler not supported")
     endif ()
 endif ()
+
 include_directories(
-        inc/
-)
+        include/
+        )
 
-file(GLOB_RECURSE INC_FILES CONFIGURE_DEPENDS
-        inc/*.hpp
-)
-file(GLOB_RECURSE SRC_FILES CONFIGURE_DEPENDS
-        src/*.cpp
-)
-
-set(LIB_VERSION 2.0.0)
-
-if ("${CMAKE_INSTALL_PREFIX}" STREQUAL "")
-    message(STATUS "${PROJECT_NAME}: CMAKE_INSTALL_PREFIX is not set. $ENV{HOME} directory will be used")
-    set(INSTALL_PREFIX "$ENV{HOME}/tristan_libs")
-else ()
-    set(INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}")
-endif ()
-
-set(PROJECT_INSTALL_DIR ${INSTALL_PREFIX}/${PROJECT_NAME})
-set(LIBRARY_INSTALL_DIR ${PROJECT_INSTALL_DIR}/${CMAKE_BUILD_TYPE})
-message(STATUS "${PROJECT_NAME}: Library install directory is set to ${LIBRARY_INSTALL_DIR}")
-set(INCLUDE_INSTALL_DIR ${LIBRARY_INSTALL_DIR}/inc)
-message(STATUS "${PROJECT_NAME}: Include install directory is set to ${INCLUDE_INSTALL_DIR}")
-set(CMAKE_CONFIG_INSTALL_DIR ${INSTALL_PREFIX}/cmake/${CMAKE_BUILD_TYPE})
-message(STATUS "${PROJECT_NAME}: CMake config files install directory is set to ${CMAKE_CONFIG_INSTALL_DIR}")
-
-if (BUILD_STATIC)
-    message(STATUS "${PROJECT_NAME}: Will build static library")
-    add_library(${PROJECT_NAME} STATIC)
-else ()
-    message(STATUS "${PROJECT_NAME}: Will build shared library")
-    add_library(${PROJECT_NAME} SHARED)
-endif ()
-
-if (PROJECT_IS_TOP_LEVEL)
+if (${PROJECT_IS_TOP_LEVEL})
     if (CMAKE_BUILD_TYPE STREQUAL "Debug")
-        target_compile_definitions(${PROJECT_NAME} PUBLIC TRISTAN_DEBUG)
+        add_compile_definitions(DEBUG_BUILD)
     endif ()
 endif ()
 
-if (${ENABLE_ASAN} AND CMAKE_CXX_COMPILER_ID STREQUAL "Clang" AND CMAKE_BUILD_TYPE STREQUAL "Debug")
-    string(REPLACE "." ";" CLANG_VERSION ${CMAKE_CXX_COMPILER_VERSION})
-    list(GET CLANG_VERSION 0 CLANG_VERSION_MAJOR)
-    set(PATH_TO_CLANG_DIRECTORY "/usr/lib/llvm-${CLANG_VERSION_MAJOR}/lib/clang/")
-
-    execute_process(
-            COMMAND find ${PATH_TO_CLANG_DIRECTORY} -name libclang_rt.asan-x86_64.so
-            OUTPUT_VARIABLE PATH_TO_CLANG_LIB_DIRECTORY
-    )
-    string(STRIP ${PATH_TO_CLANG_LIB_DIRECTORY} PATH_TO_CLANG_LIB_DIRECTORY)
-    target_link_directories(${PROJECT_NAME} PRIVATE
-            ${PATH_TO_CLANG_LIB_DIRECTORY}
-    )
-    target_link_libraries(${PROJECT_NAME} PRIVATE
-            -lclang_rt.asan-x86_64
-    )
+if (BUILD_STATIC)
+    message(STATUS "${PROJECT_NAME}: Will build static library")
+    add_library(${PROJECT_NAME} STATIC
+                source/time.cpp
+                source/date.cpp
+                source/date_time.cpp
+                )
+else ()
+    message(STATUS "${PROJECT_NAME}: Will build shared library")
+    add_library(${PROJECT_NAME} SHARED
+                source/time.cpp
+                source/date.cpp
+                source/date_time.cpp
+                )
 endif ()
 
-target_sources(
-        ${PROJECT_NAME}
-        PRIVATE ${SRC_FILES}
-        PUBLIC ${INC_FILES}
-)
+if (${PROJECT_IS_TOP_LEVEL})
+    if (${ENABLE_ASAN} AND CMAKE_CXX_COMPILER_ID STREQUAL "Clang" AND CMAKE_BUILD_TYPE STREQUAL "Debug")
+        string(REPLACE "." ";" CLANG_VERSION ${CMAKE_CXX_COMPILER_VERSION})
+        list(GET CLANG_VERSION 0 CLANG_VERSION_MAJOR)
+        set(PATH_TO_CLANG_DIRECTORY "/usr/lib/llvm-${CLANG_VERSION_MAJOR}/lib/clang/")
+
+        execute_process(
+                COMMAND find ${PATH_TO_CLANG_DIRECTORY} -name libclang_rt.asan-x86_64.so
+                OUTPUT_VARIABLE PATH_TO_CLANG_LIB_ASAN
+                )
+        target_link_libraries(${PROJECT_NAME} PRIVATE
+                              ${PATH_TO_CLANG_LIB_ASAN}
+                              )
+    endif ()
+endif ()
+
+if ("${CMAKE_INSTALL_PREFIX}" STREQUAL "")
+    message(STATUS "${PROJECT_NAME}: CMAKE_INSTALL_PREFIX is not set. ${CMAKE_BINARY_DIR} directory will be used")
+    set(CMAKE_INSTALL_PREFIX ${CMAKE_BINARY_DIR})
+endif ()
+
+string(TOLOWER ${CMAKE_BUILD_TYPE} BUILD_TYPE)
+set(LIBRARY_DIR ${CMAKE_INSTALL_PREFIX}/${PROJECT_NAME}/lib/${BUILD_TYPE})
+set(INCLUDE_DIR ${CMAKE_INSTALL_PREFIX}/${PROJECT_NAME}/include)
+message(STATUS "${PROJECT_NAME}: Include install directory is set to ${INCLUDE_DIR}")
+message(STATUS "${PROJECT_NAME}: Library install directory is set to ${LIBRARY_DIR}")
+
+if (NOT ${PROJECT_IS_TOP_LEVEL})
+    set(DATE_TIME_LIBRARY_DIR ${LIBRARY_DIR} PARENT_SCOPE)
+    set(DATE_TIME_INCLUDE_DIR ${INCLUDE_DIR} PARENT_SCOPE)
+endif ()
+
+set(LIB_VERSION 1.0.0)
+
+SET(PUBLIC_HEADERS
+    include/time.hpp
+    include/time_zones.hpp
+    include/date.hpp
+    include/date_time.hpp
+    )
 
 set_target_properties(
         ${PROJECT_NAME}
         PROPERTIES
         VERSION ${LIB_VERSION}
         OUTPUT_NAME ${PROJECT_NAME}
-)
-if (BUILD_TESTS)
-    add_subdirectory(Tests)
-endif ()
-if (DOCS)
-    find_package(Doxygen REQUIRED doxygen)
-    set(DOXYGEN_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/Docs)
-    set(DOXYGEN_GENERATE_HTML YES)
-    set(DOXYGEN_GENERATE_LATEX NO)
-    set(DOXYGEN_SORT_MEMBER_DOCS NO)
-    doxygen_add_docs(
-            doxygen
-            ${PROJECT_SOURCE_DIR}/inc
-            ALL
-    )
-endif ()
+        PUBLIC_HEADER "${PUBLIC_HEADERS}"
+        )
 
+install(TARGETS ${PROJECT_NAME}
+        PUBLIC_HEADER DESTINATION ${INCLUDE_DIR}
+        ARCHIVE DESTINATION ${LIBRARY_DIR}
+        LIBRARY DESTINATION ${LIBRARY_DIR}
+        )
