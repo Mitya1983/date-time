@@ -21,8 +21,7 @@ mt::date::Date::Date(mt::TimeZone p_time_zone) {
 }
 
 mt::date::Date::Date(const std::chrono::time_point< std::chrono::system_clock > p_time_point) :
-    m_date{std::chrono::year_month_day{std::chrono::floor< std::chrono::days >(p_time_point)}} {
-}
+    m_date{std::chrono::year_month_day{std::chrono::floor< std::chrono::days >(p_time_point)}} { }
 
 mt::date::Date::Date(const std::chrono::year p_year, const std::chrono::month p_month, const std::chrono::day p_day) {
     if (!p_day.ok()) {
@@ -189,7 +188,19 @@ std::string mt::date::Date::toString(const std::function< std::string(const Date
 }
 
 auto mt::date::Date::localDate() -> mt::date::Date {
+#if defined(__APPLE__)
+    const std::time_t now = std::time(nullptr);
+    std::tm gm_tm = *std::gmtime(&now);
+    std::tm local_tm = *std::localtime(&now);
+
+    const std::time_t gm_time = std::mktime(&gm_tm);
+    const std::time_t local_time = std::mktime(&local_tm);
+
+    const auto offset = static_cast< int32_t >(difftime(local_time, gm_time));
+    return mt::date::Date(static_cast< mt::TimeZone >(offset / 3600));
+#else
     return mt::date::Date(static_cast< mt::TimeZone >(std::chrono::local_info().first.offset.count() / 3600));
+#endif
 }
 
 bool mt::date::operator!=(const mt::date::Date& l, const mt::date::Date& r) { return !(l == r); }

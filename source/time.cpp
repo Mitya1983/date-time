@@ -224,8 +224,19 @@ auto mt::time::Time::nanoseconds() const -> std::chrono::nanoseconds {
 }
 
 auto mt::time::Time::localTime() -> mt::time::Time {
+#if defined(__APPLE__)
+    const std::time_t now = std::time(nullptr);
+    std::tm gm_tm = *std::gmtime(&now);
+    std::tm local_tm = *std::localtime(&now);
 
+    const std::time_t gm_time = std::mktime(&gm_tm);
+    const std::time_t local_time = std::mktime(&local_tm);
+
+    const auto offset = static_cast< int32_t >(difftime(local_time, gm_time));
+    return mt::time::Time(static_cast< mt::TimeZone >(offset / 3600));
+#else
     return mt::time::Time(static_cast< mt::TimeZone >(std::chrono::local_info().first.offset.count() / 3600));
+#endif
 }
 
 //
