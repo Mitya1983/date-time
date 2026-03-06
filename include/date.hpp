@@ -7,7 +7,6 @@
 #include <string>
 #include <ostream>
 #include <functional>
-#include <random>
 #include <variant>
 
 /**
@@ -25,26 +24,26 @@ namespace mt::date {
      * \headerfile date.hpp
      */
 
-    using DateDuration = std::variant< std::chrono::days, std::chrono::months, std::chrono::years >;
+    using date_duration = std::variant< std::chrono::days, std::chrono::months, std::chrono::years >;
 
-    class Date {
-        friend auto operator+(Date p_date, DateDuration p_value) -> Date;
-        friend auto operator-(Date p_date, DateDuration p_value) -> Date;
+    class date {
+        friend auto operator+(date p_date, date_duration p_value) -> date;
+        friend auto operator-(date p_date, date_duration p_value) -> date;
 
     public:
         /**
          * \brief Default constructor.
          * Creates Date object which represent current date based on UTC time zone
          */
-        Date();
-        explicit Date(std::chrono::seconds since_epoch);
+        date();
+        explicit date(std::chrono::seconds since_epoch);
         /**
          * \overload
          * \brief Overloaded constructor
          * Creates Date object which represent current date based on provided time zone
          * \param p_time_zone
          */
-        explicit Date(TimeZone p_time_zone);
+        explicit date(TimeZone p_time_zone);
         /**
          * \overload
          * \brief Overloaded constructor
@@ -52,7 +51,7 @@ namespace mt::date {
          * \param p_time_point std::chrono::time_point< std::chrono::system_clock >.
 
          */
-        explicit Date(std::chrono::time_point< std::chrono::system_clock > p_time_point);
+        explicit date(std::chrono::time_point< std::chrono::system_clock > p_time_point);
         /**
          * \overload
          * \brief Overloaded constructor
@@ -62,7 +61,7 @@ namespace mt::date {
          * \param p_day std::chrono::day.
          * \throws std::range_error.
          */
-        explicit Date(std::chrono::year p_year, std::chrono::month p_month, std::chrono::day p_day);
+        explicit date(std::chrono::year p_year, std::chrono::month p_month, std::chrono::day p_day);
         /**
          * \overload
          * \brief Overloaded constructor
@@ -72,7 +71,7 @@ namespace mt::date {
          * \param p_years std::chrono::years.
          * \throws std::range_error.
          */
-        explicit Date(std::chrono::years p_years, std::chrono::months p_months, std::chrono::days p_days);
+        explicit date(std::chrono::years p_years, std::chrono::months p_months, std::chrono::days p_days);
         /**
          * \overload
          * \brief Overloaded constructor
@@ -80,65 +79,65 @@ namespace mt::date {
          * \param p_iso_date const std::string&.
          * \throws std::range_error - if date representation has invalid values.
          */
-        explicit Date(const std::string& p_iso_date);
+        explicit date(const std::string& p_iso_date);
         /**
          * \brief Copy constructor
          */
-        Date(const Date&) = default;
+        date(const date&) = default;
         /**
          * \brief Move constructor
          */
-        Date(Date&&) = default;
+        date(date&&) = default;
 
         /**
          * \brief Copy assignment operator
          * \return Date&
          */
-        auto operator=(const Date&) -> Date& = default;
+        auto operator=(const date&) -> date& = default;
         /**
          * \brief Move assignment operator
          * \return Date&
          */
-        auto operator=(Date&&) -> Date& = default;
+        auto operator=(date&&) -> date& = default;
         /// \brief Operator equal.
         /**
          * \brief Operator ==
          * \param other const Date&
          * \return bool
          */
-        auto operator==(const Date& other) const -> bool;
+        auto operator==(const date& other) const -> bool;
         /**
          * \brief Operator <
          * \param other const Date&
          * \return bool
          */
-        auto operator<(const Date& other) const -> bool;
+        auto operator<(const date& other) const -> bool;
         /**
          * \brief Adds specified value
          * \param p_value DateValue
          */
-        void operator+=(DateDuration p_value);
+        void operator+=(date_duration p_value);
         /**
          * \brief Subtracts specified value
          * \param p_value DateValue
          */
-        void operator-=(DateDuration p_value);
+        void operator-=(date_duration p_value);
 
         /**
          * \brief Destructor
          */
-        ~Date() = default;
+        ~date() = default;
         /**
          * \brief Returns currently set date.
          * \return std::chrono::year_month_day
          */
-        [[nodiscard]] auto date() const -> std::chrono::year_month_day;
+        [[nodiscard]] auto chrono_date() const -> std::chrono::year_month_day;
         /**
          * \brief Returns currently set day of the month.
          * \note This function returns actual, or otherworldly current, day of the months and not the total number of days passed in the month.
          * \return uint8_t.
          */
-        [[nodiscard]] auto monthDay() const -> std::chrono::day;
+        [[nodiscard]] auto month_day() const -> std::chrono::day;
         /**
          * \brief Helper function to get month as an integer value (except bool)
          * \tparam OType output type
@@ -146,13 +145,13 @@ namespace mt::date {
          */
         template < class OType >
             requires(std::is_integral_v< OType > && !std::same_as< bool, OType >)
-        [[nodiscard]] auto monthDay() const -> OType;
+        [[nodiscard]] auto month_day() const -> OType;
         /**
          * \brief Returns currently set day of the week.
          * \note This function returns actual, or otherworldly current, day of the week and not the total number of days passed in the week.
          * \return uint8_t.
          */
-        [[nodiscard]] auto weekDay() const -> std::chrono::weekday;
+        [[nodiscard]] auto week_day() const -> std::chrono::weekday;
         /**
          * \brief Helper function to get month as an integer value (except bool)
          * \tparam OType output type
@@ -160,13 +159,13 @@ namespace mt::date {
          */
         template < class OType >
             requires(std::is_integral_v< OType > && !std::same_as< bool, OType >)
-        [[nodiscard]] auto weekDay() const -> OType;
+        [[nodiscard]] auto week_day() const -> OType;
         /**
          * \brief Returns if currently set day of the week is weekend.
          * \note Saturday and Sunday are considered as weekend days.
          * \return bool.
          */
-        [[nodiscard]] auto isWeekend() const -> bool;
+        [[nodiscard]] auto is_weekend() const -> bool;
         /**
          * \brief Returns currently set month of the year.
          * \return Months.
@@ -192,12 +191,12 @@ namespace mt::date {
          * \brief Generates string representation of date in ISO standard representation format. Or using provided formatter.
          * \return std::string.
          */
-        [[nodiscard]] auto toString(const std::function< std::string(const Date&) >& formatter = {}) const -> std::string;
+        [[nodiscard]] auto to_string(const std::function< std::string(const date&) >& formatter = {}) const -> std::string;
         /**
          * \brief Creates Date object which represents local date.
          * \return Date.
          */
-        [[nodiscard]] static auto localDate() -> Date;
+        [[nodiscard]] static auto local_date() -> date;
 
     private:
         std::chrono::year_month_day m_date{};
@@ -205,7 +204,7 @@ namespace mt::date {
 
     template < class OType >
         requires(std::is_integral_v< OType > && !std::same_as< bool, OType >)
-    auto Date::monthDay() const -> OType {
+    auto date::month_day() const -> OType {
         if constexpr (std::convertible_to< std::chrono::day, OType >) {
             return static_cast< OType >(m_date.day());
         }
@@ -214,19 +213,19 @@ namespace mt::date {
 
     template < class OType >
         requires(std::is_integral_v< OType > && !std::same_as< bool, OType >)
-    auto Date::weekDay() const -> OType {
+    auto date::week_day() const -> OType {
         if constexpr (std::is_same_v<OType, uint32_t>) {
-            return weekDay().c_encoding();
+            return week_day().c_encoding();
         }
         if constexpr (std::convertible_to< std::chrono::weekday, OType >) {
-            return static_cast< OType >(weekDay());
+            return static_cast< OType >(week_day());
         }
-        return static_cast< OType >(weekDay().c_encoding());
+        return static_cast< OType >(week_day().c_encoding());
     }
 
     template < class OType >
         requires(std::is_integral_v< OType > && !std::same_as< bool, OType >)
-    auto Date::month() const -> OType {
+    auto date::month() const -> OType {
         if constexpr (std::convertible_to< std::chrono::month, OType >) {
             return static_cast< OType >(m_date.month());
         }
@@ -235,8 +234,8 @@ namespace mt::date {
 
     template < class OType >
         requires(std::is_integral_v< OType > && !std::same_as< bool, OType >)
-    auto Date::year() const -> OType {
-        if (std::numeric_limits< OType >::max() <= static_cast<int32_t>(m_date.year()) || std::numeric_limits< OType >::min() >= static_cast<int32_t>(m_date.year())) {
+    auto date::year() const -> OType {
+        if (std::numeric_limits< OType >::max() < static_cast<int32_t>(m_date.year()) || std::numeric_limits< OType >::min() > static_cast<int32_t>(m_date.year())) {
             throw std::range_error("Output type can not represent storable value");
         }
         if constexpr (std::convertible_to< std::chrono::year, OType >) {
@@ -251,50 +250,50 @@ namespace mt::date {
      * \param r const Date &
      * \return bool
      */
-    auto operator!=(const Date& l, const Date& r) -> bool;
+    auto operator!=(const date& l, const date& r) -> bool;
     /**
      * \brief Operator >
      * \param l const Date &
      * \param r const Date &
      * \return bool
      */
-    auto operator>(const Date& l, const Date& r) -> bool;
+    auto operator>(const date& l, const date& r) -> bool;
     /**
      * \brief Operator <=
      * \param l const Date &
      * \param r const Date &
      * \return bool
      */
-    auto operator<=(const Date& l, const Date& r) -> bool;
+    auto operator<=(const date& l, const date& r) -> bool;
     /**
      * \brief Operator >=
      * \param l const Date &
      * \param r const Date &
      * \return bool
      */
-    auto operator>=(const Date& l, const Date& r) -> bool;
+    auto operator>=(const date& l, const date& r) -> bool;
     /**
      * \brief Adds value to currently stored date
      * \param p_date Date
      * \param p_value DateValue
      * \return Date
      */
-    auto operator+(Date p_date, DateDuration p_value) -> Date;
+    auto operator+(date p_date, date_duration p_value) -> date;
     /**
      * \brief Subtracts value to currently stored date
      * \param p_date Date
      * \param p_value DateValue
      * \return Date
      */
-    auto operator-(Date p_date, DateDuration p_value) -> Date;
+    auto operator-(date p_date, date_duration p_value) -> date;
 
-    auto operator<<(std::ostream& out, const Date& date) -> std::ostream&;
+    auto operator<<(std::ostream& out, const date& date) -> std::ostream&;
 }  //namespace mt::date
 
 #if defined __cpp_lib_format
-template <> struct std::formatter< mt::date::Date > : std::formatter< std::chrono::year_month_day > {
-    auto format(const mt::date::Date date, std::format_context& context) const {
-        return std::formatter< std::chrono::year_month_day >::format(date.date(), context);
+template <> struct std::formatter< mt::date::date > : std::formatter< std::chrono::year_month_day > {
+    auto format(const mt::date::date date, std::format_context& context) const {
+        return std::formatter< std::chrono::year_month_day >::format(date.chrono_date(), context);
     }
 };
 #endif

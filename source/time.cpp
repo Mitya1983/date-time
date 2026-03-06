@@ -8,14 +8,14 @@ namespace {
     auto checkTimeFormat(const std::string& time) -> bool;
 }  // End of unnamed namespace
 
-mt::time::Time::Time() {
+mt::time::time::time() {
 
     const auto time_point = std::chrono::time_point_cast< std::chrono::nanoseconds >(std::chrono::system_clock::now());
     const auto days = std::chrono::time_point_cast< std::chrono::days >(time_point);
     m_nanoseconds_since_day_start = std::chrono::duration_cast< std::chrono::nanoseconds >(time_point - days);
 }
 
-mt::time::Time::Time(const mt::TimeZone p_time_zone) :
+mt::time::time::time(const mt::TimeZone p_time_zone) :
     m_offset(p_time_zone) {
     auto time_point = std::chrono::time_point_cast< std::chrono::nanoseconds >(std::chrono::system_clock::now());
     time_point += std::chrono::duration_cast< std::chrono::nanoseconds >(std::chrono::hours(static_cast< int8_t >(m_offset)));
@@ -23,7 +23,7 @@ mt::time::Time::Time(const mt::TimeZone p_time_zone) :
     m_nanoseconds_since_day_start = std::chrono::duration_cast< std::chrono::nanoseconds >(time_point - days);
 }
 
-mt::time::Time::Time(TimeDuration p_time_duration) {
+mt::time::time::time(time_duration p_time_duration) {
     std::visit(
         [this]< typename TimeValueTime >(TimeValueTime&& value) -> void {
             if constexpr (std::is_same_v< std::decay_t< TimeValueTime >, std::chrono::nanoseconds >) {
@@ -43,12 +43,12 @@ mt::time::Time::Time(TimeDuration p_time_duration) {
         p_time_duration);
 }
 
-mt::time::Time::Time(const std::chrono::time_point< std::chrono::system_clock > p_time_point) {
+mt::time::time::time(const std::chrono::time_point< std::chrono::system_clock > p_time_point) {
     const auto days = std::chrono::time_point_cast< std::chrono::days >(p_time_point);
     m_nanoseconds_since_day_start = std::chrono::duration_cast< std::chrono::nanoseconds >(p_time_point - days);
 }
 
-mt::time::Time::Time(const std::chrono::hours p_hours,
+mt::time::time::time(const std::chrono::hours p_hours,
                      const std::chrono::minutes p_minutes,
                      const std::chrono::seconds p_seconds,
                      const std::chrono::milliseconds p_milliseconds,
@@ -78,7 +78,7 @@ mt::time::Time::Time(const std::chrono::hours p_hours,
                                     + std::to_string(milliseconds) + ". The value from 0 to 999 is expected";
         throw std::range_error{message};
     }
-    if (const auto nanoseconds = p_nanoseconds.count() > 999) {
+    if (const auto nanoseconds = p_nanoseconds.count(); nanoseconds > 999) {
         const std::string message = "mt::time::Time(int hours, int minutes, int seconds, uint16_t "
                                     "milliseconds): bad [nanoseconds] value was provided - "
                                     + std::to_string(nanoseconds) + ". The value from 0 to 999 is expected";
@@ -106,7 +106,7 @@ mt::time::Time::Time(const std::chrono::hours p_hours,
     }
 }
 
-mt::time::Time::Time(const std::string& time) {
+mt::time::time::time(const std::string& time) {
 
     auto l_time = time;
 
@@ -133,14 +133,14 @@ mt::time::Time::Time(const std::string& time) {
         case 5: {
             const auto hours = static_cast< uint8_t >(std::stoi(l_time.substr(hours_pos, 2)));
             const auto minutes = static_cast< uint8_t >(std::stoi(l_time.substr(minutes_pos, 2)));
-            *this = mt::time::Time(std::chrono::hours{hours}, std::chrono::minutes{minutes});
+            *this = mt::time::time(std::chrono::hours{hours}, std::chrono::minutes{minutes});
             break;
         }
         case 8: {
             const auto hours = static_cast< uint8_t >(std::stoi(l_time.substr(hours_pos, 2)));
             const auto minutes = static_cast< uint8_t >(std::stoi(l_time.substr(minutes_pos, 2)));
             const auto seconds = static_cast< uint8_t >(std::stoi(l_time.substr(seconds_pos, 2)));
-            *this = mt::time::Time(std::chrono::hours{hours}, std::chrono::minutes{minutes}, std::chrono::seconds{seconds});
+            *this = mt::time::time(std::chrono::hours{hours}, std::chrono::minutes{minutes}, std::chrono::seconds{seconds});
             break;
         }
         case 12: {
@@ -148,7 +148,7 @@ mt::time::Time::Time(const std::string& time) {
             const auto minutes = std::stoi(l_time.substr(minutes_pos, 2));
             const auto seconds = std::stoi(l_time.substr(seconds_pos, 2));
             const auto milliseconds = std::stoi(l_time.substr(milliseconds_pos, 3));
-            *this = mt::time::Time(std::chrono::hours{hours}, std::chrono::minutes{minutes}, std::chrono::seconds{seconds}, std::chrono::milliseconds{milliseconds});
+            *this = mt::time::time(std::chrono::hours{hours}, std::chrono::minutes{minutes}, std::chrono::seconds{seconds}, std::chrono::milliseconds{milliseconds});
             break;
         }
         case 16: {
@@ -157,7 +157,7 @@ mt::time::Time::Time(const std::string& time) {
             const auto seconds = std::stoi(l_time.substr(seconds_pos, 2));
             const auto milliseconds = std::stoi(l_time.substr(milliseconds_pos, 3));
             const auto microseconds = std::stoi(l_time.substr(microseconds_pos, 3));
-            *this = mt::time::Time(std::chrono::hours{hours},
+            *this = mt::time::time(std::chrono::hours{hours},
                                    std::chrono::minutes{minutes},
                                    std::chrono::seconds{seconds},
                                    std::chrono::milliseconds{milliseconds},
@@ -171,7 +171,7 @@ mt::time::Time::Time(const std::string& time) {
             const auto milliseconds = std::stoi(l_time.substr(milliseconds_pos, 3));
             const auto microseconds = std::stoi(l_time.substr(microseconds_pos, 3));
             const auto nanoseconds = std::stoi(l_time.substr(nanoseconds_pos, 3));
-            *this = mt::time::Time(std::chrono::hours{hours},
+            *this = mt::time::time(std::chrono::hours{hours},
                                    std::chrono::minutes{minutes},
                                    std::chrono::seconds{seconds},
                                    std::chrono::milliseconds{milliseconds},
@@ -189,58 +189,60 @@ mt::time::Time::Time(const std::string& time) {
     }
 }
 
-auto mt::time::Time::operator==(const mt::time::Time& other) const -> bool { return m_nanoseconds_since_day_start == other.m_nanoseconds_since_day_start; }
+auto mt::time::time::operator==(const mt::time::time& other) const -> bool { return m_nanoseconds_since_day_start == other.m_nanoseconds_since_day_start; }
 
-auto mt::time::Time::operator<(const mt::time::Time& other) const -> bool { return m_nanoseconds_since_day_start < other.m_nanoseconds_since_day_start; }
+auto mt::time::time::operator<(const mt::time::time& other) const -> bool { return m_nanoseconds_since_day_start < other.m_nanoseconds_since_day_start; }
 
-void mt::time::Time::operator+=(const mt::time::Time& other) { *this = *this + other; }
+void mt::time::time::operator+=(const mt::time::time& other) { *this = *this + other; }
 
-void mt::time::Time::operator+=(const TimeDuration p_value) { *this = *this + p_value; }
+void mt::time::time::operator+=(const time_duration p_value) { *this = *this + p_value; }
 
-void mt::time::Time::operator-=(const mt::time::Time& other) { *this = *this - other; }
+void mt::time::time::operator-=(const mt::time::time& other) { *this = *this - other; }
 
-void mt::time::Time::operator-=(const TimeDuration p_value) { *this = *this - p_value; }
+void mt::time::time::operator-=(const time_duration p_value) { *this = *this - p_value; }
 
-void mt::time::Time::setOffset(const mt::TimeZone p_offset) { m_offset = p_offset; }
+void mt::time::time::set_offset(const mt::TimeZone p_offset) { m_offset = p_offset; }
 
-auto mt::time::Time::hours() const -> std::chrono::hours { return std::chrono::duration_cast< std::chrono::hours >(m_nanoseconds_since_day_start); }
+auto mt::time::time::hours() const -> std::chrono::hours { return std::chrono::duration_cast< std::chrono::hours >(m_nanoseconds_since_day_start); }
 
-auto mt::time::Time::minutes() const -> std::chrono::minutes { return std::chrono::duration_cast< std::chrono::minutes >(m_nanoseconds_since_day_start - this->hours()); }
+auto mt::time::time::minutes() const -> std::chrono::minutes { return std::chrono::duration_cast< std::chrono::minutes >(m_nanoseconds_since_day_start - this->hours()); }
 
-auto mt::time::Time::seconds() const -> std::chrono::seconds {
+auto mt::time::time::seconds() const -> std::chrono::seconds {
     return std::chrono::duration_cast< std::chrono::seconds >(m_nanoseconds_since_day_start - this->hours() - this->minutes());
 }
 
-auto mt::time::Time::milliseconds() const -> std::chrono::milliseconds {
+auto mt::time::time::milliseconds() const -> std::chrono::milliseconds {
     return std::chrono::duration_cast< std::chrono::milliseconds >(m_nanoseconds_since_day_start - this->hours() - this->minutes() - this->seconds());
 }
 
-auto mt::time::Time::microseconds() const -> std::chrono::microseconds {
+auto mt::time::time::microseconds() const -> std::chrono::microseconds {
     return std::chrono::duration_cast< std::chrono::microseconds >(m_nanoseconds_since_day_start - this->hours() - this->minutes() - this->seconds() - this->milliseconds());
 }
 
-auto mt::time::Time::nanoseconds() const -> std::chrono::nanoseconds {
+auto mt::time::time::nanoseconds() const -> std::chrono::nanoseconds {
     return m_nanoseconds_since_day_start - this->hours() - this->minutes() - this->seconds() - this->milliseconds() - this->microseconds();
 }
 
-auto mt::time::Time::localTime() -> mt::time::Time {
+auto mt::time::time::local_time() -> mt::time::time {
 #if defined(__APPLE__)
     const std::time_t now = std::time(nullptr);
-    std::tm gm_tm = *std::gmtime(&now);
-    std::tm local_tm = *std::localtime(&now);
+    std::tm gm_tm{};
+    std::tm local_tm{};
+    gmtime_r(&now, &gm_tm);
+    localtime_r(&now, &local_tm);
 
     const std::time_t gm_time = std::mktime(&gm_tm);
     const std::time_t local_time = std::mktime(&local_tm);
 
     const auto offset = static_cast< int32_t >(difftime(local_time, gm_time));
-    return mt::time::Time(static_cast< mt::TimeZone >(offset / 3600));
+    return mt::time::time(static_cast< mt::TimeZone >(offset / 3600));
 #else
-    return mt::time::Time(static_cast< mt::TimeZone >(std::chrono::local_info().first.offset.count() / 3600));
+    return mt::time::time(static_cast< mt::TimeZone >(std::chrono::local_info().first.offset.count() / 3600));
 #endif
 }
 
 //
-std::string mt::time::Time::toString(const std::function< std::string(const Time&) >& formatter) const {
+std::string mt::time::time::to_string(const std::function< std::string(const time&) >& formatter) const {
     if (formatter) {
         return formatter(*this);
     }
@@ -248,23 +250,23 @@ std::string mt::time::Time::toString(const std::function< std::string(const Time
     return std::format("{0:%T}{1}", *this, m_offset);
 #else
     std::string time;
-    const auto hours = hours().count();
-    if (hours < 10) {
+    const auto l_hours = this->hours().count();
+    if (l_hours < 10) {
         time += '0';
     }
-    time += std::to_string(hours);
+    time += std::to_string(l_hours);
     time += ':';
-    const auto minutes = minutes().count();
-    if (minutes < 10) {
+    const auto l_minutes = this->minutes().count();
+    if (l_minutes < 10) {
         time += '0';
     }
-    time += std::to_string(minutes);
+    time += std::to_string(l_minutes);
     time += ':';
-    const auto seconds = seconds().count();
-    if (seconds < 10) {
+    const auto l_seconds = this->seconds().count();
+    if (l_seconds < 10) {
         time += '0';
     }
-    time += std::to_string(seconds);
+    time += std::to_string(l_seconds);
     time += '.';
     const auto nanoseconds = (m_nanoseconds_since_day_start - std::chrono::duration_cast< std::chrono::seconds >(m_nanoseconds_since_day_start)).count();
     time += std::to_string(nanoseconds);
@@ -282,17 +284,17 @@ std::string mt::time::Time::toString(const std::function< std::string(const Time
 #endif
 }
 
-bool mt::time::operator!=(const mt::time::Time& l, const mt::time::Time& r) { return not(l == r); }
+bool mt::time::operator!=(const mt::time::time& l, const mt::time::time& r) { return not(l == r); }
 
-bool mt::time::operator>(const mt::time::Time& l, const mt::time::Time& r) { return not(l <= r); }
+bool mt::time::operator>(const mt::time::time& l, const mt::time::time& r) { return not(l <= r); }
 
-bool mt::time::operator<=(const mt::time::Time& l, const mt::time::Time& r) { return (l < r || l == r); }
+bool mt::time::operator<=(const mt::time::time& l, const mt::time::time& r) { return (l < r || l == r); }
 
-bool mt::time::operator>=(const mt::time::Time& l, const mt::time::Time& r) { return (l > r || l == r); }
+bool mt::time::operator>=(const mt::time::time& l, const mt::time::time& r) { return (l > r || l == r); }
 
-auto mt::time::operator+(const mt::time::Time l, mt::time::Time r) -> mt::time::Time { return l + r.m_nanoseconds_since_day_start; }
+auto mt::time::operator+(const mt::time::time l, mt::time::time r) -> mt::time::time { return l + r.m_nanoseconds_since_day_start; }
 
-mt::time::Time mt::time::operator+(Time p_time, const TimeDuration p_value) {
+mt::time::time mt::time::operator+(time p_time, const time_duration p_value) {
     std::visit(
         [&p_time]< typename TimeValueType >(TimeValueType&& value) -> void {
             p_time.m_nanoseconds_since_day_start += value;
@@ -304,9 +306,9 @@ mt::time::Time mt::time::operator+(Time p_time, const TimeDuration p_value) {
     return p_time;
 }
 
-auto mt::time::operator-(const mt::time::Time l, mt::time::Time r) -> mt::time::Time { return l - r.m_nanoseconds_since_day_start; }
+auto mt::time::operator-(const mt::time::time l, mt::time::time r) -> mt::time::time { return l - r.m_nanoseconds_since_day_start; }
 
-auto mt::time::operator-(mt::time::Time p_time, const mt::time::TimeDuration p_value) -> mt::time::Time {
+auto mt::time::operator-(mt::time::time p_time, const mt::time::time_duration p_value) -> mt::time::time {
     std::visit(
         [&p_time]< typename TimeValueType >(TimeValueType&& value) -> void {
             p_time.m_nanoseconds_since_day_start -= value;
@@ -318,8 +320,8 @@ auto mt::time::operator-(mt::time::Time p_time, const mt::time::TimeDuration p_v
     return p_time;
 }
 
-auto mt::time::operator<<(std::ostream& out, const Time& time) -> std::ostream& {
-    const auto& _string = time.toString();
+auto mt::time::operator<<(std::ostream& out, const time& time) -> std::ostream& {
+    const auto& _string = time.to_string();
     out.write(_string.data(), std::ssize(_string));
     return out;
 }

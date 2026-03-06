@@ -8,35 +8,35 @@
  */
 namespace mt::date_time {
 
-    class DateTime;
+    class date_time;
 
     /**
      * \brief Class to store date and day time
      * \headerfile date_time.hpp
      */
-    class DateTime {
-        friend auto operator+(const DateTime& l, mt::time::TimeDuration) -> DateTime;
-        friend auto operator+(const DateTime& l, mt::date::DateDuration) -> DateTime;
-        friend auto operator-(const DateTime& l, mt::time::TimeDuration) -> DateTime;
-        friend auto operator-(const DateTime& l, mt::date::DateDuration) -> DateTime;
+    class date_time {
+        friend auto operator+(const date_time& l, mt::time::time_duration) -> date_time;
+        friend auto operator+(const date_time& l, mt::date::date_duration) -> date_time;
+        friend auto operator-(const date_time& l, mt::time::time_duration) -> date_time;
+        friend auto operator-(const date_time& l, mt::date::date_duration) -> date_time;
     public:
         /**
          * \brief Default constructor.
          * Creates DateTime based on UTC time zone
          */
-        DateTime() = default;
+        date_time() = default;
         /**
          * \brief TimeZone constructor.
          * Creates DateTime based on provided time zone
          * \param p_time_point std::chrono::time_point< std::chrono::system_clock >
          */
-        explicit DateTime(std::chrono::time_point< std::chrono::system_clock > p_time_point);
+        explicit date_time(std::chrono::time_point< std::chrono::system_clock > p_time_point);
         /**
          * \brief TimeZone constructor.
          * Creates DateTime based on provided time zone
          * \param p_time_zone mt::TimeZone
          */
-        explicit DateTime(mt::TimeZone p_time_zone);
+        explicit date_time(mt::TimeZone p_time_zone);
         /**
          * \brief String constructor.
          * \param p_date_time Date and time string representation
@@ -57,102 +57,102 @@ namespace mt::date_time {
          * \li [YYYYMMDDTHH:MM:SS.mmm.mmm.nnn+(-)HH]
          * \li [YYYY-MM-DDTHH:MM:SS.mmm.mmm.nnn+(-)HH]
          */
-        explicit DateTime(const std::string& p_date_time);
+        explicit date_time(const std::string& p_date_time);
         /**
          * \brief Copy constructor
          */
-        DateTime(const DateTime&) = default;
+        date_time(const date_time&) = default;
         /**
          * \brief Move constructor
          */
-        DateTime(DateTime&&) = default;
+        date_time(date_time&&) = default;
         /**
          * \brief Copy assignment operator
          * \return DateTime&
          */
-        auto operator=(const DateTime&) -> DateTime& = default;
+        auto operator=(const date_time&) -> date_time& = default;
         /**
          * \brief Move assignment operator
          * \return DateTime&
          */
-        auto operator=(DateTime&&) -> DateTime& = default;
+        auto operator=(date_time&&) -> date_time& = default;
         /**
          * \brief Operator ==
          * \param other const DateTime&
          * \return bool
          */
-        auto operator==(const DateTime& other) const -> bool;
+        auto operator==(const date_time& other) const -> bool;
         /**
          * \brief Operator <
          * \param other const DateTime&
          * \return bool
          */
-        auto operator<(const DateTime& other) const -> bool;
-        void operator+=(mt::time::TimeDuration);
-        void operator+=(mt::date::DateDuration);
-        void operator-=(mt::time::TimeDuration);
-        void operator-=(mt::date::DateDuration);
+        auto operator<(const date_time& other) const -> bool;
+        void operator+=(mt::time::time_duration);
+        void operator+=(mt::date::date_duration);
+        void operator-=(mt::time::time_duration);
+        void operator-=(mt::date::date_duration);
         /**
          * \brief Destructor
          */
-        ~DateTime() = default;
+        ~date_time() = default;
         /**
          * \brief Copy assignment setter
          * \param p_date const date::Date&
          */
-        void setDate(const date::Date& p_date);
+        void set_date(const date::date& p_date);
         /**
          * \brief Move assignment setter
          * \param p_date date::Date&&
          */
-        void setDate(date::Date&& p_date);
+        void set_date(date::date&& p_date);
         /**
          * \brief Copy assignment setter
          * \param p_time const time::Time&
          */
-        void setTime(const time::Time& p_time);
+        void set_time(const time::time& p_time);
         /**
          * \brief Move assignment setter
          * \param p_time time::Time&&
          */
-        void setTime(time::Time&& p_time);
+        void set_time(time::time&& p_time);
         /**
          * \brief Returns date
          * \return const date::Date&
          */
-        [[nodiscard]] auto date() const -> const date::Date&;
+        [[nodiscard]] auto date() const -> const date::date&;
         /**
          * \brief Returns date
          * \return date::Date&
          */
-        [[nodiscard]] auto date() -> date::Date&;
+        [[nodiscard]] auto date() -> date::date&;
         /**
          * \brief Returns time
          * \return const time::Time&
          */
-        [[nodiscard]] auto time() const -> const time::Time&;
+        [[nodiscard]] auto time() const -> const time::time&;
         /**
          * \brief Returns time
          * \return time::Time&
          */
-        [[nodiscard]] auto time() -> time::Time&;
+        [[nodiscard]] auto time() -> time::time&;
 
         /**
          * \brief Generates string representation of date and time which is ISO standard representation. Or by formatter provided.
          * \param formatter const std::function< std::string(const DateTime&) >
          * \return std::string
          */
-        [[nodiscard]] auto toString(const std::function< std::string(const DateTime&) >& formatter = {}) const -> std::string;
+        [[nodiscard]] auto to_string(const std::function< std::string(const date_time&) >& formatter = {}) const -> std::string;
 
         /**
          * \brief Creates Date object which represents local date.
          * \return DateTime.
          */
-        [[nodiscard]] static auto localDateTime() -> DateTime;
+        [[nodiscard]] static auto local_date_time() -> date_time;
 
     private:
-        date::Date m_date;
-        time::Time m_time;
+        date::date m_date;
+        time::time m_time;
     };
 
     /**
@@ -161,28 +161,28 @@ namespace mt::date_time {
      * \param r const DateTime &
      * \return bool
      */
-    auto operator!=(const DateTime& l, const DateTime& r) -> bool;
+    auto operator!=(const date_time& l, const date_time& r) -> bool;
     /**
      * \brief Operator >
      * \param l const DateTime &
      * \param r const DateTime &
      * \return bool
      */
-    auto operator>(const DateTime& l, const DateTime& r) -> bool;
+    auto operator>(const date_time& l, const date_time& r) -> bool;
     /**
      * \brief Operator <=
      * \param l const DateTime &
      * \param r const DateTime &
      * \return bool
      */
-    auto operator<=(const DateTime& l, const DateTime& r) -> bool;
+    auto operator<=(const date_time& l, const date_time& r) -> bool;
     /**
      * \brief Operator >=
      * \param l const DateTime &
      * \param r const DateTime &
      * \return bool
      */
-    auto operator>=(const DateTime& l, const DateTime& r) -> bool;
+    auto operator>=(const date_time& l, const date_time& r) -> bool;
     /**
      * \brief Operator <<
      * \param out std::ostream&
@@ -190,12 +190,12 @@ namespace mt::date_time {
      * \return std::ostream&
      * \note Method toString() is used here
      */
-    auto operator<<(std::ostream& out, const DateTime& dt) -> std::ostream&;
+    auto operator<<(std::ostream& out, const date_time& dt) -> std::ostream&;
 
-    auto operator+(const DateTime& l, mt::time::TimeDuration) -> DateTime;
-    auto operator+(const DateTime& l, mt::date::DateDuration) -> DateTime;
-    auto operator-(const DateTime& l, mt::time::TimeDuration) -> DateTime;
-    auto operator-(const DateTime& l, mt::date::DateDuration) -> DateTime;
+    auto operator+(const date_time& l, mt::time::time_duration) -> date_time;
+    auto operator+(const date_time& l, mt::date::date_duration) -> date_time;
+    auto operator-(const date_time& l, mt::time::time_duration) -> date_time;
+    auto operator-(const date_time& l, mt::date::date_duration) -> date_time;
 
 }  // namespace tristan::date_time
 

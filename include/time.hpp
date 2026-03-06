@@ -17,42 +17,42 @@ namespace mt::time {
     /**
      * \brief Type alias used for Time modifications
      */
-    using TimeDuration
+    using time_duration
         = std::variant< std::chrono::hours, std::chrono::minutes, std::chrono::seconds, std::chrono::milliseconds, std::chrono::microseconds, std::chrono::nanoseconds >;
 
     /**
      * \brief Class to handle time
      * \headerfile time.hpp
      */
-    class Time {
+    class time {
 
-        friend auto operator+(Time l, Time r) -> Time;
-        friend auto operator+(Time p_time, TimeDuration p_value) -> Time;
-        friend auto operator-(Time l, Time r) -> Time;
-        friend auto operator-(Time p_time, TimeDuration p_value) -> Time;
-        friend struct std::formatter< Time >;
+        friend auto operator+(time l, time r) -> time;
+        friend auto operator+(time p_time, time_duration p_value) -> time;
+        friend auto operator-(time l, time r) -> time;
+        friend auto operator-(time p_time, time_duration p_value) -> time;
+        friend struct std::formatter< time >;
 
     public:
         /**
          * \brief Default constructor.
          * Creates time based on UTC time zone
          */
-        explicit Time();
+        explicit time();
         /**
          * \overload
          * \brief Overloaded constructor.
          * Creates time based on provided time zone
          * \param p_time_zone tristan::TimeZone
          */
-        explicit Time(TimeZone p_time_zone);
+        explicit time(TimeZone p_time_zone);
         /**
          * \overload
          * \brief Overloaded constructor.
          * Creates time based on provided time zone
          * \param p_time_duration TimeValue
          */
-        explicit Time(TimeDuration p_time_duration);
-        explicit Time(std::chrono::time_point< std::chrono::system_clock > p_time_point);
+        explicit time(time_duration p_time_duration);
+        explicit time(std::chrono::time_point< std::chrono::system_clock > p_time_point);
         /**
          * \overload
          * \brief Overloaded constructor.
@@ -63,7 +63,7 @@ namespace mt::time {
          * \param p_microseconds std::chrono::microseconds. Default is 0.
          * \param p_nanoseconds std::chrono::nanoseconds. Default is 0.
          */
-        explicit Time(std::chrono::hours p_hours,
+        explicit time(std::chrono::hours p_hours,
                       std::chrono::minutes p_minutes,
                       std::chrono::seconds p_seconds = std::chrono::seconds{0},
                       std::chrono::milliseconds p_milliseconds = std::chrono::milliseconds{0},
@@ -85,70 +85,70 @@ namespace mt::time {
          * \li [HH:MM:SS.mmm.mmm.nnn+(-)HH].
          * \throws std::invali_argument, std::range_error.
          */
-        explicit Time(const std::string& time);
+        explicit time(const std::string& time);
 
         /**
          * \brief Copy constructor
          */
-        Time(const Time&) = default;
+        time(const time&) = default;
         /**
          * \brief Move constructor
          */
-        Time(Time&&) = default;
+        time(time&&) = default;
         /**
          * \brief Copy assignment operator
          * \return Time&
          */
-        auto operator=(const Time&) -> Time& = default;
+        auto operator=(const time&) -> time& = default;
         /**
          * \brief Move assignment operator
          * \return Time&
          */
-        auto operator=(Time&&) -> Time& = default;
+        auto operator=(time&&) -> time& = default;
         /**
          * \brief Operator ==
          * \param other const Time&
          * \return bool
          * \note Precision is taken into account. That is if comparable objects are having different precision - false is returned
          */
-        auto operator==(const Time& other) const -> bool;
+        auto operator==(const time& other) const -> bool;
         /**
          * \brief Operator <
          * \param other const Time&
          * \return bool
          * \note Precision is taken into account. That is if comparable objects are having different precision - false is returned.
          */
-        auto operator<(const Time& other) const -> bool;
+        auto operator<(const time& other) const -> bool;
         /**
          * \brief Operator +=
          * \param other const Time&
          */
-        void operator+=(const Time& other);
+        void operator+=(const time& other);
         /**
          * \brief Operator +=
          * \param p_value const TimeValue
          */
-        void operator+=(TimeDuration p_value);
+        void operator+=(time_duration p_value);
         /**
          * \brief Operator -=
          * \param other const Time&
          */
-        void operator-=(const Time& other);
+        void operator-=(const time& other);
         /**
          * \brief Operator -=
          * \param p_value const TimeValue&
          */
-        void operator-=(TimeDuration p_value);
+        void operator-=(time_duration p_value);
         /**
          * \brief Destructor
          */
-        ~Time() = default;
+        ~time() = default;
 
         /**
          * \brief Sets timezone offset. Only ISO hour based offsets are considered.
          * \param p_offset TimeZone
          */
-        [[maybe_unused]] void setOffset(TimeZone p_offset);
+        [[maybe_unused]] void set_offset(TimeZone p_offset);
         /**
          * \brief Returns number of hours passed since day start.
          * \return std::chrono::hours
@@ -196,7 +196,7 @@ namespace mt::time {
          * \brief Creates Time object which represents localtime.
          * \return Time.
          */
-        [[nodiscard]] static auto localTime() -> Time;
+        [[nodiscard]] static auto local_time() -> time;
 
         /**
          * \brief Generates string representation of time which is ISO standard representation in format represented below. Or by formatter provided.
@@ -204,7 +204,7 @@ namespace mt::time {
          * \par Default format:
          * \li [hours:minutes:seconds.milliseconds.microseconds.nanoseconds].
          */
-        [[nodiscard]] auto toString(const std::function< std::string(const Time&) >& formatter = {}) const -> std::string;
+        [[nodiscard]] auto to_string(const std::function< std::string(const time&) >& formatter = {}) const -> std::string;
 
     private:
         std::chrono::nanoseconds m_nanoseconds_since_day_start{};
@@ -217,28 +217,28 @@ namespace mt::time {
      * \param r const Time&
      * \return bool
      */
-    auto operator!=(const Time& l, const Time& r) -> bool;
+    auto operator!=(const time& l, const time& r) -> bool;
     /**
      * \brief Operator >
      * \param l const Time&
      * \param r const Time&
      * \return bool
      */
-    auto operator>(const Time& l, const Time& r) -> bool;
+    auto operator>(const time& l, const time& r) -> bool;
     /**
      * \brief Operator <=
      * \param l const Time&
      * \param r const Time&
      * \return bool
      */
-    auto operator<=(const Time& l, const Time& r) -> bool;
+    auto operator<=(const time& l, const time& r) -> bool;
     /**
      * \brief Operator >=
      * \param l const Time&
      * \param r const Time&
      * \return bool
      */
-    auto operator>=(const Time& l, const Time& r) -> bool;
+    auto operator>=(const time& l, const time& r) -> bool;
 
     /**
      * \brief Operator +
@@ -246,28 +246,28 @@ namespace mt::time {
      * \param r Time
      * \return Time
      */
-    auto operator+(Time l, Time r) -> Time;
+    auto operator+(time l, time r) -> time;
     /**
      *
      * @param p_time Time
      * @param p_value TimeValue
      * @return Time
      */
-    auto operator+(Time p_time, mt::time::TimeDuration p_value) -> Time;
+    auto operator+(time p_time, mt::time::time_duration p_value) -> time;
     /**
      * \brief Operator -
      * \param l Time
      * \param r Time
      * \return Time
      */
-    auto operator-(Time l, Time r) -> Time;
+    auto operator-(time l, time r) -> time;
     /**
      *
      * @param p_time Time
      * @param p_value TimeValue
      * @return Time
      */
-    auto operator-(Time p_time, mt::time::TimeDuration p_value) -> Time;
+    auto operator-(time p_time, mt::time::time_duration p_value) -> time;
     /**
      * \brief Operator <<
      * \param out std::ostream&
@@ -276,7 +276,7 @@ namespace mt::time {
      * \note Method toString() is used here
      */
 
-    auto operator<<(std::ostream& out, const Time& time) -> std::ostream&;
+    auto operator<<(std::ostream& out, const time& time) -> std::ostream&;
 }  // namespace mt::time
 
 #if defined __cpp_lib_format
@@ -297,8 +297,8 @@ template <> struct std::formatter< mt::TimeZone > : std::formatter< std::string 
     }
 };
 
-template <> struct std::formatter< mt::time::Time > : std::formatter< std::chrono::hh_mm_ss< std::chrono::nanoseconds > > {
-    auto format(const mt::time::Time time, std::format_context& context) const {
+template <> struct std::formatter< mt::time::time > : std::formatter< std::chrono::hh_mm_ss< std::chrono::nanoseconds > > {
+    auto format(const mt::time::time time, std::format_context& context) const {
         return std::formatter< std::chrono::hh_mm_ss< std::chrono::nanoseconds > >::format(std::chrono::hh_mm_ss<std::chrono::nanoseconds>{time.m_nanoseconds_since_day_start}, context);
     }
 };
